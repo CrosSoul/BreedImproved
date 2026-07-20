@@ -1,0 +1,13 @@
+﻿namespace = myck3mod_test
+
+myck3mod_test.0001 = {
+	type = character_event
+	title = myck3mod_test.0001.t
+	desc = myck3mod_test.0001.desc
+	theme = default
+	orphan = yes
+
+	option = {
+		name = myck3mod_test.0001.a
+	}
+}

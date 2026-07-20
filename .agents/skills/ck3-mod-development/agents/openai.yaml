@@ -1,0 +1,4 @@
+interface:
+  display_name: "CK3 Mod 开发"
+  short_description: "基于项目证据安全生成、审查与调试 CK3 Mod 脚本"
+  default_prompt: "Use $ck3-mod-development to implement this CK3 mod change using project-local evidence and clearly flag any unverified syntax."
