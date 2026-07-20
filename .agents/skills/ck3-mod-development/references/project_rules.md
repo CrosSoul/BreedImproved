@@ -69,13 +69,55 @@ Use lowercase ASCII snake_case after the prefix. Angle-bracket components are pl
 
 The existing `MyCK3Mod` content-folder and launcher-template names are temporary scaffold names. This documentation update does not authorize renaming metadata or content paths; handle any future rename as a separate, reviewed foundation change.
 
+### Player Control and Automation Prohibition
+
+- Do not perform automatic or scheduled dynasty-member scans, including yearly cleanup scans.
+- Do not remove dynasty members automatically.
+- Do not use background events or passive processes to modify dynasty membership.
+- Require explicit player interaction to begin every dynasty-cleanup workflow.
+- Require player confirmation before every individual or multi-character removal is applied.
+- Permit candidate scanning only inside a management flow explicitly initiated by the player. A player-triggered scan must not continue as recurring or background automation.
+
 ### Phase 1: Dynasty Membership Management
 
 - Allow players to remove unwanted dynasty members.
 - Use characters with the bastard trait as one primary design criterion.
 - Use characters whose biological parents are not members of the intended dynasty as another primary design criterion.
 - Require explicit player confirmation before a dynasty-membership removal action is applied.
-- Keep the definition of the "intended dynasty," character eligibility, exclusions, UI, and CK3 implementation mechanism open until separately specified and verified.
+- Keep the definition of the "intended dynasty," character eligibility, exclusions, and CK3 implementation mechanism open until separately specified and verified.
+
+#### Character Interaction Interface
+
+Purpose:
+
+- Handle individual cases.
+- Allow the player to initiate removal of a specific dynasty member from that character's interaction menu.
+
+Use case:
+
+- Remove one unwanted dynasty member.
+
+The interface must require explicit player initiation and a confirmation step before applying removal.
+
+#### Dynasty Decision Interface
+
+Purpose:
+
+- Handle large dynasties efficiently.
+- Allow the player to initiate an eligible-candidate scan, review the results, and select multiple characters for removal.
+
+Use case:
+
+- Manage hundreds of dynasty members without processing each character individually.
+
+The candidate scan must occur only after explicit player action. The interface must require the player to select candidates and confirm the operation before applying any removals. It must not create a recurring scan, yearly cleanup, background event, or automatic removal process.
+
+#### Shared Validation
+
+- Use common eligibility and validation logic for both interfaces where possible.
+- Ensure that the same character produces a consistent eligibility result in individual and bulk-management flows.
+- Keep presentation and selection behavior separate from shared eligibility rules.
+- Do not assume that a CK3 scripted trigger, scripted effect, interaction field, decision field, list-selection mechanism, or confirmation mechanism exists. Verify the exact target-version CK3 structures before implementation.
 
 The phrase "bastard trait" in this design section is a product requirement, not a verified CK3 trait key, trigger, scope, or scripted condition. Future implementation must identify and verify the correct target-version CK3 syntax before using it in runnable files.
 
@@ -308,9 +350,11 @@ Complete these items before the first gameplay implementation:
 - Locate or provide same-version vanilla CK3 references.
 - Add verified examples to `ck3_vanilla_examples/`.
 - Verify the actual CK3 root directories and file formats needed by the first feature.
+- Verify target-version CK3 examples for character interactions, decisions, player-initiated candidate presentation or selection, and confirmation flows before implementing either Phase 1 interface.
 - Allocate the first namespace and event ID range only if events are required.
 - Verify decision and localisation field conventions only if those content families are required.
 - Establish validation tooling and an in-game test procedure.
 - Select one confirmed phase and create a separate, reviewed feature specification before adding gameplay files.
 - Resolve the open design terms needed by that feature without expanding the confirmed product scope.
+- Design one shared Phase 1 eligibility specification for the individual and bulk interfaces before choosing a CK3 reuse mechanism.
 - Verify all required CK3 identifiers and syntax; design-language labels are not implementation evidence.

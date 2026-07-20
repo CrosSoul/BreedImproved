@@ -18,7 +18,11 @@ Breed Improved provides player-controlled tools for managing dynasty membership 
 ## Product Boundaries
 
 - Dynasty-management actions must remain under player control.
-- Actions that remove a character from a dynasty must require player confirmation.
+- Do not perform automatic or scheduled candidate scanning, including yearly cleanup scans.
+- Do not remove dynasty members automatically.
+- Do not use background events to modify dynasty membership.
+- Every cleanup operation must begin with explicit player interaction, and every removal must require player confirmation.
+- A candidate scan is permitted only when the player explicitly opens or activates the relevant management interface.
 - Long-term breeding assistance must support player decisions rather than operate as a fully autonomous system.
 - CK3 script structures and identifiers must be verified from project references or vanilla CK3 examples before implementation.
 - Implementation details remain flexible until each feature receives a separate, reviewed specification.
@@ -27,7 +31,17 @@ Breed Improved provides player-controlled tools for managing dynasty membership 
 
 ### Phase 1: Dynasty Membership Management
 
-Provide tools for removing unwanted dynasty members. The initial design criteria are characters with the bastard trait and characters whose biological parents are not members of the intended dynasty. The precise meaning of "intended dynasty," eligibility rules, and CK3 implementation mechanism remain to be defined and verified.
+Provide player-initiated tools for removing unwanted dynasty members. The initial design criteria are characters with the bastard trait and characters whose biological parents are not members of the intended dynasty. The precise meaning of "intended dynasty," eligibility rules, and CK3 implementation mechanism remain to be defined and verified.
+
+#### Character Interaction
+
+Handle an individual case by allowing the player to initiate removal for a specific dynasty member from that character's interaction menu. This interface is intended for removing one unwanted member and must show a confirmation step before applying any change.
+
+#### Dynasty Decision
+
+Handle large dynasties through an explicitly player-initiated management flow. When activated by the player, it may scan for eligible candidates, present the results, allow selection of multiple characters, and require confirmation before applying removals. It must never run as an automatic, scheduled, or background process.
+
+Both interfaces should use the same eligibility and validation rules where possible so that individual and bulk management produce consistent results. This is a design requirement only; the CK3 structures used to implement either interface and any reusable validation definition must be verified before development.
 
 ### Phase 2: Dynasty Marriage Assistance
 
