@@ -1,0 +1,59 @@
+breedimp_test_create_dynasty_interaction = {
+	category = interaction_category_friendly
+	icon = designate_favorite
+	interface_priority = 8
+	desc = breedimp_test_create_dynasty_interaction_desc
+
+	is_shown = {
+		scope:actor = {
+			is_ai = no
+		}
+		scope:recipient.dynasty = scope:actor.dynasty
+		scope:actor != scope:recipient
+	}
+
+	is_valid_showing_failures_only = {
+		scope:recipient = {
+			custom_tooltip = {
+				text = breedimp_test_create_dynasty_recipient_must_be_ai_tt
+				is_ai = yes
+			}
+			custom_tooltip = {
+				text = breedimp_test_create_dynasty_recipient_must_be_alive_tt
+				is_alive = yes
+			}
+			custom_tooltip = {
+				text = breedimp_test_create_dynasty_recipient_must_be_adult_tt
+				is_adult = yes
+			}
+			custom_tooltip = {
+				text = breedimp_test_create_dynasty_recipient_must_be_highborn_tt
+				is_lowborn = no
+			}
+			custom_tooltip = {
+				text = breedimp_test_create_dynasty_recipient_must_be_unlanded_tt
+				is_landed = no
+			}
+			custom_tooltip = {
+				text = breedimp_test_create_dynasty_recipient_must_not_be_ruler_tt
+				is_ruler = no
+			}
+			custom_tooltip = {
+				text = breedimp_test_create_dynasty_recipient_must_not_be_house_head_tt
+				NOT = { is_house_head = yes }
+			}
+			custom_tooltip = {
+				text = breedimp_test_create_dynasty_recipient_must_not_be_dynast_tt
+				NOT = { is_dynast = yes }
+			}
+		}
+	}
+
+	on_accept = {
+		scope:recipient = {
+			create_dynasty = { save_scope_as = breedimp_test_new_dynasty }
+		}
+	}
+
+	auto_accept = yes
+}

@@ -1,0 +1,11 @@
+﻿l_english:
+ breedimp_test_create_dynasty_interaction: "TEST: Create Replacement Dynasty"
+ breedimp_test_create_dynasty_interaction_desc: "Test-only action that creates a replacement Dynasty for one eligible character."
+ breedimp_test_create_dynasty_recipient_must_be_ai_tt: "The selected character must be controlled by the AI."
+ breedimp_test_create_dynasty_recipient_must_be_alive_tt: "The selected character must be alive."
+ breedimp_test_create_dynasty_recipient_must_be_adult_tt: "The selected character must be an adult."
+ breedimp_test_create_dynasty_recipient_must_be_highborn_tt: "The selected character must not be lowborn."
+ breedimp_test_create_dynasty_recipient_must_be_unlanded_tt: "The selected character must be unlanded."
+ breedimp_test_create_dynasty_recipient_must_not_be_ruler_tt: "The selected character must not be a ruler."
+ breedimp_test_create_dynasty_recipient_must_not_be_house_head_tt: "The selected character must not be a House Head."
+ breedimp_test_create_dynasty_recipient_must_not_be_dynast_tt: "The selected character must not be the Dynast."
