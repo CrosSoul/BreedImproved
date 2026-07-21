@@ -25,11 +25,14 @@ The staging root directly contains:
 
 ```text
 descriptor.mod
+thumbnail.png
 common/
 localization/
 ```
 
-The script completely deletes and recreates the staging root on every run. It recursively copies all production files except repository-only `.gitkeep` markers and verifies a byte-identical production copy before applying the only authorized staging transform: adding exactly one `remote_file_id="3769010534"` to the staged `descriptor.mod`.
+The script completely deletes and recreates the staging root on every run. It recursively copies all production files except repository-only `.gitkeep` markers, then copies the fixed publishing asset from `assets/workshop/thumbnail.png` to the staging root. The thumbnail is Workshop publishing metadata, not a gameplay file and not part of the production Mod root.
+
+The script verifies a byte-identical production copy and publishing-asset copy before applying the only authorized descriptor transform: adding exactly one `remote_file_id="3769010534"` to the staged `descriptor.mod`.
 
 After injection, every gameplay and localisation file must remain byte-identical to production. The staged descriptor must equal the production descriptor plus only the exact Workshop association line. The production descriptor remains free of `remote_file_id` and local `path` fields.
 
@@ -44,12 +47,14 @@ The workflow verifies:
 - exactly one staged `remote_file_id="3769010534"` entry;
 - no missing, duplicate, malformed, or different staged Workshop ID;
 - required production gameplay and localisation files;
+- required `assets/workshop/thumbnail.png` source and staged `thumbnail.png`;
+- PNG signature, `IHDR` header, positive image dimensions, non-empty byte size, and exact source/staging thumbnail size and SHA-256 match;
 - English and Simplified Chinese UTF-8 BOM;
 - no outer `.mod` file or `INSTALL.txt`;
 - no extra `MyCK3Mod/` layer;
 - no development directories, local absolute paths, or `breedimp_test_` identifiers; and
-- byte-identical production/staging hashes before descriptor injection; and
-- byte-identical gameplay/localisation hashes after injection, with only the exact descriptor association permitted to differ.
+- byte-identical production/publishing-source and staging hashes before descriptor injection; and
+- byte-identical gameplay, localisation, and thumbnail hashes after injection, with only the exact descriptor association permitted to differ.
 
 `dist/` is generated and Git-ignored. The staging directory is an internal upload input, not a public download or supported manual-install package.
 

@@ -335,6 +335,7 @@ Apply these rules:
 - Keep the developer-only `MyCK3Mod.mod` portable in version control. Put an absolute path only in the copied launcher file used on the local machine, and never include it in Workshop staging.
 - Treat `dist/workshop/BreedImproved/` as generated, Git-ignored Workshop upload staging rather than a public download.
 - Preserve Workshop item `3769010534` in the repository publishing configuration. Require the staged descriptor to contain exactly one matching `remote_file_id`, while keeping the production descriptor free of it.
+- Keep the Workshop thumbnail at `assets/workshop/thumbnail.png`. Treat it as a publishing asset outside the production Mod root; `scripts/stage_workshop.ps1` must validate and copy it to staging as `thumbnail.png` without classifying it as gameplay content.
 - Do not publish or support manual-install ZIPs, installers, checksums, or GitHub Release assets for end-user installation.
 - Do not copy large vanilla CK3 files into the repository without a documented technical need and applicable distribution rights.
 - Preserve released namespaces, event IDs, decision IDs, and localisation keys whenever possible.

@@ -11,6 +11,48 @@ $workshopRoot = [System.IO.Path]::GetFullPath((Join-Path $distRoot "workshop"))
 $stageRoot = [System.IO.Path]::GetFullPath((Join-Path $workshopRoot "BreedImproved"))
 $workshopIdConfigPath = Join-Path $repositoryRoot "docs/publishing/workshop_item_id.txt"
 $expectedWorkshopId = "3769010534"
+$thumbnailSourcePath = Join-Path $repositoryRoot "assets/workshop/thumbnail.png"
+$thumbnailStagePath = Join-Path $stageRoot "thumbnail.png"
+
+function Get-PngMetadata {
+	param(
+		[Parameter(Mandatory = $true)]
+		[string]$Path
+	)
+
+	if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+		throw "Required Workshop thumbnail is missing: $Path"
+	}
+
+	$bytes = [System.IO.File]::ReadAllBytes($Path)
+	if ($bytes.Length -lt 24) {
+		throw "Workshop thumbnail is empty or too small to be a valid PNG: $Path"
+	}
+
+	$pngSignature = @(0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
+	for ($index = 0; $index -lt $pngSignature.Count; $index++) {
+		if ($bytes[$index] -ne $pngSignature[$index]) {
+			throw "Workshop thumbnail does not have a valid PNG signature: $Path"
+		}
+	}
+	if ([System.Text.Encoding]::ASCII.GetString($bytes, 12, 4) -ne "IHDR") {
+		throw "Workshop thumbnail does not contain the required PNG IHDR header: $Path"
+	}
+
+	$width = [System.Net.IPAddress]::NetworkToHostOrder([System.BitConverter]::ToInt32($bytes, 16))
+	$height = [System.Net.IPAddress]::NetworkToHostOrder([System.BitConverter]::ToInt32($bytes, 20))
+	if ($width -le 0 -or $height -le 0) {
+		throw "Workshop thumbnail has invalid PNG dimensions: $Path"
+	}
+
+	[PSCustomObject]@{
+		Path = $Path
+		Bytes = $bytes.Length
+		Width = $width
+		Height = $height
+		SHA256 = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash
+	}
+}
 
 $workshopPrefix = $workshopRoot.TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
 if (-not $stageRoot.StartsWith($workshopPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
@@ -30,6 +72,8 @@ if ([string]::IsNullOrWhiteSpace($configuredWorkshopId)) {
 if ($configuredWorkshopId -ne $expectedWorkshopId) {
 	throw "Configured Workshop ID '$configuredWorkshopId' does not match the approved item '$expectedWorkshopId'."
 }
+
+$thumbnailSourceMetadata = Get-PngMetadata -Path $thumbnailSourcePath
 
 $sourceDescriptorPath = Join-Path $productionRoot "descriptor.mod"
 $sourceDescriptor = Get-Content -LiteralPath $sourceDescriptorPath -Raw -Encoding UTF8
@@ -58,6 +102,19 @@ foreach ($sourceFile in $productionFiles) {
 	$destinationDirectory = Split-Path -Parent $destinationPath
 	New-Item -ItemType Directory -Path $destinationDirectory -Force | Out-Null
 	Copy-Item -LiteralPath $sourceFile.FullName -Destination $destinationPath
+}
+
+# The Workshop thumbnail is a publishing asset, not a gameplay file. Keep its
+# repository source outside the CK3 production Mod root and copy it explicitly.
+Copy-Item -LiteralPath $thumbnailSourcePath -Destination $thumbnailStagePath
+$thumbnailStageMetadata = Get-PngMetadata -Path $thumbnailStagePath
+if (
+	$thumbnailStageMetadata.Bytes -ne $thumbnailSourceMetadata.Bytes -or
+	$thumbnailStageMetadata.Width -ne $thumbnailSourceMetadata.Width -or
+	$thumbnailStageMetadata.Height -ne $thumbnailSourceMetadata.Height -or
+	$thumbnailStageMetadata.SHA256 -ne $thumbnailSourceMetadata.SHA256
+) {
+	throw "Staged Workshop thumbnail does not match the repository publishing asset."
 }
 
 $requiredProductionFiles = @(
@@ -89,14 +146,15 @@ if (Test-Path -LiteralPath (Join-Path $stageRoot "INSTALL.txt")) {
 	throw "Workshop staging must not contain manual-install instructions."
 }
 
-# Before applying the one authorized staging transform, require a one-to-one
-# file set and byte-identical hashes for the complete production copy.
+# Before applying the one authorized descriptor transform, require a one-to-one
+# file set and byte-identical hashes for the production copy and publishing asset.
 $preInjectionStagedFiles = @(Get-ChildItem -LiteralPath $stageRoot -Recurse -File -Force)
 $sourceMap = @{}
 foreach ($sourceFile in $productionFiles) {
 	$relativePath = $sourceFile.FullName.Substring($productionRoot.Length + 1)
 	$sourceMap[$relativePath] = $sourceFile
 }
+$sourceMap["thumbnail.png"] = Get-Item -LiteralPath $thumbnailSourcePath
 $preInjectionStageMap = @{}
 foreach ($stagedFile in $preInjectionStagedFiles) {
 	$relativePath = $stagedFile.FullName.Substring($stageRoot.Length + 1)
@@ -215,7 +273,7 @@ foreach ($file in $stagedFiles) {
 }
 
 # After descriptor injection, retain one-to-one file coverage and require all
-# gameplay/localisation files to remain byte-identical to production.
+# gameplay/localisation files and the publishing asset to remain byte-identical.
 $stageMap = @{}
 foreach ($stagedFile in $stagedFiles) {
 	$relativePath = $stagedFile.FullName.Substring($stageRoot.Length + 1)
@@ -248,9 +306,11 @@ foreach ($relativePath in $allRelativePaths) {
 	WorkshopItemId = $configuredWorkshopId
 	RemoteFileIdCount = $remoteFileIdDeclarations.Count
 	ProductionFiles = $productionFiles.Count
+	PublishingAssets = 1
 	StagedFiles = $stagedFiles.Count
-	HashComparison = "PASS (all files before injection; all gameplay/localisation files after injection)"
+	HashComparison = "PASS (production files and publishing asset)"
 	DescriptorTransform = "PASS (exact remote_file_id injection only)"
+	ThumbnailValidation = "PASS (PNG, $($thumbnailStageMetadata.Width)x$($thumbnailStageMetadata.Height), $($thumbnailStageMetadata.Bytes) bytes)"
 	LocalisationBOM = "PASS"
-	ContentRootLayout = "descriptor.mod + common/ + localization/"
+	ContentRootLayout = "descriptor.mod + thumbnail.png + common/ + localization/"
 }
