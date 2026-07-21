@@ -1,0 +1,6 @@
+breedimp_exile_dynasty_member = {
+	create_dynasty = {
+		spread_to_descendants = yes
+		save_scope_as = breedimp_new_dynasty
+	}
+}

@@ -1,193 +1,218 @@
-# Breed Improved Phase 1 - T1/T7 Controlled Test Record
+# Breed Improved Phase 1 - Controlled Runtime Test Record
 
 ## Status
 
-- Status: `NOT RUN`
 - CK3 target: `1.19.0.6`
-- Runtime result: `NOT RUN`; no runtime behavior is claimed
-- Save/reload result: `NOT RUN`
-- Approval requirement: obtain Jay's approval before launching CK3 or recording runtime results
+- Standalone harness: Boss-approved runtime testing completed for the scenarios recorded below
+- Production approval: v0.1 Character Interaction authorized from the approved harness results
+- Production runtime status: `NOT RUN`
+- Matt execution status for the production task: static review `PASSED`; CK3 was not launched
 - Test mod: `tests/phase1_create_dynasty/BreedImprovedPhase1Test/`
-- Production status: test-only; not approved for `MyCK3Mod/`
+- Save/reload detail: not separately supplied for every scenario; no missing observation is inferred
 
-## Test boundaries
+This document records the approved test-harness observations supplied to Matt. It distinguishes those observations from the new production implementation, which has not been launched in CK3.
 
-The test harness contains one explicitly selected and confirmed Character Interaction. Its only game-state mutation is a recipient-scoped `create_dynasty` call. It intentionally omits `spread_to_descendants`.
+## 1. Tested operation
 
-Do not add or exercise:
+The standalone harness performed one recipient-scoped state-changing operation:
 
-- claims or claim removal;
-- inheritance changes or `disinherit_effect`;
-- court movement, banishment, imprisonment, or adventurer conversion;
-- title or government changes;
-- Decisions, events, scans, iteration, recurring execution, or bulk behavior; or
-- production files.
+```text
+create_dynasty = {
+    spread_to_descendants = yes
+    save_scope_as = breedimp_test_new_dynasty
+}
+```
 
-For local testing after approval, copy `BreedImprovedPhase1Test.mod` to the CK3 launcher mod directory and replace `path="<LOCAL_MOD_PATH>"` in that copy only with the absolute path to `tests/phase1_create_dynasty/BreedImprovedPhase1Test/`, using forward slashes. Keep the repository template portable.
+The harness did not directly alter claims, inheritance traits, marriage, betrothal, titles, government, court, realm, imprisonment, or political status.
 
-## Shared environment record
+## 2. Final tested eligibility boundary
 
-Complete these fields before either test begins.
+The approved harness allowed a recipient when the recipient was:
 
-| Field | Recorded value |
-| --- | --- |
-| Tester | `NOT RUN` |
-| Test date and time | `NOT RUN` |
-| Reviewer | `NOT RUN` |
-| CK3 executable/build identification | `NOT RUN` |
-| Enabled DLC | `NOT RUN` |
-| Game rules | `NOT RUN` |
-| Game language | `NOT RUN` |
-| Playset/load order | `NOT RUN` |
-| Save or start identifier | `NOT RUN` |
-| Baseline backup identifier | `NOT RUN` |
-| Exact error-log source inspected | `NOT RUN` |
-
-## Shared observation inventory
-
-Record each item before execution, immediately after execution, and after save/reload.
-
-| State category | Before | Immediate after | After save/reload |
-| --- | --- | --- | --- |
-| Character identifier | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-| Alive/dead state | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-| House | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-| Dynasty | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-| House Head / Dynast status | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-| Descendants and their Houses/Dynasties | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-| Claims | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-| Traits | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-| Court and realm | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-| Titles and ruler/landed status | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-| Imprisonment | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-| Marriage | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-| Legal and biological parentage shown | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-| Succession position observations | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-| Generated Dynasty/House presentation | `NOT RUN` | `NOT RUN` | `NOT RUN` |
-
-## T1 - Ordinary highborn unlanded courtier
-
-### Setup
-
-Select one character who is manually confirmed to be:
-
-- living and adult;
-- highborn (`is_lowborn = no` in the harness);
 - AI-controlled;
-- unlanded and a non-ruler;
-- neither House Head nor Dynast;
-- in the player actor's Dynasty;
+- alive;
+- not lowborn;
+- in the actor's Dynasty;
 - not the actor;
-- an ordinary courtier with no known special title or untested leadership state.
+- not House Head; and
+- not Dynast.
 
-| Setup field | Recorded value |
-| --- | --- |
-| Actor identifier | `NOT RUN` |
-| Recipient identifier | `NOT RUN` |
-| Recipient court/realm | `NOT RUN` |
-| Eligibility checklist completed by | `NOT RUN` |
-| Special-title/leadership review | `NOT RUN` |
+The final harness had no age, landed, ruler, heir, marriage, or betrothal restriction.
 
-### Action
+The actor was player-controlled and in the same Dynasty. The production implementation adds the approved requirement that the actor must also be alive and the current Dynast.
 
-1. Record the complete shared observation inventory.
-2. Open `TEST: Create Replacement Dynasty` on the selected recipient.
-3. Confirm that the standard actor confirmation window appears.
-4. Confirm the action exactly once.
-5. Record immediate observations and the first relevant error-log entries, if any.
-6. Save under a new test identifier, reload, locate the same character, and record the final observations.
+## 3. Runtime result summary
 
-Action status: `NOT RUN`
-
-### Expected result for a future pass
-
-- The selected target alone receives a replacement Dynasty and associated House.
-- The target remains alive, unlanded, a non-ruler, and in the same court/realm.
-- Claims, traits, titles, imprisonment, marriage, and parentage remain unchanged.
-- No other character changes Dynasty or House.
-- Generated Dynasty/House state is valid and visible.
-- No relevant parser/runtime error occurs.
-- The observed result persists after save/reload.
-
-These are pass criteria, not claimed CK3 behavior.
-
-### T1 result
-
-| Check | Result | Evidence/notes |
+| Test | Status | Approved observation |
 | --- | --- | --- |
-| Interaction appeared only for the intended valid target | `NOT RUN` | `NOT RUN` |
-| Standard actor confirmation appeared | `NOT RUN` | `NOT RUN` |
-| Target received a replacement Dynasty | `NOT RUN` | `NOT RUN` |
-| Target received an associated House | `NOT RUN` | `NOT RUN` |
-| Target remained in the same court/realm | `NOT RUN` | `NOT RUN` |
-| Claims remained unchanged | `NOT RUN` | `NOT RUN` |
-| Traits remained unchanged | `NOT RUN` | `NOT RUN` |
-| Titles and ruler/landed state remained unchanged | `NOT RUN` | `NOT RUN` |
-| Imprisonment remained unchanged | `NOT RUN` | `NOT RUN` |
-| Marriage and parentage remained unchanged | `NOT RUN` | `NOT RUN` |
-| No non-target affiliation changed | `NOT RUN` | `NOT RUN` |
-| No relevant error was observed | `NOT RUN` | `NOT RUN` |
-| Result persisted after save/reload | `NOT RUN` | `NOT RUN` |
-| Unexpected side effects | `NOT RUN` | `NOT RUN` |
-| Final T1 verdict | `NOT RUN` | `PASS` or `FAIL` only after review |
+| T-Age | `PASS` | Both minor and adult eligible recipients could use the interaction |
+| T1 - ordinary highborn target | `PASS` | Dynasty replacement worked for the approved unlanded target class |
+| T7 - descendant propagation | `PASS` | Recipient and descendants moved; parents and siblings remained unchanged |
+| T-Ruler-1 | `PASS` | A landed ruler retained titles and government after Dynasty replacement |
+| T-Ruler-2 | `PASS` | A ruler with children and descendants moved to the new Dynasty without the reported title/government disruption |
+| T-Heir | `PASS` | The current player heir could be exiled; CK3 selected a new player heir |
+| Runtime error check | `PASS` | No CK3 runtime error was reported for the tested harness |
 
-## T7 - Omitted `spread_to_descendants` with an existing child
+## 4. T-Age record
 
 ### Setup
 
-Use the same target class as T1, but select a target with at least one existing child. Record every known descendant's identifier, generation, House, Dynasty, court/realm, titles, marriage, and head status before execution.
-
-| Setup field | Recorded value |
-| --- | --- |
-| Actor identifier | `NOT RUN` |
-| Recipient identifier | `NOT RUN` |
-| Direct child identifiers | `NOT RUN` |
-| Later descendant identifiers | `NOT RUN` |
-| Descendant affiliation inventory completed by | `NOT RUN` |
-| Special-title/leadership review | `NOT RUN` |
+Use one living minor and one living adult who otherwise satisfy the same recipient rules.
 
 ### Action
 
-1. Record the shared inventory and the full descendant affiliation inventory.
-2. Open `TEST: Create Replacement Dynasty` on the selected recipient.
-3. Confirm that the standard actor confirmation window appears.
-4. Confirm the action exactly once.
-5. Compare the target and every descendant immediately after execution.
-6. Record the first relevant error-log entries, if any.
-7. Save under a new test identifier, reload, and compare every recorded descendant again.
+Execute the harness interaction separately on each target.
 
-Action status: `NOT RUN`
+### Pass criteria
 
-### Expected result for a future pass
+- Both targets can see and execute the interaction.
+- No adulthood, childhood, minimum-age, or maximum-age validation appears.
+- Each target receives a generated replacement Dynasty.
 
-- The selected target receives a replacement Dynasty and associated House.
-- Every existing child and later descendant retains the exact pre-test House and Dynasty.
-- No descendant experiences any other unexpected state change.
-- No delayed or reload-time propagation occurs.
-- All T1 non-propagation and excluded-state criteria also pass.
+### Recorded result
 
-These are pass criteria, not claimed CK3 behavior.
+`PASS` — both minors and adults executed successfully after all age gates were removed.
 
-### Descendant comparison
+## 5. T1 - ordinary highborn target
 
-| Descendant identifier | Relationship/generation | House before | Dynasty before | House after | Dynasty after | After reload | Unexpected effects |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| `NOT RUN` | `NOT RUN` | `NOT RUN` | `NOT RUN` | `NOT RUN` | `NOT RUN` | `NOT RUN` | `NOT RUN` |
+### Setup
 
-### T7 result
+Use a living, highborn, AI-controlled member of the actor's Dynasty who is neither House Head nor Dynast. The approved case included an unlanded character.
 
-| Check | Result | Evidence/notes |
-| --- | --- | --- |
-| Target received a replacement Dynasty and House | `NOT RUN` | `NOT RUN` |
-| Every direct child retained House and Dynasty | `NOT RUN` | `NOT RUN` |
-| Every later descendant retained House and Dynasty | `NOT RUN` | `NOT RUN` |
-| No delayed propagation was observed | `NOT RUN` | `NOT RUN` |
-| No reload-time propagation was observed | `NOT RUN` | `NOT RUN` |
-| All T1 excluded-state checks passed | `NOT RUN` | `NOT RUN` |
-| No relevant error was observed | `NOT RUN` | `NOT RUN` |
-| Unexpected side effects | `NOT RUN` | `NOT RUN` |
-| Final T7 verdict | `NOT RUN` | `PASS` or `FAIL` only after review |
+### Pass criteria
 
-## Review gate
+- The target receives a generated replacement Dynasty and leaves the actor's Dynasty.
+- With descendant propagation enabled, descendants follow the target.
+- No excluded state is directly changed by the harness script.
 
-Do not convert this harness into production code from a static pass alone. Jay must review actual T1/T7 observations, errors, and save/reload evidence before approving production Character Interaction work.
+### Recorded result
+
+`PASS` — Dynasty replacement worked for the approved ordinary target class.
+
+## 6. T7 - descendant propagation
+
+### Setup
+
+Use an eligible target with at least one existing descendant. Record the Dynasty and House of the target, descendants, parents, and siblings.
+
+### Pass criteria
+
+- The target receives the replacement Dynasty.
+- Descendants move with the target.
+- Parents and siblings remain unchanged.
+
+### Recorded result
+
+`PASS` — descendants moved with the target as intended; parents and siblings remained unchanged.
+
+This result applies to the tested family structures. It is not evidence for every possible adoption, historical parentage, special title, or modded genealogy state.
+
+## 7. T-Ruler-1 - landed ruler
+
+### Setup
+
+Use a landed AI ruler who:
+
+- is alive and not lowborn;
+- belongs to the actor's Dynasty;
+- is not the actor;
+- is not House Head; and
+- is not Dynast.
+
+The review record should cover titles, government, House, Dynasty, succession, claims, spouse, children, court, realm, and vassal relationships.
+
+### Pass criteria
+
+- The ruler receives a generated replacement Dynasty.
+- Titles and government remain stable.
+- No direct title, claim, marriage, court, realm, or vassal effect is executed by the harness.
+- No CK3 runtime error is produced by the tested operation.
+
+### Recorded result
+
+`PASS` — the tested landed ruler changed Dynasty while retaining titles and government; no runtime error was reported.
+
+Save/reload observations and every secondary political field were not separately supplied to Matt and are therefore not fabricated here.
+
+## 8. T-Ruler-2 - ruler with descendants
+
+### Setup
+
+Use an otherwise eligible landed ruler with existing children or further descendants. Record the ruler, descendants, parents, siblings, titles, government, and succession state.
+
+### Pass criteria
+
+- The ruler receives the replacement Dynasty.
+- Descendants move as requested by `spread_to_descendants = yes`.
+- Parents and siblings remain unchanged.
+- Titles and government remain stable.
+- No unexpected runtime error occurs.
+
+### Recorded result
+
+`PASS` — the ruler and descendants moved as approved; parents and siblings remained unchanged, and the tested ruler's titles and government remained stable.
+
+## 9. T-Heir - current player heir
+
+### Setup
+
+Use an eligible AI recipient who is the actor's current player heir. Record the player-heir designation and relevant succession order before execution.
+
+### Pass criteria
+
+- The interaction can execute without a special heir restriction.
+- The target receives the replacement Dynasty.
+- CK3 recalculates player-heir state without a scripted inheritance or title mutation.
+
+### Recorded result
+
+`PASS` — the current player heir was exiled successfully, and CK3 selected a new player heir.
+
+This observation supports omitting an heir restriction. It does not guarantee a particular successor or succession outcome in every realm configuration.
+
+## 10. Married-target time-advance observation
+
+### Observed result
+
+A married target later gained spouse-related strong claims after game time advanced.
+
+### Interpretation boundary
+
+- The observation is real and must remain visible in project documentation.
+- The supplied result does not establish that `create_dynasty` directly granted those claims.
+- The current product direction does not authorize divorce, claim removal, or a marriage restriction.
+- v0.1 therefore leaves claims and marriage untouched by script.
+
+### Deferred investigation
+
+A future controlled test should record exact claim identifiers and sources immediately before the interaction, immediately after it, and after the relevant time advance. A comparison character should be observed over the same interval. Save inspection and error/game logs should be retained. Only then should Jay and the Boss consider a claim or marriage policy.
+
+## 11. Production verification boundary
+
+The standalone harness remains preserved as the runtime evidence instrument. Production uses distinct `breedimp_` identifiers, shared validation/effect wrappers, hostile Dynasty-interaction presentation, and bilingual localisation.
+
+The following remain required before anyone may claim that production v0.1 passed runtime testing:
+
+- enable the production mod rather than the standalone harness;
+- confirm the interaction appears only for the approved actor and recipient classes;
+- inspect both English and Simplified Chinese interaction text and confirmation presentation;
+- repeat representative age, unlanded, ruler, descendant, and heir cases;
+- inspect the CK3 error log;
+- save, reload, and re-inspect Dynasty, House, titles, government, and succession; and
+- record any unexpected side effect.
+
+Until a separately approved production test is run and recorded, production runtime status remains `NOT RUN`.
+
+## 12. Forbidden expansion during v0.1 validation
+
+Do not add any of the following while validating the approved production interaction:
+
+- claim removal;
+- `disinherit_effect` or other inheritance-trait changes;
+- divorce or betrothal changes;
+- banishment, imprisonment, or court movement;
+- title removal or government changes;
+- adventurer conversion;
+- events or Decisions;
+- scans, iteration, recurring execution, or bulk processing; or
+- automatic cleanup.

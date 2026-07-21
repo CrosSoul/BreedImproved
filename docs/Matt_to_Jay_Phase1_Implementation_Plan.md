@@ -1,197 +1,195 @@
-# Breed Improved Phase 1 - Implementation Plan
+# Breed Improved Phase 1 - v0.1 Implementation Record
 
 Prepared by Matt (CK3ModDeveloper) for Jay (CK3ModLeader).
 
 - CK3 target: `1.19.0.6`
-- Product approval source: Boss direction recorded for Phase 1
-- Evidence status: Character Interaction structure is resolved; `create_dynasty` runtime behavior for the approved target class remains untested
-- Execution boundary: Stage A and Stage B only, followed by static review
+- Product state: production v0.1 implementation authorized by the Boss
+- Production validation state: static review `PASSED` on 2026-07-21; production runtime is `NOT RUN`
+- Runtime evidence source: the preserved standalone Phase 1 test harness
+- Feature: player-initiated Character Interaction, **Exile from Dynasty** / **逐出宗族**
 
-This document plans an isolated technical test. It does not approve production gameplay and does not claim that CK3 runtime behavior has passed.
+This document records the approved v0.1 implementation boundary. It does not claim that the production files have passed an in-game test.
 
-## 1. Approved scope
+## 1. Approved player-facing behavior
 
-The approved prototype tests one player-selected, explicitly confirmed character at a time.
+The current player, while serving as the Dynasty's Dynast, may select one eligible AI-controlled member of the same Dynasty and confirm **Exile from Dynasty**.
 
-The target must be:
+On acceptance:
 
-- living;
-- adult;
-- highborn, represented only by the verified character check `is_lowborn = no`;
-- unlanded;
-- a non-ruler;
-- neither House Head nor Dynast;
-- in the actor's Dynasty;
-- controlled by AI for this isolated test; and
-- outside any untested special-title or leadership state by manual test setup.
+- CK3 creates a generated replacement Dynasty for the selected character;
+- the selected character leaves the actor's Dynasty;
+- the selected character's descendants move to the replacement Dynasty; and
+- CK3 may recalculate succession after the affiliation change.
 
-The only state-changing operation is a character-scoped `create_dynasty` call. The prototype omits `spread_to_descendants`, custom Dynasty names, coats of arms, and player-selected replacement identity. It leaves claims, inheritance, traits, titles, imprisonment, marriage, parentage, court, realm, and political status untouched by script.
+The script does not directly alter titles, claims, marriages, court membership, realm membership, imprisonment, government, or other political status.
 
-Explicitly excluded:
+There is no automatic cleanup, background scan, recurring execution, Decision, event, or bulk processing in v0.1.
 
-- every production file under `MyCK3Mod/`;
-- a production Character Interaction;
-- runtime execution during Stage A or Stage B;
-- claims or claim iteration;
-- `disinherit_effect` or other inheritance changes;
-- `banish`, `move_to_pool`, imprisonment, and adventurer conversion;
-- descendant propagation;
-- Decisions, events, scans, iterators, recurring actions, and bulk behavior;
-- candidate-reason logic for bastard or parent-Dynasty cases; and
-- broader actors, rulers, landed characters, children, players, House Heads, Dynasts, or special leadership cases.
+## 2. Eligibility contract
 
-## 2. Evidence readiness review
+### Actor requirements
 
-| Construct | Expected scope and context | Exact vanilla evidence | Readiness | Registry action | Remaining uncertainty |
-| --- | --- | --- | --- | --- | --- |
-| `create_dynasty` | Effect in character scope; called inside the selected recipient's character scope | `common/scripted_effects/00_accolades_scripted_effects.txt`; `common/scripted_effects/10_dlc_tgp_japan_scripted_effects.txt`; `events/dlc/tgp/tgp_japan_decision_events.txt`; `events/dlc/tgp/tgp_mandala_task_contract_events.txt` | Exact `create_dynasty = { save_scope_as = new_dynasty }` form is implementation-ready for an isolated test | Add before harness creation | Runtime behavior on an arbitrary existing highborn unlanded target and the omission of `spread_to_descendants` require T1/T7 |
-| Character Interaction definition | Top-level definition in `common/character_interactions/*.txt` | `common/character_interactions/00_choose_favorite_interaction.txt`, `choose_favorite_interaction`; `common/character_interactions/_character_interactions.info` | Implementation-ready for the selected test shape | Add required fields and restrictions | Production policy is not established by this test form |
-| `scope:actor`, `scope:recipient` | Character scopes available inside Character Interaction triggers and accepted effects | `common/character_interactions/00_choose_favorite_interaction.txt` | Implementation-ready | Add | None for the isolated scope flow |
-| Default actor confirmation | Omit deprecated `needs_confirmation` | `common/character_interactions/_character_interactions.info`; omission in `choose_favorite_interaction` | Implementation-ready | Add | No custom confirmation-localisation suffix is verified or used |
-| `auto_accept = yes` | Top-level interaction field | `common/character_interactions/00_choose_favorite_interaction.txt`; `_character_interactions.info` | Implementation-ready | Add | This controls recipient acceptance, not the actor's confirmation window |
-| Same-Dynasty comparison | Trigger comparison inside `is_shown` | `common/character_interactions/00_choose_favorite_interaction.txt`; supporting inverse form in `common/character_interactions/00_dynast_interactions.txt` | Implementation-ready | Add | None for this comparison |
-| Actor/recipient AI gating | `is_ai` on actor or recipient character scope | `common/character_interactions/00_choose_favorite_interaction.txt` | Implementation-ready | Add | Production multiplayer policy remains deferred |
-| Visible failure reasons | `custom_tooltip = { text = <key> <trigger> }` inside `is_valid_showing_failures_only` | `common/character_interactions/00_choose_favorite_interaction.txt`; standard button behavior in `gui/interaction_confirmation.gui` | Implementation-ready | Add | Conditions placed only in `is_shown` are not assumed to display reasons |
-| `is_alive` | Character trigger on recipient scope | `common/character_interactions/00_education_interactions.txt`, `offer_ward_interaction` | Implementation-ready | Add | None for the isolated target check |
-| `is_lowborn` | Character trigger on recipient scope | `common/character_interactions/06_ep3_scheme_interactions.txt`, `start_challenge_status_interaction` | Implementation-ready | Add | `is_lowborn = no` proves only the script check, not a broader undocumented definition of highborn |
-| `is_adult`, `is_landed`, `is_ruler` | Character triggers on the target | `events/relations_events/parent_events.txt`, `parent_1009_valid_new_courtier`; recipient-context support in `common/character_interactions/00_diarch_interactions.txt` and `common/character_interactions/00_fp3_interactions.txt` | Implementation-ready for the isolated combination | Add | Lynn did not find the exact landed/ruler pair together inside one interaction block; both predicates and recipient context are independently verified |
-| `is_house_head` | Character trigger negated for the target | `events/lifestyles/statecraft_lifestyle/diplomacy_family_events.txt`, `diplomacy_family_2300_relative_trigger`; recipient support in `common/character_interactions/10_tgp_japan_interactions.txt` | Implementation-ready | Add | None for the excluded target class |
-| `is_dynast` | Character trigger negated for the target | `events/lifestyles/statecraft_lifestyle/diplomacy_family_events.txt`, `diplomacy_family_2300_relative_trigger`; definition in `common/scripted_triggers/00_dynasty_triggers.txt` | Implementation-ready | Add | The verified spelling is `is_dynast`; `is_dynasty_head` is not approved |
-| English localisation | `localization/english/*.yml`, `l_english:` header, explicitly referenced keys | `localization/english/interactions/choose_favorite_l_english.yml` | Implementation-ready | Add | UTF-8 BOM is observed in the source file but not asserted as a universal engine requirement |
+The actor must be:
 
-## 3. Blocking research assessment
+- player-controlled: `is_ai = no`;
+- alive: `is_alive = yes`; and
+- the current Dynast: `is_dynast = yes`.
 
-The Character Interaction research request from the technical proposal is resolved by `docs/research/Lynn_to_Jay_CharacterInteraction_Evidence.md`.
+### Recipient requirements
 
-| Research request | Classification for current work | Assessment |
+The recipient must be:
+
+- AI-controlled: `is_ai = yes`;
+- alive: `is_alive = yes`;
+- highborn for this feature boundary: `is_lowborn = no`;
+- in the actor's current Dynasty;
+- a character other than the actor;
+- not a House Head; and
+- not the Dynast.
+
+The production interaction intentionally has no restriction based on:
+
+- age or adulthood;
+- landed or ruler status;
+- current player-heir status;
+- marriage or betrothal;
+- bastard status; or
+- the Dynasties of the recipient's parents.
+
+The last two criteria remain possible future candidate-assistance rules, not v0.1 eligibility gates.
+
+## 3. Verified runtime evidence behind the approved boundary
+
+The Boss-approved standalone harness produced these observations:
+
+| Scenario | Observed result |
+| --- | --- |
+| Minor recipient | Interaction executed successfully |
+| Adult recipient | Interaction executed successfully |
+| Unlanded recipient | Dynasty replacement worked |
+| Landed ruler | Dynasty replacement worked; titles and government remained stable |
+| Current player heir | Dynasty replacement worked; CK3 selected a new player heir |
+| Recipient with descendants | Recipient and descendants moved to the replacement Dynasty |
+| Recipient with parents or siblings | Parents and siblings remained in their prior Dynasty |
+| Runtime error check | No CK3 runtime error was reported for the tested harness |
+
+These results support the narrowly matched production operation and eligibility boundary. They do not establish behavior for every government, title arrangement, special character state, multiplayer configuration, or mod combination.
+
+## 4. Production architecture
+
+| Layer | Production identifier | File |
 | --- | --- | --- |
-| Exact `every_dynasty_member` evidence | Only blocks later bulk functionality | No iterator is used in Stage A/B. |
-| Native bulk selection and preview patterns | Only blocks later bulk functionality | Decisions and bulk management are excluded. |
-| Exact Character Interaction confirmation and recipient pattern | Non-blocking; resolved | Lynn verified the selected `choose_favorite_interaction` structure, scopes, default confirmation, failure display, accepted hook, and localisation form. |
-| Cross-Dynasty `set_house` call context | Non-blocking | The approved prototype uses only `create_dynasty`. |
+| Character Interaction | `breedimp_exile_from_dynasty_interaction` | `MyCK3Mod/common/character_interactions/breedimp_exile_from_dynasty_interaction.txt` |
+| Shared validation trigger | `breedimp_can_exile_dynasty_member` | `MyCK3Mod/common/scripted_triggers/breedimp_dynasty_exile_triggers.txt` |
+| Shared state-changing effect | `breedimp_exile_dynasty_member` | `MyCK3Mod/common/scripted_effects/breedimp_dynasty_exile_effects.txt` |
+| Saved replacement-Dynasty scope | `breedimp_new_dynasty` | inside `breedimp_exile_dynasty_member` |
+| English localisation | `breedimp_exile_from_dynasty_interaction*` | `MyCK3Mod/localization/english/breedimp_dynasty_exile_l_english.yml` |
+| Simplified Chinese localisation | `breedimp_exile_from_dynasty_interaction*` | `MyCK3Mod/localization/simp_chinese/breedimp_dynasty_exile_l_simp_chinese.yml` |
 
-No additional Lynn request blocks the isolated harness. The remaining questions are runtime questions for T1/T7 and must be answered by controlled CK3 testing and save inspection, not by inventing script or returning them to research.
+The shared trigger keeps recipient validation available for a later approved interface without duplicating the rule set. The shared effect contains the complete mutation boundary so future callers cannot silently diverge from the approved operation.
 
-## 4. Development stages
+## 5. Character Interaction structure
 
-### Stage A - Syntax and evidence preparation
+The production interaction follows the verified vanilla Dynasty-interaction presentation pattern from:
 
-1. Register every construct used by the harness in `ck3_syntax_reference.md`.
-2. Record concise vanilla provenance with exact paths, enclosing identifiers where Lynn supplied them, minimal excerpts, context, and limitations.
-3. Keep unverified behavior clearly separated from verified script form.
+- `common/character_interactions/00_dynast_interactions.txt`, `disinherit_interaction`; and
+- `common/character_interactions/_character_interactions.info`.
 
-### Stage B - Isolated test harness
+It uses:
 
-1. Create a standalone test mod under `tests/phase1_create_dynasty/`.
-2. Add one Character Interaction based on the verified `choose_favorite_interaction` structure.
-3. Use static recipient checks and exactly one `create_dynasty` effect.
-4. Add only the explicitly referenced English localisation keys.
-5. Perform static review without launching CK3.
-
-### Stage C - Controlled CK3 tests
-
-Blocked pending separate approval. Run T1 and T7 from clean, recorded baselines; inspect errors, state changes, and save/reload persistence. Do not reinterpret a parser-clean load as behavioral success.
-
-### Stage D - Recorded-result review
-
-Jay reviews complete T1/T7 evidence. A pass must demonstrate the approved target changes affiliation, descendants do not, excluded state remains unchanged, and the result survives save/reload.
-
-### Stage E - Production Character Interaction
-
-Blocked pending Stage D approval. Production code must be designed separately and must not be copied automatically from the test harness.
-
-### Stage F - Production localisation, validation, confirmation, and regression tests
-
-Blocked pending Stage E approval. This stage must add approved actor authority, candidate reasons, production feedback, final revalidation, and regression coverage from verified evidence only.
-
-## 5. Exact repository changes
-
-### Created documentation and evidence
-
-- `docs/Matt_to_Jay_Phase1_Implementation_Plan.md` - this approved implementation/testing plan; development documentation.
-- `.agents/skills/ck3-mod-development/references/ck3_vanilla_examples/phase1_create_dynasty_interaction_1_19_0_6.md` - concise CK3 `1.19.0.6` provenance; development evidence.
-- `docs/testing/phase1_create_dynasty_t1_t7.md` - T1/T7 protocol and empty result forms; test documentation.
-
-### Modified reference
-
-- `.agents/skills/ck3-mod-development/references/ck3_syntax_reference.md` - register only the exact constructs required by the harness.
-
-### Created test-only files
-
-- `tests/phase1_create_dynasty/BreedImprovedPhase1Test.mod` - portable launcher template with `path="<LOCAL_MOD_PATH>"`.
-- `tests/phase1_create_dynasty/BreedImprovedPhase1Test/descriptor.mod` - test content descriptor.
-- `tests/phase1_create_dynasty/BreedImprovedPhase1Test/common/character_interactions/breedimp_test_create_dynasty_interaction.txt` - one test-only Character Interaction with ID `breedimp_test_create_dynasty_interaction`.
-- `tests/phase1_create_dynasty/BreedImprovedPhase1Test/localization/english/breedimp_test_create_dynasty_l_english.yml` - static English name, description, and failure reasons using `breedimp_test_` keys.
-
-### Left untouched
-
-- every file under `MyCK3Mod/`;
-- root production launcher template `MyCK3Mod.mod`;
-- installed vanilla CK3 files;
-- README, project rules, product designs, technical proposal, and Lynn's research;
-- all production event, Decision, scripted trigger, scripted effect, GUI, and gameplay paths.
-
-## 6. Test harness design
-
-The safest available method is a standalone, test-only Character Interaction because Lynn verified its single-recipient scope, explicit player initiation, default confirmation, visible validation failures, and `on_accept` recipient access. It avoids vanilla modification, iteration, scheduled execution, and production-file contamination.
-
-The harness uses:
-
-- a player-only actor;
-- one AI recipient selected through the ordinary interaction menu;
-- same-Dynasty and non-self visibility gates;
-- target-class checks before the interaction can be sent;
+- `icon = icon_dynasty`;
+- `category = interaction_category_hostile`;
+- `interface_priority = 60`;
+- an explicitly referenced `desc` key;
+- an explicitly referenced `prompt` key;
+- `use_diplomatic_range = no`;
 - default actor confirmation by omitting deprecated `needs_confirmation`;
-- recipient auto-acceptance through `auto_accept = yes`; and
-- one recipient-scoped `create_dynasty` operation.
+- `auto_accept = yes` so an eligible AI recipient does not separately accept or reject;
+- `is_shown` for stable visibility constraints; and
+- `is_valid_showing_failures_only` plus a static `custom_tooltip.text` failure key for mutable recipient validation.
 
-Runtime success requires all of the following:
+The interaction enters `scope:recipient` before calling the shared effect. No target argument is guessed for `create_dynasty`.
 
-- the intended target receives a replacement Dynasty and associated House;
-- the actor and every non-target character remain unchanged;
-- no descendant changes affiliation when `spread_to_descendants` is omitted;
-- claims, traits, titles, succession observations, court, imprisonment, marriage, and parentage show no unexpected mutation;
-- no relevant parser or runtime error is recorded; and
-- the result persists after save/reload.
+## 6. Shared effect and mutation boundary
 
-Runtime failure includes a parser/runtime error, failure to change the target, descendant propagation, any excluded state change, unstable save/reload behavior, or an unexplained side effect. The current runtime status is `NOT RUN`.
+The only direct state-changing CK3 effect in the production implementation is:
 
-## 7. Production Character Interaction plan
+```text
+create_dynasty = {
+    spread_to_descendants = yes
+    save_scope_as = breedimp_new_dynasty
+}
+```
 
-Production work is deferred. If T1/T7 pass and Jay authorizes conversion, the production interaction should be planned as follows:
+The form is supported by Lynn's verified `create_dynasty` sources and by the approved runtime harness. It is executed from the recipient character scope.
 
-- Visibility: player-authority policy, same managed Dynasty, non-self, and any cheap identity gates.
-- Availability: shared production eligibility with exact player-readable failures.
-- Scopes: verified `scope:actor` and `scope:recipient` only, with every additional scope link separately evidenced.
-- Final revalidation: repeat all mutable safety and eligibility checks immediately before mutation using a verified execution pattern.
-- Confirmation: preserve default confirmation or adopt another verified CK3 pattern only after review.
-- Mutation: exactly one approved recipient-scoped affiliation operation.
-- Feedback: add only a verified success/failure presentation form.
-- Localisation: production `breedimp_` keys, verified explicit references, verified dynamic text only if later evidence supports it.
+The saved scope is retained from the verified harness form for traceability and possible diagnostic inspection. No further effect consumes it in v0.1.
 
-Still unresolved for production: actor authority, bastard/parent-Dynasty candidate reasons, special-title exclusions expressible in script, final-revalidation architecture, success feedback, dynamic target/Dynasty text, and production naming. The test harness does not decide those policies.
+## 7. Localisation and confirmation disclosure
 
-## 8. Risk controls
+English and Simplified Chinese provide explicit keys for:
 
-- Unsupported targets are hidden or disabled by the narrow verified target checks and by manual T1/T7 setup restrictions.
-- Descendant propagation is prevented in script by omitting `spread_to_descendants`; T7 must verify the runtime default before production.
-- Repeated automatic execution is impossible because the harness has no event, Decision, pulse, on_action, iterator, scan, or background process.
-- Partial feature composition is prevented by allowing exactly one state-changing operation.
-- Claims and inheritance cannot be modified because no related constructs appear in the test mod.
-- Political exile cannot be triggered because the test mod contains no court movement, banishment, imprisonment, title, government, or adventurer operation.
-- Test scripts are isolated under `tests/` and have test-only metadata and identifiers; production conversion requires a new approval and implementation pass.
-- Unverified syntax is kept out of runnable files. Every game-defined token in the harness is registered with versioned evidence and restrictions.
+- interaction name;
+- description;
+- confirmation prompt; and
+- validation failure text.
 
-## 9. Approval gates
+The English name is **Exile from Dynasty**. The Simplified Chinese name is **逐出宗族**.
 
-- Test-harness creation: approved only for the Stage A/B files listed above.
-- CK3 launch and T1/T7 execution: requires new Jay approval after static review.
-- Recording runtime or save/reload results: requires the same runtime approval and actual observed evidence.
-- Production conversion: requires T1/T7 review and explicit Jay approval.
-- Broader eligibility: requires separate evidence, tests, and Boss approval for affected player-facing behavior.
-- Optional claims, inheritance, political, court, descendant, or identity consequences: require separate Boss product approval and technical verification.
-- Dynasty Decision or bulk management: requires later Lynn evidence, architecture review, and explicit approval.
+The description and prompt state that:
 
-## 10. Immediate next action
+- the recipient and descendants enter a newly generated Dynasty;
+- they leave the actor's Dynasty;
+- titles, claims, marriages, court, and political status are not directly changed; and
+- CK3 may recalculate succession.
 
-Complete Stage A evidence registration and create the isolated Stage B test harness, then stop after static review with runtime status `NOT RUN`.
+Both localisation files use the correct language header, quoted values, project-established unversioned keys, and UTF-8 BOM. Dynamic forms used in the description are limited to vanilla-verified `$dynasty_interaction_header$`, `[recipient.GetShortUINameNoTooltip]`, and `[dynasty|E]`.
+
+## 8. Explicitly excluded behavior
+
+The v0.1 production implementation does not contain:
+
+- `disinherit_effect` or another inheritance-trait change;
+- claim removal or `remove_claim`;
+- divorce or betrothal changes;
+- banishment, imprisonment, or court movement;
+- title removal or transfer;
+- government conversion;
+- adventurer conversion;
+- events or Decisions;
+- scans, iterators, recurring execution, or bulk processing; or
+- automatic or AI-initiated cleanup.
+
+## 9. Deferred runtime finding: spouse-related claims
+
+In the approved harness testing, a married target later gained spouse-related strong claims after time advanced.
+
+This is recorded as a deferred behavior to investigate. The observation does not by itself prove that `create_dynasty` directly granted the claims. v0.1 therefore adds neither claim removal nor divorce. A future investigation should isolate the claim source through controlled before/after timing, logs, save inspection, and a comparison case before any product policy is proposed.
+
+## 10. Evidence provenance
+
+Primary verified paths used by this production implementation include:
+
+- `common/character_interactions/00_dynast_interactions.txt`
+- `common/character_interactions/_character_interactions.info`
+- `common/character_interactions/00_courtier_and_guest_interactions.txt`
+- `common/scripted_triggers/00_interaction_triggers.txt`
+- `common/scripted_triggers/00_dynasty_triggers.txt`
+- `common/scripted_effects/00_interaction_effects.txt`
+- `common/scripted_effects/00_accolades_scripted_effects.txt`
+- `common/scripted_effects/10_dlc_tgp_japan_scripted_effects.txt`
+- `events/dlc/tgp/tgp_japan_decision_events.txt`
+- `events/dlc/tgp/tgp_mandala_task_contract_events.txt`
+- `localization/english/interactions/dynast_interaction_l_english.yml`
+- `localization/simp_chinese/interactions/dynast_interaction_l_simp_chinese.yml`
+- `docs/research/Lynn_to_Jay_Phase1_Followup.md`
+- `docs/research/Lynn_to_Jay_CharacterInteraction_Evidence.md`
+- `.agents/skills/ck3-mod-development/references/ck3_vanilla_examples/phase1_create_dynasty_interaction_1_19_0_6.md`
+
+All vanilla paths refer to CK3 `1.19.0.6`. No vanilla file is modified or copied wholesale.
+
+## 11. Validation boundary and next gate
+
+This implementation received static review only in the current task. The review passed file-placement, balanced-syntax, identifier-consistency, bilingual-localisation, eligibility-contract, and single-effect mutation-boundary checks.
+
+Production runtime remains `NOT RUN`. Launching CK3, asserting production runtime success, broadening eligibility, adding consequences, or implementing the Dynasty Decision requires a separate approval and test stage.

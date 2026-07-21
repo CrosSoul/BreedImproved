@@ -77,10 +77,10 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Enclosing context: a character-scoped effect block; the intended character is entered before the call
 - Input scope: character
 - Output scope or state change: creates a Dynasty for the scoped character; cited vanilla flows access that character's resulting `house` immediately afterward
-- Arguments: verified keys are `name`, `coat_of_arms`, `spread_to_descendants = yes`, and `save_scope_as = <saved_scope_name>`; the minimal verified form used by the test harness is `create_dynasty = { save_scope_as = new_dynasty }`
+- Arguments: verified keys are `name`, `coat_of_arms`, `spread_to_descendants = yes`, and `save_scope_as = <saved_scope_name>`; the approved test harness and production wrapper use `spread_to_descendants = yes` with `save_scope_as = <saved_scope_name>`
 - Evidence: `common/scripted_effects/00_accolades_scripted_effects.txt`; `common/scripted_effects/10_dlc_tgp_japan_scripted_effects.txt`; `events/dlc/tgp/tgp_japan_decision_events.txt`; `events/dlc/tgp/tgp_mandala_task_contract_events.txt`; `docs/research/Lynn_to_Jay_Phase1_Followup.md`, section 1
-- Minimal verified example: `create_dynasty = { save_scope_as = new_dynasty }`
-- Restrictions and notes: no target argument is verified; enter the intended character scope first. Existing-character use is verified, but use on an arbitrary existing highborn unlanded target requires T1. Omission of `spread_to_descendants` is verified syntax, but target-only runtime behavior is not verified and requires T7. Do not infer other arguments or default descendant behavior.
+- Minimal verified example: `create_dynasty = { spread_to_descendants = yes save_scope_as = new_dynasty }`
+- Restrictions and notes: no target argument is verified; enter the intended character scope first. Breed Improved's isolated harness runtime tests confirmed Dynasty replacement for approved highborn AI targets, including minors, adults, unlanded characters, landed rulers, and the current player heir. With `spread_to_descendants = yes`, descendants moved to the replacement Dynasty while parents and siblings remained unchanged; tested landed targets retained titles and government. These observations validate the approved harness behavior, not every possible character state or the production interaction as a whole. Do not infer other arguments or default descendant behavior.
 
 ### `category`
 
@@ -91,10 +91,10 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Enclosing context: top level of a Character Interaction definition
 - Input scope: interaction database object; no character scope transition
 - Output scope or state change: assigns the interaction to an interaction category
-- Arguments: a valid interaction-category identifier; verified example value `interaction_category_friendly`
-- Evidence: `common/character_interactions/00_choose_favorite_interaction.txt`, `choose_favorite_interaction`; `common/character_interactions/_character_interactions.info`
-- Minimal verified example: `category = interaction_category_friendly`
-- Restrictions and notes: the field is documented as required. The verified value is reused only as test-only UI presentation and does not establish the production category.
+- Arguments: a valid interaction-category identifier; verified values are `interaction_category_friendly` and `interaction_category_hostile`
+- Evidence: `common/character_interactions/00_choose_favorite_interaction.txt`, `choose_favorite_interaction`; `common/character_interactions/00_dynast_interactions.txt`, `disinherit_interaction`; `common/character_interactions/_character_interactions.info`
+- Minimal verified example: `category = interaction_category_hostile`
+- Restrictions and notes: the field is documented as required. The production interaction follows the hostile-category pattern used by vanilla `disinherit_interaction`.
 
 ### `icon`
 
@@ -105,10 +105,10 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Enclosing context: top level of a Character Interaction definition
 - Input scope: interaction database object; no character scope transition
 - Output scope or state change: selects the displayed interaction icon
-- Arguments: a valid interaction-icon identifier; verified example value `designate_favorite`
-- Evidence: `common/character_interactions/00_choose_favorite_interaction.txt`, `choose_favorite_interaction`
-- Minimal verified example: `icon = designate_favorite`
-- Restrictions and notes: the value is context-dependent vanilla UI data and is approved only for the isolated test harness, not for production branding.
+- Arguments: a valid interaction-icon identifier; verified values are `designate_favorite` and `icon_dynasty`
+- Evidence: `common/character_interactions/00_choose_favorite_interaction.txt`, `choose_favorite_interaction`; `common/character_interactions/00_dynast_interactions.txt`, `disinherit_interaction`
+- Minimal verified example: `icon = icon_dynasty`
+- Restrictions and notes: `designate_favorite` remains test-only. Production uses the vanilla Dynasty interaction icon `icon_dynasty` from `disinherit_interaction`.
 
 ### `interface_priority`
 
@@ -119,10 +119,10 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Enclosing context: top level of a Character Interaction definition
 - Input scope: interaction database object; no character scope transition
 - Output scope or state change: controls interaction-menu ordering
-- Arguments: numeric priority; verified example value `8`
-- Evidence: `common/character_interactions/00_choose_favorite_interaction.txt`, `choose_favorite_interaction`; `common/character_interactions/_character_interactions.info`
-- Minimal verified example: `interface_priority = 8`
-- Restrictions and notes: the number is a test-only UI choice and does not establish a production priority.
+- Arguments: numeric priority; verified values include `8` and `60`
+- Evidence: `common/character_interactions/00_choose_favorite_interaction.txt`, `choose_favorite_interaction`; `common/character_interactions/00_dynast_interactions.txt`, `disinherit_interaction`; `common/character_interactions/_character_interactions.info`
+- Minimal verified example: `interface_priority = 60`
+- Restrictions and notes: the production value `60` follows vanilla `disinherit_interaction`; it is a menu-ordering choice, not a gameplay rule.
 
 ### `desc`
 
@@ -137,6 +137,34 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Evidence: `common/character_interactions/00_choose_favorite_interaction.txt`, `choose_favorite_interaction`; `localization/english/interactions/choose_favorite_l_english.yml`
 - Minimal verified example: `desc = choose_favorite_interaction_desc`
 - Restrictions and notes: `_desc` is not assumed to resolve automatically; the key must be referenced explicitly.
+
+### `prompt`
+
+- Status: `VERIFIED`
+- Category: Character Interaction localisation field
+- CK3 version: `1.19.0.6`
+- File family: `common/character_interactions/*.txt`
+- Enclosing context: top level of a Character Interaction definition
+- Input scope: interaction database object; no character scope transition
+- Output scope or state change: references the localisation text shown under the portrait in the interaction window
+- Arguments: localisation key
+- Evidence: `common/character_interactions/_character_interactions.info`, lines documenting `prompt = loc_key`
+- Minimal verified example: `prompt = breedimp_exile_from_dynasty_interaction_prompt`
+- Restrictions and notes: the project key must be explicitly defined. This entry verifies the field and localisation reference, not a guaranteed layout or line-wrapping result.
+
+### `use_diplomatic_range`
+
+- Status: `VERIFIED`
+- Category: Character Interaction field
+- CK3 version: `1.19.0.6`
+- File family: `common/character_interactions/*.txt`
+- Enclosing context: top level of a Character Interaction definition
+- Input scope: interaction database object; no character scope transition
+- Output scope or state change: determines whether normal diplomatic-range checking applies
+- Arguments: `yes`, `no`, or a trigger; production uses the verified boolean value `no`
+- Evidence: `common/character_interactions/_character_interactions.info`; `common/character_interactions/00_dynast_interactions.txt`, `disinherit_interaction`
+- Minimal verified example: `use_diplomatic_range = no`
+- Restrictions and notes: this removes the normal diplomatic-range check only. It does not bypass the interaction's own actor or recipient validation.
 
 ### `is_shown`
 
@@ -180,6 +208,20 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Minimal verified example: `on_accept = { scope:recipient = { <verified character effect> } }`
 - Restrictions and notes: the selected vanilla interaction calls a scripted effect with actor and recipient. The test harness instead enters `scope:recipient` and uses the independently verified character effect `create_dynasty`; no result-message behavior is inferred.
 
+### no-argument scripted effect definition and call
+
+- Status: `VERIFIED`
+- Category: scripted effect definition and effect call
+- CK3 version: `1.19.0.6`
+- File family: definition in `common/scripted_effects/*.txt`; call from Character Interaction effect blocks
+- Enclosing context: a top-level scripted effect definition and a character-scoped `on_accept` effect block
+- Input scope: inherited character scope; the caller enters `scope:recipient` before invoking the effect
+- Output scope or state change: runs the verified effects inside the named scripted effect
+- Arguments: `yes` for a no-argument call
+- Evidence: definition `restore_inheritance_effect` in `common/scripted_effects/00_interaction_effects.txt`; recipient-scoped call in `common/character_interactions/00_dynast_interactions.txt`, `restore_inheritance_interaction`
+- Minimal verified example: `scope:recipient = { restore_inheritance_effect = yes }`
+- Restrictions and notes: only the definition-and-call form is generalized here. Every state-changing construct inside a project scripted effect must be independently verified for the inherited scope.
+
 ### `auto_accept`
 
 - Status: `VERIFIED`
@@ -221,6 +263,20 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Evidence: `common/character_interactions/00_choose_favorite_interaction.txt`, `choose_favorite_interaction`; `common/character_interactions/_character_interactions.info`
 - Minimal verified example: `scope:actor = { is_ai = no }` and `scope:recipient = { is_ai = yes }`
 - Restrictions and notes: availability outside the documented Character Interaction context is not established by this entry.
+
+### no-argument scripted trigger definition and call in a Character Interaction
+
+- Status: `VERIFIED`
+- Category: scripted trigger definition and trigger call
+- CK3 version: `1.19.0.6`
+- File family: definition in `common/scripted_triggers/*.txt`; call from Character Interaction trigger blocks
+- Enclosing context: a top-level scripted trigger definition and a recipient character scope inside `is_valid_showing_failures_only`
+- Input scope: inherited character scope; interaction saved scopes such as `scope:actor` remain available in the cited definition
+- Output scope or state change: returns the combined trigger result; no state change
+- Arguments: `yes` for a no-argument call
+- Evidence: definition `kick_from_court_validity_trigger` in `common/scripted_triggers/00_interaction_triggers.txt`; recipient-scoped call in `common/character_interactions/00_courtier_and_guest_interactions.txt`, `kick_from_court_interaction`
+- Minimal verified example: `scope:recipient = { kick_from_court_validity_trigger = yes }`
+- Restrictions and notes: the scripted trigger must be called from the character scope it expects. This evidence supports access to `scope:actor` retained from the enclosing Character Interaction context; it does not establish arbitrary saved-scope availability in unrelated callers.
 
 ### `scope:recipient.dynasty = scope:actor.dynasty`
 
@@ -312,13 +368,13 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Category: character trigger
 - CK3 version: `1.19.0.6`
 - File family: character trigger blocks
-- Enclosing context: character trigger `parent_1009_valid_new_courtier`; the test moves the same character trigger into a documented recipient character trigger block
+- Enclosing context: character trigger `parent_1009_valid_new_courtier`
 - Input scope: character
 - Output scope or state change: boolean condition; no state change
 - Arguments: `yes` or `no`; verified use `yes`
 - Evidence: `events/relations_events/parent_events.txt`, `parent_1009_valid_new_courtier`; recipient scope support from `common/character_interactions/_character_interactions.info`
 - Minimal verified example: `is_adult = yes`
-- Restrictions and notes: Lynn did not cite the exact predicate inside the selected Character Interaction; its character scope and the interaction's recipient character scope are independently verified.
+- Restrictions and notes: this construct is registered for reference but is intentionally absent from the approved harness and production v0.1, which permit both minors and adults.
 
 ### `is_landed`
 
@@ -332,7 +388,7 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Arguments: `yes` or `no`; verified use `no`
 - Evidence: `events/relations_events/parent_events.txt`, `parent_1009_valid_new_courtier`; `common/character_interactions/00_fp3_interactions.txt`
 - Minimal verified example: `is_landed = no`
-- Restrictions and notes: do not treat `is_landed = no` as equivalent to `is_ruler = no`; the test checks both.
+- Restrictions and notes: do not treat `is_landed = no` as equivalent to `is_ruler = no`. This construct is intentionally absent from the approved harness and production v0.1, which permit unlanded and landed recipients.
 
 ### `is_ruler`
 
@@ -346,7 +402,7 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Arguments: `yes` or `no`; verified use `no`
 - Evidence: `events/relations_events/parent_events.txt`, `parent_1009_valid_new_courtier`; `common/character_interactions/00_diarch_interactions.txt`
 - Minimal verified example: `is_ruler = no`
-- Restrictions and notes: do not treat `is_ruler = no` as equivalent to `is_landed = no`; the test checks both. The exact pair was not found together inside one interaction block, but both predicates and recipient context are independently verified.
+- Restrictions and notes: do not treat `is_ruler = no` as equivalent to `is_landed = no`. This construct is intentionally absent from the approved harness and production v0.1, which permit non-rulers and rulers. The exact pair was not found together inside one interaction block, but both predicates and recipient context are independently verified.
 
 ### `is_house_head`
 
@@ -360,7 +416,7 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Arguments: `yes` or `no`; verified exclusion forms are `NOT = { is_house_head = yes }` and recipient `is_house_head = no`
 - Evidence: `events/lifestyles/statecraft_lifestyle/diplomacy_family_events.txt`, `diplomacy_family_2300_relative_trigger`; `common/character_interactions/10_tgp_japan_interactions.txt`, `kick_from_house_bloc_interaction`
 - Minimal verified example: `NOT = { is_house_head = yes }`
-- Restrictions and notes: the test excludes House Heads; it does not establish behavior if the effect is applied to one.
+- Restrictions and notes: the approved harness and production v0.1 exclude House Heads; tested behavior does not establish what would happen if the effect were applied to one.
 
 ### `is_dynast`
 
@@ -386,9 +442,23 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Input scope: not applicable; static localisation database entries
 - Output scope or state change: registers English text for explicitly referenced localisation keys
 - Arguments: first line `l_english:`; entries use one leading space, a key, a colon, and a quoted value
-- Evidence: `localization/english/interactions/choose_favorite_l_english.yml`
+- Evidence: `localization/english/interactions/choose_favorite_l_english.yml`; `localization/english/interactions/dynast_interaction_l_english.yml`
 - Minimal verified example: `l_english:` followed by ` choose_favorite_interaction: "Choose Favorite Child"`
-- Restrictions and notes: this cited vanilla file begins with UTF-8 BOM bytes `EF BB BF`; the test file preserves that observed property. The evidence does not prove BOM is universally required. Numeric key versions such as `:0` are not established as required by this example. Interaction name resolves from the interaction ID when `send_name` is omitted; description and failure keys are explicitly referenced. Dynamic character or Dynasty expressions are not verified and are not used.
+- Restrictions and notes: the cited vanilla files begin with UTF-8 BOM bytes `EF BB BF`; project files preserve that observed property. The evidence does not prove BOM is universally required. Vanilla demonstrates both versioned keys (for example `:0`) and unversioned keys; the project uses its established unversioned form. Interaction name resolves from the interaction ID when `send_name` is omitted; description, prompt, and failure keys are explicitly referenced. `dynast_interaction_l_english.yml` verifies `$dynasty_interaction_header$`, `[recipient.GetShortUINameNoTooltip]`, and `[dynasty|E]`-style game-concept links in an interaction description.
+
+### Simplified Chinese localisation file form
+
+- Status: `VERIFIED`
+- Category: file structure and localisation format
+- CK3 version: `1.19.0.6`
+- File family: `localization/simp_chinese/*.yml`
+- Enclosing context: Simplified Chinese localisation file
+- Input scope: not applicable; static localisation database entries
+- Output scope or state change: registers Simplified Chinese text for explicitly referenced localisation keys
+- Arguments: first line `l_simp_chinese:`; entries use one leading space, a key, a colon, and a quoted value
+- Evidence: `localization/simp_chinese/interactions/dynast_interaction_l_simp_chinese.yml`
+- Minimal verified example: `l_simp_chinese:` followed by ` disinherit_interaction: "剥夺继承权"`
+- Restrictions and notes: the cited vanilla file begins with UTF-8 BOM bytes `EF BB BF`; the project preserves that observed property without asserting that BOM is a universal engine requirement. The cited file uses unversioned keys and verifies `$dynasty_interaction_header$`, `[recipient.GetShortUINameNoTooltip]`, and `[dynasty|E]`-style game-concept links in Simplified Chinese interaction localisation.
 
 ## Uncertainty Protocol
 

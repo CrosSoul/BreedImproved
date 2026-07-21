@@ -1,0 +1,15 @@
+breedimp_can_exile_dynasty_member = {
+	scope:actor = {
+		is_ai = no
+		is_alive = yes
+		is_dynast = yes
+	}
+
+	is_ai = yes
+	is_alive = yes
+	is_lowborn = no
+	dynasty = scope:actor.dynasty
+	this != scope:actor
+	NOT = { is_house_head = yes }
+	NOT = { is_dynast = yes }
+}

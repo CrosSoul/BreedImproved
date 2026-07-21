@@ -1,0 +1,39 @@
+breedimp_exile_from_dynasty_interaction = {
+	icon = icon_dynasty
+	category = interaction_category_hostile
+	interface_priority = 60
+
+	desc = breedimp_exile_from_dynasty_interaction_desc
+	prompt = breedimp_exile_from_dynasty_interaction_prompt
+	use_diplomatic_range = no
+
+	is_shown = {
+		scope:actor = {
+			is_ai = no
+			is_alive = yes
+			is_dynast = yes
+			dynasty = scope:recipient.dynasty
+		}
+		scope:recipient = {
+			is_ai = yes
+		}
+		scope:actor != scope:recipient
+	}
+
+	is_valid_showing_failures_only = {
+		custom_tooltip = {
+			text = breedimp_exile_from_dynasty_interaction_invalid_tt
+			scope:recipient = {
+				breedimp_can_exile_dynasty_member = yes
+			}
+		}
+	}
+
+	on_accept = {
+		scope:recipient = {
+			breedimp_exile_dynasty_member = yes
+		}
+	}
+
+	auto_accept = yes
+}

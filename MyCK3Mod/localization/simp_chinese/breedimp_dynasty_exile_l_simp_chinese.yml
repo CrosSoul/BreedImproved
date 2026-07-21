@@ -1,0 +1,5 @@
+﻿l_simp_chinese:
+ breedimp_exile_from_dynasty_interaction: "逐出宗族"
+ breedimp_exile_from_dynasty_interaction_desc: "$dynasty_interaction_header$[recipient.GetShortUINameNoTooltip]及其后代将加入一个新生成的[dynasty|E]，并离开你的[dynasty|E]。此操作不会直接改变头衔、宣称、婚姻、宫廷或政治状态。CK3可能会重新计算继承顺序。"
+ breedimp_exile_from_dynasty_interaction_prompt: "选中的角色及其后代将加入一个新生成的宗族，并离开你的宗族。此操作不会直接改变头衔、宣称、婚姻、宫廷或政治状态。CK3可能会重新计算继承顺序。"
+ breedimp_exile_from_dynasty_interaction_invalid_tt: "选中的角色必须仍然在世、并非出身卑微、由AI控制、属于你的宗族，并且既非家主也非宗族族长。"
