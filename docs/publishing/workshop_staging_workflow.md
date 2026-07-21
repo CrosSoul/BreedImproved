@@ -4,6 +4,8 @@
 
 Steam Workshop is the sole supported end-user distribution channel. This workflow creates deterministic upload content; it does not create a ZIP, installer, local launcher entry, checksum, or Workshop upload.
 
+The first upload created Workshop item `3769010534`. All future Breed Improved updates must reuse that item. The repository-owned association is stored in `docs/publishing/workshop_item_id.txt`; it is public publishing metadata, not a secret.
+
 ## Build command
 
 From the repository root on Windows:
@@ -27,7 +29,9 @@ common/
 localization/
 ```
 
-The script completely deletes and recreates the staging root on every run. It recursively copies all production files except repository-only `.gitkeep` markers, then requires identical source and staged file sets, sizes, and SHA-256 hashes.
+The script completely deletes and recreates the staging root on every run. It recursively copies all production files except repository-only `.gitkeep` markers and verifies a byte-identical production copy before applying the only authorized staging transform: adding exactly one `remote_file_id="3769010534"` to the staged `descriptor.mod`.
+
+After injection, every gameplay and localisation file must remain byte-identical to production. The staged descriptor must equal the production descriptor plus only the exact Workshop association line. The production descriptor remains free of `remote_file_id` and local `path` fields.
 
 ## Validation gates
 
@@ -36,12 +40,25 @@ The workflow verifies:
 - version `0.1.0`;
 - `supported_version="1.19.*"`;
 - no local `path` field;
-- no pre-upload `remote_file_id`;
+- configured Workshop ID exists and is exactly `3769010534`;
+- exactly one staged `remote_file_id="3769010534"` entry;
+- no missing, duplicate, malformed, or different staged Workshop ID;
 - required production gameplay and localisation files;
 - English and Simplified Chinese UTF-8 BOM;
 - no outer `.mod` file or `INSTALL.txt`;
 - no extra `MyCK3Mod/` layer;
 - no development directories, local absolute paths, or `breedimp_test_` identifiers; and
-- byte-identical production/staging hashes.
+- byte-identical production/staging hashes before descriptor injection; and
+- byte-identical gameplay/localisation hashes after injection, with only the exact descriptor association permitted to differ.
 
 `dist/` is generated and Git-ignored. The staging directory is an internal upload input, not a public download or supported manual-install package.
+
+## Updating the existing Workshop item
+
+1. Run `scripts/stage_workshop.ps1` to prepare and validate the content.
+2. In the CK3 Launcher, select the existing **Breed Improved** entry associated with Workshop item `3769010534`.
+3. Use the Launcher's update workflow only after the separate publishing approval is granted.
+
+Do not create a new Mod entry for an update; doing so risks creating a duplicate Workshop item. The local outer `BreedImproved.mod` under the user's CK3 Documents directory is Launcher-managed, machine-specific, and must not be generated or committed by this repository. The staged `descriptor.mod` must retain `remote_file_id="3769010534"` so the Launcher associates future uploads with the existing item.
+
+The existence of this Workshop item does not establish that its visibility is public. Ray must separately confirm any visibility change.

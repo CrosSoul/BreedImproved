@@ -35,6 +35,8 @@ Use angle-bracket values as unresolved placeholders. Do not copy them literally 
 | Mod scope | CK3 dynasty management utility |
 | Compatibility policy | `<COMPATIBILITY_POLICY>` |
 | Supported end-user distribution | Steam Workshop only |
+| Steam Workshop item | `3769010534` |
+| Steam Workshop URL | `https://steamcommunity.com/sharedfiles/filedetails/?id=3769010534` |
 | GitHub role | Public source, history, issues, roadmap, documentation, tags, and Release notes |
 | Release versioning scheme | `<VERSIONING_SCHEME>` |
 
@@ -188,7 +190,7 @@ Use `MyCK3Mod.mod` only as a developer/advanced-user local launcher template. Ke
 
 This local path workflow is not an officially supported end-user installation method. Do not include `MyCK3Mod.mod` in Workshop staging.
 
-Keep `MyCK3Mod/descriptor.mod` free of the local `path` field. Do not add `remote_file_id` until the Workshop publishing process assigns one.
+Keep `MyCK3Mod/descriptor.mod` free of the local `path` field and `remote_file_id`. The first upload assigned Workshop item `3769010534`; store that public ID in `docs/publishing/workshop_item_id.txt`, and let `scripts/stage_workshop.ps1` inject exactly one `remote_file_id="3769010534"` into the generated staged descriptor. All future Workshop updates must reuse this item. Select the existing **Breed Improved** Launcher entry instead of creating a new Mod entry, which could create a duplicate Workshop item. The user-directory outer `BreedImproved.mod` is Launcher-managed and must not be generated or committed by the repository.
 
 The empty leaf directories contain only `.gitkeep` repository markers. These markers preserve the verified folder structure and are not gameplay definitions.
 
@@ -332,6 +334,7 @@ Apply these rules:
 - Do not commit secrets, credentials, usernames, or local absolute paths.
 - Keep the developer-only `MyCK3Mod.mod` portable in version control. Put an absolute path only in the copied launcher file used on the local machine, and never include it in Workshop staging.
 - Treat `dist/workshop/BreedImproved/` as generated, Git-ignored Workshop upload staging rather than a public download.
+- Preserve Workshop item `3769010534` in the repository publishing configuration. Require the staged descriptor to contain exactly one matching `remote_file_id`, while keeping the production descriptor free of it.
 - Do not publish or support manual-install ZIPs, installers, checksums, or GitHub Release assets for end-user installation.
 - Do not copy large vanilla CK3 files into the repository without a documented technical need and applicable distribution rights.
 - Preserve released namespaces, event IDs, decision IDs, and localisation keys whenever possible.

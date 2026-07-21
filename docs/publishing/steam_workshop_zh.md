@@ -50,7 +50,9 @@ Breed Improved v0.1.0 新增个人角色互动：**逐出宗族**。该互动仅
 
 ## 安装
 
-Steam 创意工坊是唯一受支持的安装渠道。订阅创意工坊条目，在 CK3 启动器播放集内启用 **Breed Improved**，然后启动游戏。
+Steam 创意工坊是唯一受支持的安装渠道。创意工坊条目：https://steamcommunity.com/sharedfiles/filedetails/?id=3769010534
+
+当该条目对你可用时进行订阅，在 CK3 启动器播放集内启用 **Breed Improved**，然后启动游戏。本文案不声明该条目的可见性已经改为公开。
 
 ## 已知行为与限制
 

@@ -64,7 +64,7 @@ Version 0.1.0 does not include:
 
 Steam Workshop is the only supported end-user installation channel.
 
-1. Subscribe to **Breed Improved** on Steam Workshop: `<INSERT_STEAM_WORKSHOP_URL_AFTER_PUBLISHING>`.
+1. Open the **Breed Improved** Workshop item: https://steamcommunity.com/sharedfiles/filedetails/?id=3769010534 and subscribe when it is available to you.
 2. Enable **Breed Improved** in a CK3 Launcher playset.
 3. Launch the game.
 

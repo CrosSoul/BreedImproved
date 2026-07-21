@@ -50,7 +50,9 @@ Only script-visible legal parents are checked. Missing parents, spouses, descend
 
 ## Installation
 
-Steam Workshop is the sole supported installation channel. Subscribe to the Workshop item, enable **Breed Improved** in a CK3 Launcher playset, and launch the game.
+Steam Workshop is the sole supported installation channel. Workshop item: https://steamcommunity.com/sharedfiles/filedetails/?id=3769010534
+
+Subscribe when the item is available to you, enable **Breed Improved** in a CK3 Launcher playset, and launch the game. This publishing copy does not assert that the item's visibility is public.
 
 ## Known behavior and limitations
 
