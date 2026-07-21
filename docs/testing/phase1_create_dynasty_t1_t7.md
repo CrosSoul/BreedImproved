@@ -3,16 +3,36 @@
 ## Status
 
 - CK3 target: `1.19.0.6`
-- Standalone harness: Boss-approved runtime testing completed for the scenarios recorded below
-- Production approval: v0.1 Character Interaction authorized from the approved harness results
-- Production runtime status: `NOT RUN`
-- Matt execution status for the production task: static review `PASSED`; CK3 was not launched
+- Production runtime acceptance: `PASS`
+- Release status: approved as the Breed Improved v0.1.0 release candidate
+- Standalone harness: earlier iterative runtime testing completed before production implementation
+- Production save/reload persistence: `PASS`
+- Production CK3 runtime errors: none observed
+- Production other abnormalities: none observed
 - Test mod: `tests/phase1_create_dynasty/BreedImprovedPhase1Test/`
-- Save/reload detail: not separately supplied for every scenario; no missing observation is inferred
 
-This document records the approved test-harness observations supplied to Matt. It distinguishes those observations from the new production implementation, which has not been launched in CK3.
+This document records both the earlier standalone test-harness iterations and the completed Boss-reported production acceptance test. The production results below apply to the release-candidate gameplay files under `MyCK3Mod/`; the historical harness sections remain development evidence and are not the release package.
 
-## 1. Tested operation
+## Production runtime acceptance
+
+| Acceptance check | Result |
+| --- | --- |
+| Production interaction appears correctly | `PASS` |
+| Simplified Chinese localisation | `PASS` |
+| Hostile/Dynasty interaction presentation | `PASS` |
+| Minor targets | `PASS` |
+| Adult targets | `PASS` |
+| Unlanded characters | `PASS` |
+| Landed rulers | `PASS` |
+| Current player heir | `PASS` |
+| Descendant propagation | `PASS` |
+| Save and reload persistence | `PASS` |
+| CK3 runtime errors | None observed |
+| Other abnormalities | None observed |
+
+Production acceptance confirms that an eligible target receives a generated replacement Dynasty, descendants move with the target, parents and siblings remain unchanged, and CK3 recalculates the player heir when necessary. Breed Improved does not directly modify titles or political status.
+
+## 1. Earlier standalone test-harness operation
 
 The standalone harness performed one recipient-scoped state-changing operation:
 
@@ -41,7 +61,7 @@ The final harness had no age, landed, ruler, heir, marriage, or betrothal restri
 
 The actor was player-controlled and in the same Dynasty. The production implementation adds the approved requirement that the actor must also be alive and the current Dynast.
 
-## 3. Runtime result summary
+## 3. Earlier test-harness result summary
 
 | Test | Status | Approved observation |
 | --- | --- | --- |
@@ -172,6 +192,8 @@ This observation supports omitting an heir restriction. It does not guarantee a 
 
 ## 10. Married-target time-advance observation
 
+**DEFERRED — NOT BLOCKING v0.1**
+
 ### Observed result
 
 A married target later gained spouse-related strong claims after game time advanced.
@@ -179,7 +201,7 @@ A married target later gained spouse-related strong claims after game time advan
 ### Interpretation boundary
 
 - The observation is real and must remain visible in project documentation.
-- The supplied result does not establish that `create_dynasty` directly granted those claims.
+- The supplied result does not establish the cause and does not prove that `create_dynasty` directly granted those claims.
 - The current product direction does not authorize divorce, claim removal, or a marriage restriction.
 - v0.1 therefore leaves claims and marriage untouched by script.
 
@@ -187,25 +209,25 @@ A married target later gained spouse-related strong claims after game time advan
 
 A future controlled test should record exact claim identifiers and sources immediately before the interaction, immediately after it, and after the relevant time advance. A comparison character should be observed over the same interval. Save inspection and error/game logs should be retained. Only then should Jay and the Boss consider a claim or marriage policy.
 
-## 11. Production verification boundary
+## 11. Production acceptance boundary
 
-The standalone harness remains preserved as the runtime evidence instrument. Production uses distinct `breedimp_` identifiers, shared validation/effect wrappers, hostile Dynasty-interaction presentation, and bilingual localisation.
+The standalone harness remains preserved as an earlier runtime evidence instrument. Production uses distinct `breedimp_` identifiers, shared validation/effect wrappers, hostile Dynasty-interaction presentation, and bilingual localisation.
 
-The following remain required before anyone may claim that production v0.1 passed runtime testing:
+Boss-reported production runtime acceptance is complete for v0.1.0. The accepted scope covers:
 
-- enable the production mod rather than the standalone harness;
-- confirm the interaction appears only for the approved actor and recipient classes;
-- inspect both English and Simplified Chinese interaction text and confirmation presentation;
-- repeat representative age, unlanded, ruler, descendant, and heir cases;
-- inspect the CK3 error log;
-- save, reload, and re-inspect Dynasty, House, titles, government, and succession; and
-- record any unexpected side effect.
+- production interaction visibility;
+- Simplified Chinese localisation;
+- hostile/Dynasty presentation;
+- minor, adult, unlanded, landed-ruler, and current-player-heir targets;
+- descendant propagation;
+- save/reload persistence; and
+- no observed CK3 runtime errors or other abnormalities.
 
-Until a separately approved production test is run and recorded, production runtime status remains `NOT RUN`.
+This acceptance does not establish the cause of the deferred married-character claim observation and does not approve claim or marriage handling.
 
-## 12. Forbidden expansion during v0.1 validation
+## 12. Release-candidate scope exclusions
 
-Do not add any of the following while validating the approved production interaction:
+The approved v0.1.0 release candidate contains none of the following:
 
 - claim removal;
 - `disinherit_effect` or other inheritance-trait changes;

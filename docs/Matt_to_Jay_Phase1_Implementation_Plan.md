@@ -1,14 +1,14 @@
-# Breed Improved Phase 1 - v0.1 Implementation Record
+# Breed Improved Phase 1 - v0.1.0 Implementation Record
 
 Prepared by Matt (CK3ModDeveloper) for Jay (CK3ModLeader).
 
 - CK3 target: `1.19.0.6`
-- Product state: production v0.1 implementation authorized by the Boss
-- Production validation state: static review `PASSED` on 2026-07-21; production runtime is `NOT RUN`
-- Runtime evidence source: the preserved standalone Phase 1 test harness
+- Product state: `IMPLEMENTED AND RUNTIME-VERIFIED FOR v0.1`
+- Production validation state: Boss-reported production runtime acceptance `PASSED`
+- Runtime evidence sources: the earlier standalone Phase 1 test harness and the completed production acceptance test
 - Feature: player-initiated Character Interaction, **Exile from Dynasty** / **逐出宗族**
 
-This document records the approved v0.1 implementation boundary. It does not claim that the production files have passed an in-game test.
+This document records the approved v0.1.0 implementation boundary and the Boss-reported production runtime acceptance results.
 
 ## 1. Approved player-facing behavior
 
@@ -58,22 +58,38 @@ The production interaction intentionally has no restriction based on:
 
 The last two criteria remain possible future candidate-assistance rules, not v0.1 eligibility gates.
 
-## 3. Verified runtime evidence behind the approved boundary
+### Runtime-verified supported targets
 
-The Boss-approved standalone harness produced these observations:
+Production acceptance verified support for:
 
-| Scenario | Observed result |
+- minors;
+- adults;
+- unlanded characters;
+- landed rulers; and
+- current player heirs.
+
+## 3. Production runtime acceptance
+
+The Boss reported the following results from the production mod:
+
+| Scenario | Production result |
 | --- | --- |
-| Minor recipient | Interaction executed successfully |
-| Adult recipient | Interaction executed successfully |
-| Unlanded recipient | Dynasty replacement worked |
-| Landed ruler | Dynasty replacement worked; titles and government remained stable |
-| Current player heir | Dynasty replacement worked; CK3 selected a new player heir |
-| Recipient with descendants | Recipient and descendants moved to the replacement Dynasty |
-| Recipient with parents or siblings | Parents and siblings remained in their prior Dynasty |
-| Runtime error check | No CK3 runtime error was reported for the tested harness |
+| Interaction appears correctly | `PASS` |
+| Simplified Chinese localisation | `PASS` |
+| Hostile/Dynasty interaction presentation | `PASS` |
+| Minor recipient | `PASS` |
+| Adult recipient | `PASS` |
+| Unlanded character | `PASS` |
+| Landed ruler | `PASS` |
+| Current player heir | `PASS`; CK3 selected a new player heir when necessary |
+| Descendant propagation | `PASS` |
+| Save and reload persistence | `PASS` |
+| CK3 runtime errors | None observed |
+| Other abnormalities | None observed |
 
-These results support the narrowly matched production operation and eligibility boundary. They do not establish behavior for every government, title arrangement, special character state, multiplayer configuration, or mod combination.
+The accepted behavior is that the target receives a generated replacement Dynasty, descendants move with the target, and parents and siblings remain unchanged. Titles and political status are not directly modified by Breed Improved. CK3 recalculates the player heir when necessary.
+
+The earlier standalone harness remains the development evidence that established the narrow operation before production implementation. Production acceptance supersedes the previous `NOT RUN` status for the production files, but it does not establish behavior for every government, title arrangement, special character state, multiplayer configuration, or mod combination.
 
 ## 4. Production architecture
 
@@ -162,9 +178,11 @@ The v0.1 production implementation does not contain:
 
 ## 9. Deferred runtime finding: spouse-related claims
 
+**DEFERRED — NOT BLOCKING v0.1**
+
 In the approved harness testing, a married target later gained spouse-related strong claims after time advanced.
 
-This is recorded as a deferred behavior to investigate. The observation does not by itself prove that `create_dynasty` directly granted the claims. v0.1 therefore adds neither claim removal nor divorce. A future investigation should isolate the claim source through controlled before/after timing, logs, save inspection, and a comparison case before any product policy is proposed.
+This is recorded as a deferred behavior to investigate. Its cause has not been established, and the observation does not by itself prove that `create_dynasty` directly granted the claims. v0.1 therefore adds neither claim removal nor divorce. A future investigation should isolate the claim source through controlled before/after timing, logs, save inspection, and a comparison case before any product policy is proposed.
 
 ## 10. Evidence provenance
 
@@ -188,8 +206,8 @@ Primary verified paths used by this production implementation include:
 
 All vanilla paths refer to CK3 `1.19.0.6`. No vanilla file is modified or copied wholesale.
 
-## 11. Validation boundary and next gate
+## 11. Validation status and next gate
 
-This implementation received static review only in the current task. The review passed file-placement, balanced-syntax, identifier-consistency, bilingual-localisation, eligibility-contract, and single-effect mutation-boundary checks.
+The implementation passed its earlier static review and has now passed Boss-reported production runtime acceptance for v0.1.0. Production interaction visibility, Simplified Chinese localisation, hostile Dynasty presentation, supported target classes, descendant propagation, save/reload persistence, and absence of observed CK3 runtime errors were accepted.
 
-Production runtime remains `NOT RUN`. Launching CK3, asserting production runtime success, broadening eligibility, adding consequences, or implementing the Dynasty Decision requires a separate approval and test stage.
+The individual Character Interaction is `IMPLEMENTED AND RUNTIME-VERIFIED FOR v0.1`. Broadening eligibility, adding consequences, investigating claim behavior, or implementing the Dynasty Decision requires a separate approval and test stage.
