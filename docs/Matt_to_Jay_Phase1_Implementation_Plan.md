@@ -3,12 +3,31 @@
 Prepared by Matt (CK3ModDeveloper) for Jay (CK3ModLeader).
 
 - CK3 target: `1.19.0.6`
-- Product state: `IMPLEMENTED AND RUNTIME-VERIFIED FOR v0.1`
-- Production validation state: Boss-reported production runtime acceptance `PASSED`
-- Runtime evidence sources: the earlier standalone Phase 1 test harness and the completed production acceptance test
+- Final v0.1.0 product state: `IMPLEMENTED AND RUNTIME-VERIFIED FOR v0.1.0`
+- Runtime evidence sources: the earlier standalone Phase 1 test harness and Boss-confirmed production release-candidate acceptance
 - Feature: player-initiated Character Interaction, **Exile from Dynasty** / **逐出宗族**
 
-This document records the approved v0.1.0 implementation boundary and the Boss-reported production runtime acceptance results.
+This document records the frozen v0.1.0 implementation boundary and the Boss-confirmed production runtime acceptance result.
+
+## RC2 implementation delta
+
+RC2 adds:
+
+- reusable public-trait and legal-parent-only blood-impurity triggers;
+- a native personal-Prestige interaction cost of `0` for blood-impurity cases and `100` otherwise;
+- a decaying recipient opinion modifier toward the actor;
+- `60` base recipient stress;
+- a visible ten-year recipient character modifier;
+- an untimed recipient character flag; and
+- confirmation text describing the recipient consequences while leaving native Prestige cost presentation to the bottom cost area.
+
+The final implementation uses the exact vanilla `denounce_effect` pattern for conditionally removing only an actor-held `house_head_hook` over the recipient. This is a genuine actor-scoped effect only when that hook exists. The ten-year modifier applies `diplomacy = -1`, `stress_gain_mult = 0.2`, and `monthly_prestige = -0.25`.
+
+The recipient consequences execute before the existing `create_dynasty` operation. Descendants still receive only Dynasty propagation. RC2 does not add claim, inheritance, marriage, title, court, government, imprisonment, event, Decision, scan, recurring, or bulk effects.
+
+Production acceptance verifies the standard confirmation flow, supported target classes, free and paid native cost paths, conditional House Head Hook removal, opinion, stress, visible modifier, permanent marker, Dynasty exile, descendant propagation, and save/reload persistence for the frozen v0.1.0 scope.
+
+The current RC2 product rule checks the recipient's public `bastard` and `legitimized_bastard` traits plus existing script-visible legal parents only. Grandparents are permanently outside this rule. Missing parent relations, spouses, descendants, and hidden biological-parent secrets do not qualify by themselves.
 
 ## 1. Approved player-facing behavior
 
@@ -70,7 +89,7 @@ Production acceptance verified support for:
 
 ## 3. Production runtime acceptance
 
-The Boss reported the following results from the production mod:
+The Boss confirmed the following results for the final v0.1.0 production release candidate:
 
 | Scenario | Production result |
 | --- | --- |
@@ -83,13 +102,20 @@ The Boss reported the following results from the production mod:
 | Landed ruler | `PASS` |
 | Current player heir | `PASS`; CK3 selected a new player heir when necessary |
 | Descendant propagation | `PASS` |
+| Free impurity-cost case | `PASS` |
+| Paid 100-personal-Prestige case | `PASS` |
+| Conditional House Head Hook removal | `PASS` |
+| Recipient opinion: `-60`, monthly recovery `0.5` | `PASS` |
+| Recipient base stress: `60` | `PASS` |
+| Ten-year modifier: `diplomacy = -1`, `stress_gain_mult = 0.2`, `monthly_prestige = -0.25` | `PASS` |
+| Permanent exile marker | `PASS` |
 | Save and reload persistence | `PASS` |
 | CK3 runtime errors | None observed |
 | Other abnormalities | None observed |
 
 The accepted behavior is that the target receives a generated replacement Dynasty, descendants move with the target, and parents and siblings remain unchanged. Titles and political status are not directly modified by Breed Improved. CK3 recalculates the player heir when necessary.
 
-The earlier standalone harness remains the development evidence that established the narrow operation before production implementation. Production acceptance supersedes the previous `NOT RUN` status for the production files, but it does not establish behavior for every government, title arrangement, special character state, multiplayer configuration, or mod combination.
+The earlier standalone harness remains development evidence for the narrow Dynasty-replacement operation. Final production acceptance supersedes its earlier iterative statuses, but does not establish behavior for every government, title arrangement, special character state, multiplayer configuration, mod combination, or CK3 version outside `1.19.*`.
 
 ## 4. Production architecture
 
@@ -97,7 +123,13 @@ The earlier standalone harness remains the development evidence that established
 | --- | --- | --- |
 | Character Interaction | `breedimp_exile_from_dynasty_interaction` | `MyCK3Mod/common/character_interactions/breedimp_exile_from_dynasty_interaction.txt` |
 | Shared validation trigger | `breedimp_can_exile_dynasty_member` | `MyCK3Mod/common/scripted_triggers/breedimp_dynasty_exile_triggers.txt` |
+| Parent classification trigger | `breedimp_ancestor_outside_actor_dynasty_trigger` | `MyCK3Mod/common/scripted_triggers/breedimp_dynasty_exile_triggers.txt` |
+| Blood-impurity trigger | `breedimp_recipient_has_blood_impurity_trigger` | `MyCK3Mod/common/scripted_triggers/breedimp_dynasty_exile_triggers.txt` |
+| Conditional personal-Prestige value | `breedimp_exile_prestige_cost_value` | `MyCK3Mod/common/script_values/breedimp_dynasty_exile_values.txt` |
 | Shared state-changing effect | `breedimp_exile_dynasty_member` | `MyCK3Mod/common/scripted_effects/breedimp_dynasty_exile_effects.txt` |
+| Decaying opinion modifier | `breedimp_exiled_me_from_dynasty_opinion` | `MyCK3Mod/common/opinion_modifiers/breedimp_dynasty_exile_opinions.txt` |
+| Ten-year character modifier | `breedimp_exiled_from_dynasty_modifier` | `MyCK3Mod/common/modifiers/breedimp_dynasty_exile_modifiers.txt` |
+| Untimed character flag | `breedimp_was_exiled_from_dynasty` | applied inside `breedimp_exile_dynasty_member` |
 | Saved replacement-Dynasty scope | `breedimp_new_dynasty` | inside `breedimp_exile_dynasty_member` |
 | English localisation | `breedimp_exile_from_dynasty_interaction*` | `MyCK3Mod/localization/english/breedimp_dynasty_exile_l_english.yml` |
 | Simplified Chinese localisation | `breedimp_exile_from_dynasty_interaction*` | `MyCK3Mod/localization/simp_chinese/breedimp_dynasty_exile_l_simp_chinese.yml` |
@@ -119,6 +151,7 @@ It uses:
 - an explicitly referenced `desc` key;
 - an explicitly referenced `prompt` key;
 - `use_diplomatic_range = no`;
+- native `cost.prestige` using `breedimp_exile_prestige_cost_value`;
 - default actor confirmation by omitting deprecated `needs_confirmation`;
 - `auto_accept = yes` so an eligible AI recipient does not separately accept or reject;
 - `is_shown` for stable visibility constraints; and
@@ -128,7 +161,14 @@ The interaction enters `scope:recipient` before calling the shared effect. No ta
 
 ## 6. Shared effect and mutation boundary
 
-The only direct state-changing CK3 effect in the production implementation is:
+RC2 performs this ordered transaction from recipient scope:
+
+1. add `breedimp_exiled_me_from_dynasty_opinion` toward `scope:actor`;
+2. add `60` base stress;
+3. add `breedimp_exiled_from_dynasty_modifier` for ten years;
+4. add the untimed `breedimp_was_exiled_from_dynasty` flag;
+5. if the actor holds `house_head_hook` over the recipient, enter actor scope and remove only that hook; and
+6. execute the existing Dynasty replacement as the final operation:
 
 ```text
 create_dynasty = {
@@ -137,7 +177,7 @@ create_dynasty = {
 }
 ```
 
-The form is supported by Lynn's verified `create_dynasty` sources and by the approved runtime harness. It is executed from the recipient character scope.
+The Dynasty form is supported by Lynn's verified `create_dynasty` sources and by the approved pre-RC2 runtime harness. Opinion, stress, modifier, and flag apply only to the selected recipient; the conditional hook removal applies only to the actor's exact `house_head_hook` over that recipient. Descendant propagation belongs only to `create_dynasty`.
 
 The saved scope is retained from the verified harness form for traceability and possible diagnostic inspection. No further effect consumes it in v0.1.
 
@@ -148,7 +188,9 @@ English and Simplified Chinese provide explicit keys for:
 - interaction name;
 - description;
 - confirmation prompt; and
-- validation failure text.
+- validation failure text;
+- the opinion modifier; and
+- the visible character modifier name and description.
 
 The English name is **Exile from Dynasty**. The Simplified Chinese name is **逐出宗族**.
 
@@ -156,6 +198,8 @@ The description and prompt state that:
 
 - the recipient and descendants enter a newly generated Dynasty;
 - they leave the actor's Dynasty;
+- the recipient's opinion of the actor decreases;
+- the recipient gains stress and the ten-year Exiled from Dynasty modifier;
 - titles, claims, marriages, court, and political status are not directly changed; and
 - CK3 may recalculate succession.
 
@@ -173,7 +217,7 @@ The v0.1 production implementation does not contain:
 - government conversion;
 - adventurer conversion;
 - events or Decisions;
-- scans, iterators, recurring execution, or bulk processing; or
+- scans, ancestor iteration beyond the recipient's legal parents, recurring execution, or bulk processing; or
 - automatic or AI-initiated cleanup.
 
 ## 9. Deferred runtime finding: spouse-related claims
@@ -206,8 +250,8 @@ Primary verified paths used by this production implementation include:
 
 All vanilla paths refer to CK3 `1.19.0.6`. No vanilla file is modified or copied wholesale.
 
-## 11. Validation status and next gate
+## 11. Validation status and release gate
 
-The implementation passed its earlier static review and has now passed Boss-reported production runtime acceptance for v0.1.0. Production interaction visibility, Simplified Chinese localisation, hostile Dynasty presentation, supported target classes, descendant propagation, save/reload persistence, and absence of observed CK3 runtime errors were accepted.
+The frozen v0.1.0 production implementation is Boss-confirmed as runtime-verified. Production interaction visibility, English and Simplified Chinese localisation, hostile Dynasty presentation, supported target classes, native free/paid cost handling, House Head Hook removal, recipient consequences, descendant propagation, save/reload persistence, and absence of observed CK3 runtime errors are accepted for the release candidate.
 
-The individual Character Interaction is `IMPLEMENTED AND RUNTIME-VERIFIED FOR v0.1`. Broadening eligibility, adding consequences, investigating claim behavior, or implementing the Dynasty Decision requires a separate approval and test stage.
+The next required gate is manual installation and regression testing from the clean release ZIP. Investigating deferred claim behavior or implementing Phase 2 bulk Dynasty cleanup requires separate approval and testing.

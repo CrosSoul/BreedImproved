@@ -1,0 +1,23 @@
+Breed Improved v0.1.0 — Manual Installation
+
+Supported CK3 version: 1.19.*
+Languages: English and Simplified Chinese
+
+1. Extract MyCK3Mod.mod and the MyCK3Mod directory into the CK3 user mod
+   directory used by your launcher.
+2. Open the extracted MyCK3Mod.mod file.
+3. Replace <LOCAL_MOD_PATH> with the absolute path to the extracted MyCK3Mod
+   directory. Use forward slashes in that path.
+4. Keep descriptor.mod inside the MyCK3Mod directory.
+5. Enable Breed Improved in a CK3 playset.
+
+The launcher template intentionally does not contain a machine-specific path.
+Do not add a Workshop ID before the first Steam Workshop upload assigns one.
+
+Removal
+-------
+Disable Breed Improved in the launcher, then remove MyCK3Mod.mod and the
+MyCK3Mod directory if desired. Back up important saves first. Removing the mod
+does not provide a rollback for consequences already stored in a save.
+
+Breed Improved performs no automatic background scans or recurring cleanup.

@@ -17,7 +17,7 @@
 
 ## Project Status and Goals
 
-Treat this repository as a new CK3 mod project with no gameplay implementation yet. Define development standards only; do not infer or create gameplay features from this document.
+Treat this repository as the Breed Improved CK3 mod project. Version `0.1.0` contains one runtime-verified production Character Interaction; future features remain design-only until separately approved.
 
 Use angle-bracket values as unresolved placeholders. Do not copy them literally into runnable mod files.
 
@@ -31,10 +31,10 @@ Use angle-bracket values as unresolved placeholders. Do not copy them literally 
 | Local launcher path | `<LOCAL_MOD_PATH>` (temporary placeholder) |
 | Target CK3 version | `1.19.*` (verified against installed CK3 `1.19.0.6`) |
 | Supported DLC policy | `<DLC_POLICY>` |
-| Supported languages | `<SUPPORTED_LANGUAGES>` |
+| Supported languages | English and Simplified Chinese |
 | Mod scope | CK3 dynasty management utility |
 | Compatibility policy | `<COMPATIBILITY_POLICY>` |
-| Distribution target | `<DISTRIBUTION_TARGET>` |
+| Distribution target | GitHub Releases and Steam Workshop |
 | Release versioning scheme | `<VERSIONING_SCHEME>` |
 
 Adopt these development goals:
@@ -80,11 +80,12 @@ The existing `MyCK3Mod` content-folder and launcher-template names are temporary
 
 ### Phase 1: Dynasty Membership Management
 
-- Allow players to remove unwanted dynasty members.
-- Use characters with the bastard trait as one primary design criterion.
-- Use characters whose biological parents are not members of the intended dynasty as another primary design criterion.
-- Require explicit player confirmation before a dynasty-membership removal action is applied.
-- Keep the definition of the "intended dynasty," character eligibility, exclusions, and CK3 implementation mechanism open until separately specified and verified.
+- Version `0.1.0` implements the individual **Exile from Dynasty** Character Interaction.
+- Require explicit player initiation and confirmation before every exile.
+- Support minors, adults, unlanded characters, landed rulers, and current player heirs when they meet production validation.
+- Exclude House Heads and the Dynast.
+- Move the target and descendants into a generated replacement Dynasty.
+- Keep bulk management outside Phase 1 release scope.
 
 #### Character Interaction Interface
 
@@ -99,36 +100,28 @@ Use case:
 
 The interface must require explicit player initiation and a confirmation step before applying removal.
 
-#### Dynasty Decision Interface
+### Phase 2: Bulk Dynasty Cleanup
 
-Purpose:
+Status: deferred; not implemented.
 
-- Handle large dynasties efficiently.
-- Allow the player to initiate an eligible-candidate scan, review the results, and select multiple characters for removal.
+Apply these design boundaries:
 
-Use case:
+- Use a separate conservative candidate trigger; do not automatically reuse the manual interaction's cost trigger.
+- Permit Dynasty-external parents to be marked as accepted founder parents only after separate approval.
+- Protect children of accepted founder parents from a future player-initiated bulk candidate set.
+- Keep manual **Exile from Dynasty** available independently.
+- Never hardcode character names or save-specific character IDs.
+- Require separate design approval, CK3 evidence, implementation approval, and runtime testing.
+- Run any candidate scan only after explicit player initiation; never schedule or repeat it in the background.
 
-- Manage hundreds of dynasty members without processing each character individually.
-
-The candidate scan must occur only after explicit player action. The interface must require the player to select candidates and confirm the operation before applying any removals. It must not create a recurring scan, yearly cleanup, background event, or automatic removal process.
-
-#### Shared Validation
-
-- Use common eligibility and validation logic for both interfaces where possible.
-- Ensure that the same character produces a consistent eligibility result in individual and bulk-management flows.
-- Keep presentation and selection behavior separate from shared eligibility rules.
-- Do not assume that a CK3 scripted trigger, scripted effect, interaction field, decision field, list-selection mechanism, or confirmation mechanism exists. Verify the exact target-version CK3 structures before implementation.
-
-The phrase "bastard trait" in this design section is a product requirement, not a verified CK3 trait key, trigger, scope, or scripted condition. Future implementation must identify and verify the correct target-version CK3 syntax before using it in runnable files.
-
-### Phase 2: Dynasty Marriage Assistance
+### Phase 3: Dynasty Marriage Assistance
 
 - Reduce repetitive manual marriage management in large dynasties.
 - Consider age compatibility, traits, and genetic risks when assisting the player.
 - Avoid excessively close blood relationships.
 - Keep scoring rules, relationship-distance thresholds, candidate scope, presentation, and player controls open for later design and CK3 syntax verification.
 
-### Phase 3: Advanced Breeding Assistant
+### Phase 4: Advanced Breeding Assistant
 
 - Support long-term planning.
 - Remain player-assisted rather than fully autonomous.

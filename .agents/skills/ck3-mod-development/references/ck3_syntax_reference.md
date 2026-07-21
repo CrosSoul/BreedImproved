@@ -460,6 +460,76 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Minimal verified example: `l_simp_chinese:` followed by ` disinherit_interaction: "剥夺继承权"`
 - Restrictions and notes: the cited vanilla file begins with UTF-8 BOM bytes `EF BB BF`; the project preserves that observed property without asserting that BOM is a universal engine requirement. The cited file uses unversioned keys and verifies `$dynasty_interaction_header$`, `[recipient.GetShortUINameNoTooltip]`, and `[dynasty|E]`-style game-concept links in Simplified Chinese interaction localisation.
 
+### Generic Character Interaction effect-card grouping
+
+- Status: `VERIFIED`
+- Category: GUI presentation generated from Character Interaction effects
+- CK3 version: `1.19.0.6`
+- File family: `gui/interaction_confirmation.gui`, `gui/interaction_templates.gui`, and `common/character_interactions/*.txt`
+- Enclosing context: generic Character Interaction confirmation window parsing accepted effects
+- Input scope: interaction effect description with actor and recipient named scopes
+- Output scope or state change: no gameplay state change; shows only scope cards with parsed effects
+- Arguments: GUI predicates `HasAnyEffects`, `HasActorEffects`, and `HasRecipientEffects`
+- Evidence: `denounce_interaction`; `denounce_effect`; `gui/interaction_confirmation.gui:250`; `gui/interaction_templates.gui:1014`
+- Minimal verified example: actor card `visible = "[DisplayedInteractionEffects.HasActorEffects]"`
+- Restrictions and notes: cost is rendered separately and does not itself create an actor-effect card. Exact visual size and zero-cost behavior require runtime observation.
+
+### `cost` with `prestige`
+
+- Status: `VERIFIED`
+- Category: Character Interaction cost field
+- CK3 version: `1.19.0.6`
+- File family: `common/character_interactions/*.txt`
+- Enclosing context: top level of a Character Interaction definition
+- Input scope: interaction context; actor pays and `scope:recipient` is readable by the value formula
+- Output scope or state change: disables sending when unaffordable and subtracts the calculated personal Prestige when sent
+- Arguments: `cost = { prestige = { value = <number-or-scripted-value> } }`; `piety`, `gold`, and `renown` are separately supported currencies
+- Evidence: `common/character_interactions/_character_interactions.info:467`; `common/character_interactions/00_dynast_interactions.txt`, `denounce_interaction`
+- Minimal verified example: `cost = { prestige = { value = { add = medium_prestige_value if = { limit = { <trigger> } multiply = 0 } } } }`
+- Restrictions and notes: positive values are costs. Renown is distinct from personal Prestige. Exact insufficient-cost wording and whether calculated zero is hidden require runtime observation.
+
+### Conditional scripted numeric values
+
+- Status: `VERIFIED`
+- Category: scripted value
+- CK3 version: `1.19.0.6`
+- File family: `common/script_values/*.txt` or inline in a numeric field
+- Enclosing context: any supported numeric field, including Character Interaction cost values
+- Input scope: current evaluation scope and available named scopes
+- Output scope or state change: returns a number; no scope transition
+- Arguments: `value`, arithmetic operations, and `if`/`else_if`/`else` with `limit`
+- Evidence: `common/script_values/_script_values.info`; inline formula in `denounce_interaction.cost`
+- Minimal verified example: `<id> = { value = 100 if = { limit = { <trigger> } multiply = 0 } }`
+- Restrictions and notes: operations run in authored order. Named project values must be defined in `common/script_values/`; product numbers are not vanilla balance.
+
+### Public bastard birth-state trait checks
+
+- Status: `VERIFIED`
+- Category: character trigger
+- CK3 version: `1.19.0.6`
+- File family: character trigger blocks and scripted triggers
+- Enclosing context: character scope
+- Input scope: character
+- Output scope or state change: boolean; no state change
+- Arguments: exact traits `bastard` and `legitimized_bastard`
+- Evidence: `common/traits/00_traits.txt:10412`; `common/scripted_triggers/00_bastard_triggers.txt`
+- Minimal verified example: `OR = { has_trait = bastard has_trait = legitimized_bastard }`
+- Restrictions and notes: `has_any_negative_bastard_trait_trigger` also includes `disputed_heritage`; `has_any_bastard_trait_trigger` additionally includes `wild_oat`. Do not substitute either broader trigger when only the two listed public traits are intended.
+
+### `any_parent` with `even_if_dead`
+
+- Status: `VERIFIED`
+- Category: character iterator and scope transition
+- CK3 version: `1.19.0.6`
+- File family: character trigger blocks and scripted triggers
+- Enclosing context: character-scoped trigger
+- Input scope: character
+- Output scope or state change: evaluates existing legal parents; no state change
+- Arguments: `even_if_dead = yes` includes deceased relatives
+- Evidence: `even_if_dead = yes` on `any_parent` in `common/scripted_triggers/00_family_triggers.txt`; legal-parent iteration in `common/customizable_localization/00_relations.txt:150`
+- Minimal verified example: `any_parent = { even_if_dead = yes <trigger> }`
+- Restrictions and notes: missing parent links yield no iterator member. Breed Improved's RC2 impurity rule intentionally uses exactly one `any_parent` level. This does not use `real_father` or hidden parentage secrets. Lowborn parents need an explicit branch before Dynasty comparison.
+
 ## Uncertainty Protocol
 
 When a required element is absent from the verified registry and cannot be confirmed from a higher-priority source:
