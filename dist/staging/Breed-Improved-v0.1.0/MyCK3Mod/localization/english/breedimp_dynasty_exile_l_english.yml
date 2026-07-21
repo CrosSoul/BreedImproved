@@ -1,8 +1,0 @@
-﻿l_english:
- breedimp_exile_from_dynasty_interaction: "Exile from Dynasty"
- breedimp_exile_from_dynasty_interaction_desc: "$dynasty_interaction_header$[recipient.GetShortUINameNoTooltip] and their descendants will enter a newly generated [dynasty|E] and leave your [dynasty|E]. Their opinion of you will decrease, they will gain stress, and they will receive Exiled from Dynasty for ten years. Titles, claims, marriages, court, and political status are not directly changed. CK3 may recalculate succession."
- breedimp_exile_from_dynasty_interaction_prompt: "The selected character and their descendants will enter a newly generated Dynasty and leave your Dynasty. The selected character's opinion of you will decrease, they will gain stress, and they will receive Exiled from Dynasty for ten years. Titles, claims, marriages, court, and political status are not directly changed. CK3 may recalculate succession."
- breedimp_exile_from_dynasty_interaction_invalid_tt: "The selected character must be a living, highborn, AI-controlled member of your Dynasty who is neither House Head nor Dynast."
- breedimp_exiled_me_from_dynasty_opinion: "Exiled Me from Dynasty"
- breedimp_exiled_from_dynasty_modifier: "Exiled from Dynasty"
- breedimp_exiled_from_dynasty_modifier_desc: "This character has lost the recognition and support of their former Dynasty."

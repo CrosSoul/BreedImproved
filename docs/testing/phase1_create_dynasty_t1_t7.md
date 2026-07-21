@@ -8,7 +8,7 @@
 - CK3 runtime errors: none observed
 - Other abnormalities: none observed
 - Evidence owner: Boss-reported production acceptance
-- Clean-package installation regression: manual release gate, not performed during documentation and packaging preparation
+- Steam Workshop subscribe/download regression: manual release gate, not performed during documentation and staging preparation
 
 This record distinguishes the final production acceptance result from the earlier standalone test-harness iterations. The test harness under `tests/phase1_create_dynasty/` was used during development and is not release content. The final production result below supersedes earlier iterative harness statuses and corrected-RC2 pending notes.
 
@@ -74,6 +74,6 @@ It does not directly change claims, marriage, titles, court membership, governme
 
 A married target was previously observed to receive spouse-related strong claims after game time advanced. The cause has not been established. Breed Improved v0.1.0 does not add claim removal or divorce behavior.
 
-## Release-package regression gate
+## Steam Workshop regression gate
 
-The production gameplay is accepted, but the finished ZIP still requires the manual clean-install checks listed in `docs/publishing/v0.1.0_release_checklist.md`. No CK3 runtime test is performed as part of the release documentation and packaging pass.
+The production gameplay is accepted, but the restricted/private Workshop upload still requires the subscribe/download checks listed in `docs/publishing/v0.1.0_release_checklist.md`. Testing must disable the repository development path so only Steam-downloaded content is active. No CK3 runtime test is performed as part of the release documentation and staging pass.

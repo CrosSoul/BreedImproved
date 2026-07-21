@@ -254,4 +254,4 @@ All vanilla paths refer to CK3 `1.19.0.6`. No vanilla file is modified or copied
 
 The frozen v0.1.0 production implementation is Boss-confirmed as runtime-verified. Production interaction visibility, English and Simplified Chinese localisation, hostile Dynasty presentation, supported target classes, native free/paid cost handling, House Head Hook removal, recipient consequences, descendant propagation, save/reload persistence, and absence of observed CK3 runtime errors are accepted for the release candidate.
 
-The next required gate is manual installation and regression testing from the clean release ZIP. Investigating deferred claim behavior or implementing Phase 2 bulk Dynasty cleanup requires separate approval and testing.
+The next required gate is restricted/private Steam Workshop upload and subscribe/download regression testing with the repository development path disabled. Investigating deferred claim behavior or implementing Phase 2 bulk Dynasty cleanup requires separate approval and testing.

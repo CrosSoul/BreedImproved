@@ -11,22 +11,27 @@ The first public release of Breed Improved adds **Exile from Dynasty**, a player
 - Added recipient opinion, stress, ten-year visible modifier, and permanent exile marker consequences.
 - Added English and Simplified Chinese localisation.
 
-## Supported CK3 version
+## Supported CK3 version and languages
 
-CK3 `1.19.*`. Compatibility with other CK3 versions is not claimed.
+- CK3: `1.19.*`
+- Languages: English and Simplified Chinese
 
-## Installation
+Compatibility with other CK3 versions is not claimed.
 
-1. Download `Breed-Improved-v0.1.0.zip`.
-2. Extract `MyCK3Mod.mod` and `MyCK3Mod/` into the CK3 user mod directory used by the launcher.
-3. Replace `<LOCAL_MOD_PATH>` in the extracted `MyCK3Mod.mod` with the absolute path to the extracted `MyCK3Mod/` directory, using forward slashes.
-4. Enable **Breed Improved** in a CK3 playset.
+## Official playable release
+
+Steam Workshop is the sole supported end-user installation channel.
+
+- Workshop: `<INSERT_STEAM_WORKSHOP_URL_AFTER_PUBLISHING>`
+- Subscribe through Steam Workshop, enable **Breed Improved** in a CK3 Launcher playset, and launch the game.
+
+GitHub provides the public source repository, development history, issue reporting, roadmap, documentation, tag, and these concise Release notes. This Release has no manual-install asset. GitHub-generated source archives are source snapshots, not supported installable Mod packages.
 
 ## Verified runtime behavior
 
 The release-candidate gameplay was verified with minor and adult targets, unlanded and landed targets, the current player heir, descendant propagation, native free/paid cost handling, conditional House Head Hook removal, approved recipient consequences, English and Simplified Chinese localisation, and save/reload persistence.
 
-The mod performs no automatic background scans or recurring cleanup.
+The Mod performs no automatic background scans or recurring cleanup.
 
 ## Known limitations
 
@@ -36,8 +41,6 @@ The mod performs no automatic background scans or recurring cleanup.
 - Bulk Dynasty cleanup is not included.
 - Compatibility with other mods has not been comprehensively tested.
 
-## Release asset
+## Source repository
 
-- Filename: `Breed-Improved-v0.1.0.zip`
-- SHA-256: `<INSERT_FINAL_SHA256>`
-- Steam Workshop: `<INSERT_STEAM_WORKSHOP_URL_AFTER_PUBLISHING>`
+Source, issues, roadmap, and documentation: `<INSERT_GITHUB_REPOSITORY_URL>`

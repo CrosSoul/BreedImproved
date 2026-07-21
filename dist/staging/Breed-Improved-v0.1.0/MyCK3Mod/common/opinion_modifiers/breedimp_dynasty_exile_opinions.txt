@@ -1,5 +1,0 @@
-breedimp_exiled_me_from_dynasty_opinion = {
-	opinion = -60
-	monthly_change = 0.5
-	decaying = yes
-}

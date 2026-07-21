@@ -27,14 +27,15 @@ Use angle-bracket values as unresolved placeholders. Do not copy them literally 
 | Internal identifier prefix | `breedimp` |
 | Event namespace root | `breedimp` |
 | Mod content folder | `MyCK3Mod` (temporary scaffold name) |
-| Launcher template | `MyCK3Mod.mod` (temporary scaffold name) |
-| Local launcher path | `<LOCAL_MOD_PATH>` (temporary placeholder) |
+| Developer launcher template | `MyCK3Mod.mod` (not distributed to end users) |
+| Developer local launcher path | `<LOCAL_MOD_PATH>` (temporary placeholder) |
 | Target CK3 version | `1.19.*` (verified against installed CK3 `1.19.0.6`) |
 | Supported DLC policy | `<DLC_POLICY>` |
 | Supported languages | English and Simplified Chinese |
 | Mod scope | CK3 dynasty management utility |
 | Compatibility policy | `<COMPATIBILITY_POLICY>` |
-| Distribution target | GitHub Releases and Steam Workshop |
+| Supported end-user distribution | Steam Workshop only |
+| GitHub role | Public source, history, issues, roadmap, documentation, tags, and Release notes |
 | Release versioning scheme | `<VERSIONING_SCHEME>` |
 
 Adopt these development goals:
@@ -176,12 +177,16 @@ Use this confirmed repository layout:
 
 Treat `MyCK3Mod/` as the CK3 mod content root. Keep development-only material, including `.agents/`, outside that folder.
 
-Use `MyCK3Mod.mod` as a portable launcher template. Keep `path="<LOCAL_MOD_PATH>"` unchanged in the committed template. For local testing:
+Steam Workshop is the sole supported end-user installation channel. Users subscribe through Steam Workshop and enable the Mod in a CK3 Launcher playset. GitHub source archives are not supported installable Mod packages, and cloning the repository does not automatically install the Mod.
+
+Use `MyCK3Mod.mod` only as a developer/advanced-user local launcher template. Keep `path="<LOCAL_MOD_PATH>"` unchanged in the committed template. For repository-path development testing:
 
 1. Copy `MyCK3Mod.mod` to the CK3 user mod directory used by the launcher.
 2. In that copied file only, replace `<LOCAL_MOD_PATH>` with the absolute path to this repository's `MyCK3Mod/` directory, using forward slashes.
 3. Keep the repository template portable; never commit the machine-specific replacement path.
 4. Enable the copied launcher entry in a CK3 playset.
+
+This local path workflow is not an officially supported end-user installation method. Do not include `MyCK3Mod.mod` in Workshop staging.
 
 Keep `MyCK3Mod/descriptor.mod` free of the local `path` field. Do not add `remote_file_id` until the Workshop publishing process assigns one.
 
@@ -325,7 +330,9 @@ Apply these rules:
 - Do not mix formatting-only changes with behavioral changes.
 - Do not commit saves, logs, crash dumps, launcher caches, generated runtime data, editor temporary files, or machine-specific configuration.
 - Do not commit secrets, credentials, usernames, or local absolute paths.
-- Keep `MyCK3Mod.mod` portable in version control. Put an absolute path only in the copied launcher file used on the local machine.
+- Keep the developer-only `MyCK3Mod.mod` portable in version control. Put an absolute path only in the copied launcher file used on the local machine, and never include it in Workshop staging.
+- Treat `dist/workshop/BreedImproved/` as generated, Git-ignored Workshop upload staging rather than a public download.
+- Do not publish or support manual-install ZIPs, installers, checksums, or GitHub Release assets for end-user installation.
 - Do not copy large vanilla CK3 files into the repository without a documented technical need and applicable distribution rights.
 - Preserve released namespaces, event IDs, decision IDs, and localisation keys whenever possible.
 - Record CK3 compatibility in verified project metadata once the metadata format is established.

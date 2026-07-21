@@ -60,21 +60,27 @@ Version 0.1.0 does not include:
 - divorce or claim cleanup; or
 - background or recurring execution.
 
-## Installation
+## Installation — Steam Workshop
 
-For manual installation from `Breed-Improved-v0.1.0.zip`:
+Steam Workshop is the only supported end-user installation channel.
 
-1. Extract `MyCK3Mod.mod` and the `MyCK3Mod/` directory into the CK3 user mod directory used by your launcher.
-2. Open the extracted `MyCK3Mod.mod`.
-3. Replace `<LOCAL_MOD_PATH>` with the absolute path to the extracted `MyCK3Mod/` directory, using forward slashes.
-4. Keep `MyCK3Mod/descriptor.mod` inside the content directory.
-5. Enable **Breed Improved** in a CK3 playset.
+1. Subscribe to **Breed Improved** on Steam Workshop: `<INSERT_STEAM_WORKSHOP_URL_AFTER_PUBLISHING>`.
+2. Enable **Breed Improved** in a CK3 Launcher playset.
+3. Launch the game.
 
-The repository and release template intentionally do not contain a developer-specific absolute path.
+The Workshop version is the official playable release. GitHub source archives are not installable Mod packages and are not supported as an end-user installation method.
 
 ## Removal
 
-Disable Breed Improved in the launcher and remove its extracted launcher file and content directory if desired. Back up important saves first. Uninstalling the mod does not provide a rollback mechanism for Dynasty changes or other consequences already written into a save.
+Disable Breed Improved in the CK3 Launcher and unsubscribe through Steam Workshop if desired. Back up important saves first. Removing the mod does not provide a rollback mechanism for Dynasty changes or other consequences already written into a save.
+
+## Development source
+
+GitHub provides the public source repository, development history, issue reporting, roadmap, documentation, tags, and concise Release notes. Cloning or downloading the repository does not automatically install Breed Improved.
+
+The production CK3 Mod root is `MyCK3Mod/`. Generated Workshop upload content is staged internally under `dist/workshop/BreedImproved/` and is not a public download.
+
+Advanced users may create their own CK3 local Mod entry and point it to the repository's `MyCK3Mod/` production directory. This is a developer-oriented workflow and is not an officially supported end-user installation method.
 
 ## Compatibility and known behavior
 

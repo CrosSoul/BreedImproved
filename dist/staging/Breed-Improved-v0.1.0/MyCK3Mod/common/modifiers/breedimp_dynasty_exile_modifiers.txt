@@ -1,6 +1,0 @@
-breedimp_exiled_from_dynasty_modifier = {
-	icon = stress_negative
-	diplomacy = -1
-	stress_gain_mult = 0.2
-	monthly_prestige = -0.25
-}
