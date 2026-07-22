@@ -1,0 +1,80 @@
+# Breed Improved Phase 2 individual bulk-candidate protection controls.
+# CK3 evidence target: 1.19.0.6. Runtime status NOT RUN.
+
+breedimp_protect_from_bulk_cleanup_interaction = {
+	icon = icon_dynasty
+	category = interaction_category_friendly
+	interface_priority = 55
+	desc = breedimp_protect_from_bulk_cleanup_interaction_desc
+	prompt = breedimp_protect_from_bulk_cleanup_interaction_prompt
+	use_diplomatic_range = no
+
+	is_shown = {
+		scope:actor != scope:recipient
+		scope:recipient = {
+			breedimp_can_manage_bulk_cleanup_protection_trigger = {
+				ACTOR = scope:actor
+			}
+			NOT = {
+				breedimp_is_bulk_cleanup_protected_trigger = yes
+			}
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		scope:recipient = {
+			custom_tooltip = {
+				text = breedimp_bulk_cleanup_protection_invalid_tt
+				breedimp_can_manage_bulk_cleanup_protection_trigger = {
+					ACTOR = scope:actor
+				}
+			}
+		}
+	}
+
+	on_accept = {
+		scope:recipient = {
+			add_character_flag = breedimp_bulk_cleanup_protected
+		}
+	}
+
+	auto_accept = yes
+}
+
+breedimp_remove_bulk_cleanup_protection_interaction = {
+	icon = icon_dynasty
+	category = interaction_category_friendly
+	interface_priority = 54
+	desc = breedimp_remove_bulk_cleanup_protection_interaction_desc
+	prompt = breedimp_remove_bulk_cleanup_protection_interaction_prompt
+	use_diplomatic_range = no
+
+	is_shown = {
+		scope:actor != scope:recipient
+		scope:recipient = {
+			breedimp_can_manage_bulk_cleanup_protection_trigger = {
+				ACTOR = scope:actor
+			}
+			breedimp_is_bulk_cleanup_protected_trigger = yes
+		}
+	}
+
+	is_valid_showing_failures_only = {
+		scope:recipient = {
+			custom_tooltip = {
+				text = breedimp_bulk_cleanup_protection_invalid_tt
+				breedimp_can_manage_bulk_cleanup_protection_trigger = {
+					ACTOR = scope:actor
+				}
+			}
+		}
+	}
+
+	on_accept = {
+		scope:recipient = {
+			remove_character_flag = breedimp_bulk_cleanup_protected
+		}
+	}
+
+	auto_accept = yes
+}

@@ -1,0 +1,94 @@
+# Breed Improved Phase 2 review flow. Reuses breedimp_exile_dynasty_member unchanged.
+# CK3 evidence target: 1.19.0.6. Runtime status NOT RUN.
+
+breedimp_bulk_cleanup_build_candidate_list_effect = {
+	dynasty = {
+		every_dynasty_member = {
+			limit = {
+				breedimp_bulk_cleanup_current_mode_candidate_trigger = {
+					ACTOR = root
+				}
+			}
+			add_to_list = breedimp_bulk_cleanup_candidates
+		}
+	}
+
+	breedimp_bulk_cleanup_continue_review_effect = yes
+}
+
+breedimp_bulk_cleanup_continue_review_effect = {
+	if = {
+		limit = {
+			any_in_list = {
+				list = breedimp_bulk_cleanup_candidates
+				NOT = {
+					is_in_list = breedimp_bulk_cleanup_reviewed
+				}
+				breedimp_bulk_cleanup_review_candidate_trigger = {
+					ACTOR = root
+				}
+			}
+		}
+
+		random_in_list = {
+			list = breedimp_bulk_cleanup_candidates
+			limit = {
+				NOT = {
+					is_in_list = breedimp_bulk_cleanup_reviewed
+				}
+				breedimp_bulk_cleanup_review_candidate_trigger = {
+					ACTOR = root
+				}
+			}
+			save_scope_as = breedimp_bulk_cleanup_candidate
+			add_to_list = breedimp_bulk_cleanup_reviewed
+		}
+
+		trigger_event = breedimp_dynasty_cleanup.1001
+	}
+	else = {
+		trigger_event = breedimp_dynasty_cleanup.1002
+	}
+}
+
+breedimp_bulk_cleanup_execute_selected_effect = {
+	if = {
+		limit = {
+			breedimp_bulk_cleanup_actor_is_valid_trigger = yes
+		}
+
+		every_in_list = {
+			list = breedimp_bulk_cleanup_selected
+			limit = {
+				breedimp_bulk_cleanup_current_mode_candidate_trigger = {
+					ACTOR = root
+				}
+				NOT = {
+					any_ancestor = {
+						even_if_dead = yes
+						is_in_list = breedimp_bulk_cleanup_selected
+						breedimp_bulk_cleanup_current_mode_candidate_trigger = {
+							ACTOR = root
+						}
+					}
+				}
+			}
+			add_to_list = breedimp_bulk_cleanup_execution_roots
+		}
+
+		every_in_list = {
+			list = breedimp_bulk_cleanup_execution_roots
+			if = {
+				limit = {
+					breedimp_bulk_cleanup_current_mode_candidate_trigger = {
+						ACTOR = root
+					}
+				}
+				breedimp_exile_dynasty_member = {
+					ACTOR = root
+					RECIPIENT = this
+				}
+			}
+		}
+	}
+}

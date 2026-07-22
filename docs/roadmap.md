@@ -10,20 +10,27 @@ The target and descendants enter a generated replacement Dynasty. The interactio
 
 ## Phase 2 — Bulk Dynasty Cleanup
 
-Status: deferred design; not implemented.
+Status: development implementation prepared; static validation `PASS`; runtime status `NOT RUN`; not included in v0.1.0.
 
-The following product boundaries are recorded for later design:
+The conservative first implementation provides:
 
-- Bulk cleanup must use a separate, conservative candidate trigger.
-- It must not automatically reuse the manual interaction's blood-impurity cost trigger as its candidate rule.
-- Dynasty-external parents may later be marked as accepted founder parents.
-- Children of accepted founder parents must be protected from inclusion in a player-initiated bulk cleanup candidate set.
-- The individual **Exile from Dynasty** interaction remains available independently.
-- No character names or save-specific character IDs may be hardcoded.
-- The accepted-founder-parent whitelist and bulk cleanup require separate design approval, CK3 syntax verification, implementation approval, and runtime testing.
-- Any scan must occur only after explicit player initiation. No scheduled, background, or recurring scan is permitted.
+- one player-initiated **Manage Dynasty Cleanup** Decision for a living player Dynast;
+- one mode per run: **Bloodline Cleanup** or **Negative Congenital Trait Cleanup**;
+- a fixed, evidence-backed negative congenital trait preset;
+- positive congenital trait warnings without automatic offset or scoring;
+- shared mandatory exclusions and player-managed individual direct-candidate protection;
+- ancestor-first sequential candidate review with select, leave-unselected, finish, and cancel controls;
+- a separate final confirmation and final eligibility revalidation;
+- selected ancestor/descendant overlap collapse; and
+- execution through the unchanged v0.1.0 **Exile from Dynasty** effect.
 
-“Protected from automatic cleanup” means excluded from a future player-initiated bulk candidate set. It does not authorize autonomous cleanup or background execution.
+Bloodline Cleanup is intentionally more conservative than the individual interaction's free-cost rule. It includes public bastard states or requires both explicitly existing legal parents to be outside the actor's Dynasty. It does not use the v0.1.0 cost trigger as its candidate rule.
+
+The first implementation has no batch cost. It supports only individual direct-candidate protection across both modes; this is not whole-descendant-branch protection. The ordinary individual **Exile from Dynasty** interaction remains available independently. Candidate discovery begins only after explicit player confirmation and never runs on a schedule, in the background, or through AI.
+
+Before Phase 2 can be released, Ray must complete the manual matrix in `docs/testing/phase2_dynasty_cleanup_manual.md`, including both languages, all candidate branches, protection, control flow, branch overlap, large-Dynasty behavior, save/reload, and error-log review. Jay/Boss must then explicitly approve the runtime result.
+
+Deferred work includes accepted-founder-parent and whole-branch protection, combined modes, arbitrary trait selection, scoring, saved mode preferences, and any broader descendant-deduplication design. No character names or save-specific character IDs may be hardcoded.
 
 ## Later phases
 

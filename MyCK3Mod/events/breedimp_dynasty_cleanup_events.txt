@@ -1,0 +1,244 @@
+# Breed Improved Phase 2 sequential review and final confirmation events.
+# Namespace allocation: breedimp_dynasty_cleanup.1000-1099. Runtime status NOT RUN.
+
+namespace = breedimp_dynasty_cleanup
+
+breedimp_dynasty_cleanup.1001 = {
+	type = character_event
+	title = breedimp_dynasty_cleanup.1001.t
+	theme = dynasty
+
+	desc = {
+		desc = breedimp_dynasty_cleanup.1001.desc
+
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					exists = scope:breedimp_bulk_cleanup_bloodline_mode
+				}
+				desc = breedimp_dynasty_cleanup.1001.mode.bloodline
+			}
+			desc = breedimp_dynasty_cleanup.1001.mode.traits
+		}
+
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					scope:breedimp_bulk_cleanup_candidate = {
+						is_landed = yes
+					}
+				}
+				desc = breedimp_dynasty_cleanup.1001.status.landed
+			}
+			desc = breedimp_dynasty_cleanup.1001.status.unlanded
+		}
+
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					scope:breedimp_bulk_cleanup_candidate = {
+						any_child = {
+							even_if_dead = yes
+							count >= 1
+						}
+					}
+				}
+				desc = breedimp_dynasty_cleanup.1001.status.has_children
+			}
+			desc = breedimp_dynasty_cleanup.1001.status.no_children
+		}
+
+		triggered_desc = {
+			trigger = {
+				exists = scope:breedimp_bulk_cleanup_bloodline_mode
+				scope:breedimp_bulk_cleanup_candidate = { has_trait = bastard }
+			}
+			desc = breedimp_dynasty_cleanup.1001.reason.bastard
+		}
+		triggered_desc = {
+			trigger = {
+				exists = scope:breedimp_bulk_cleanup_bloodline_mode
+				scope:breedimp_bulk_cleanup_candidate = { has_trait = legitimized_bastard }
+			}
+			desc = breedimp_dynasty_cleanup.1001.reason.legitimized_bastard
+		}
+		triggered_desc = {
+			trigger = {
+				exists = scope:breedimp_bulk_cleanup_bloodline_mode
+				scope:breedimp_bulk_cleanup_candidate = {
+					AND = {
+						exists = father
+						exists = mother
+						father = {
+							breedimp_ancestor_outside_actor_dynasty_trigger = yes
+						}
+						mother = {
+							breedimp_ancestor_outside_actor_dynasty_trigger = yes
+						}
+					}
+				}
+			}
+			desc = breedimp_dynasty_cleanup.1001.reason.both_parents_external
+		}
+
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = beauty_bad_1 } }
+			desc = breedimp_dynasty_cleanup.1001.reason.beauty_bad_1
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = beauty_bad_2 } }
+			desc = breedimp_dynasty_cleanup.1001.reason.beauty_bad_2
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = beauty_bad_3 } }
+			desc = breedimp_dynasty_cleanup.1001.reason.beauty_bad_3
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = intellect_bad_1 } }
+			desc = breedimp_dynasty_cleanup.1001.reason.intellect_bad_1
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = intellect_bad_2 } }
+			desc = breedimp_dynasty_cleanup.1001.reason.intellect_bad_2
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = intellect_bad_3 } }
+			desc = breedimp_dynasty_cleanup.1001.reason.intellect_bad_3
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = physique_bad_1 } }
+			desc = breedimp_dynasty_cleanup.1001.reason.physique_bad_1
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = physique_bad_2 } }
+			desc = breedimp_dynasty_cleanup.1001.reason.physique_bad_2
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = physique_bad_3 } }
+			desc = breedimp_dynasty_cleanup.1001.reason.physique_bad_3
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = clubfooted } }
+			desc = breedimp_dynasty_cleanup.1001.reason.clubfooted
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = hunchbacked } }
+			desc = breedimp_dynasty_cleanup.1001.reason.hunchbacked
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = lisping } }
+			desc = breedimp_dynasty_cleanup.1001.reason.lisping
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = stuttering } }
+			desc = breedimp_dynasty_cleanup.1001.reason.stuttering
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = dwarf } }
+			desc = breedimp_dynasty_cleanup.1001.reason.dwarf
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = inbred } }
+			desc = breedimp_dynasty_cleanup.1001.reason.inbred
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = spindly } }
+			desc = breedimp_dynasty_cleanup.1001.reason.spindly
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = scaly } }
+			desc = breedimp_dynasty_cleanup.1001.reason.scaly
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = wheezing } }
+			desc = breedimp_dynasty_cleanup.1001.reason.wheezing
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = bleeder } }
+			desc = breedimp_dynasty_cleanup.1001.reason.bleeder
+		}
+		triggered_desc = {
+			trigger = { exists = scope:breedimp_bulk_cleanup_trait_mode scope:breedimp_bulk_cleanup_candidate = { has_trait = infertile } }
+			desc = breedimp_dynasty_cleanup.1001.reason.infertile
+		}
+
+		triggered_desc = {
+			trigger = {
+				scope:breedimp_bulk_cleanup_candidate = {
+					breedimp_bulk_cleanup_positive_congenital_warning_trigger = yes
+				}
+			}
+			desc = breedimp_dynasty_cleanup.1001.warning.positive_trait
+		}
+	}
+
+	left_portrait = {
+		character = scope:breedimp_bulk_cleanup_candidate
+	}
+
+	option = {
+		name = breedimp_dynasty_cleanup.1001.a
+		trigger = {
+			scope:breedimp_bulk_cleanup_candidate = {
+				breedimp_bulk_cleanup_current_mode_candidate_trigger = {
+					ACTOR = root
+				}
+			}
+		}
+		scope:breedimp_bulk_cleanup_candidate = {
+			add_to_list = breedimp_bulk_cleanup_selected
+		}
+		save_scope_as = breedimp_bulk_cleanup_has_selection
+		breedimp_bulk_cleanup_continue_review_effect = yes
+	}
+
+	option = {
+		name = breedimp_dynasty_cleanup.1001.b
+		breedimp_bulk_cleanup_continue_review_effect = yes
+	}
+
+	option = {
+		name = breedimp_dynasty_cleanup.1001.c
+		trigger_event = breedimp_dynasty_cleanup.1002
+	}
+
+	option = {
+		name = breedimp_dynasty_cleanup.1001.d
+	}
+}
+
+breedimp_dynasty_cleanup.1002 = {
+	type = character_event
+	title = breedimp_dynasty_cleanup.1002.t
+	theme = dynasty
+
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					exists = scope:breedimp_bulk_cleanup_has_selection
+				}
+				desc = breedimp_dynasty_cleanup.1002.desc.selected
+			}
+			desc = breedimp_dynasty_cleanup.1002.desc.empty
+		}
+	}
+
+	left_portrait = {
+		character = root
+	}
+
+	option = {
+		name = breedimp_dynasty_cleanup.1002.a
+		trigger = {
+			exists = scope:breedimp_bulk_cleanup_has_selection
+			breedimp_bulk_cleanup_actor_is_valid_trigger = yes
+		}
+		custom_tooltip = breedimp_dynasty_cleanup.1002.confirm.tt
+		breedimp_bulk_cleanup_execute_selected_effect = yes
+	}
+
+	option = {
+		name = breedimp_dynasty_cleanup.1002.b
+	}
+}

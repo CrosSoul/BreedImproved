@@ -1,0 +1,150 @@
+# Breed Improved Phase 2 candidate/protection triggers. CK3 evidence target: 1.19.0.6.
+# Development implementation; runtime status NOT RUN.
+
+breedimp_bulk_cleanup_actor_is_valid_trigger = {
+	is_ai = no
+	is_alive = yes
+	is_dynast = yes
+}
+
+breedimp_can_manage_bulk_cleanup_protection_trigger = {
+	$ACTOR$ = {
+		breedimp_bulk_cleanup_actor_is_valid_trigger = yes
+	}
+
+	is_ai = yes
+	is_alive = yes
+	is_lowborn = no
+	dynasty = $ACTOR$.dynasty
+	this != $ACTOR$
+}
+
+breedimp_is_bulk_cleanup_protected_trigger = {
+	has_character_flag = breedimp_bulk_cleanup_protected
+}
+
+breedimp_bulk_cleanup_base_candidate_trigger = {
+	save_temporary_scope_as = breedimp_bulk_cleanup_candidate_guard
+
+	$ACTOR$ = {
+		breedimp_bulk_cleanup_actor_is_valid_trigger = yes
+		# Never select a branch root whose descendant propagation would move the actor.
+		NOT = {
+			any_ancestor = {
+				even_if_dead = yes
+				this = scope:breedimp_bulk_cleanup_candidate_guard
+			}
+		}
+	}
+
+	breedimp_can_exile_dynasty_member = yes
+
+	NOT = {
+		breedimp_is_bulk_cleanup_protected_trigger = yes
+	}
+}
+
+breedimp_bulk_cleanup_bloodline_candidate_trigger = {
+	OR = {
+		has_trait = bastard
+		has_trait = legitimized_bastard
+		AND = {
+			exists = father
+			exists = mother
+			father = {
+				breedimp_ancestor_outside_actor_dynasty_trigger = yes
+			}
+			mother = {
+				breedimp_ancestor_outside_actor_dynasty_trigger = yes
+			}
+		}
+	}
+}
+
+breedimp_bulk_cleanup_negative_congenital_trait_trigger = {
+	OR = {
+		has_trait = beauty_bad_1
+		has_trait = beauty_bad_2
+		has_trait = beauty_bad_3
+		has_trait = intellect_bad_1
+		has_trait = intellect_bad_2
+		has_trait = intellect_bad_3
+		has_trait = physique_bad_1
+		has_trait = physique_bad_2
+		has_trait = physique_bad_3
+		has_trait = clubfooted
+		has_trait = hunchbacked
+		has_trait = lisping
+		has_trait = stuttering
+		has_trait = dwarf
+		has_trait = inbred
+		has_trait = spindly
+		has_trait = scaly
+		has_trait = wheezing
+		has_trait = bleeder
+		has_trait = infertile
+	}
+}
+
+breedimp_bulk_cleanup_positive_congenital_warning_trigger = {
+	OR = {
+		has_trait = beauty_good_1
+		has_trait = beauty_good_2
+		has_trait = beauty_good_3
+		has_trait = intellect_good_1
+		has_trait = intellect_good_2
+		has_trait = intellect_good_3
+		has_trait = physique_good_1
+		has_trait = physique_good_2
+		has_trait = physique_good_3
+		has_trait = pure_blooded
+		has_trait = fecund
+	}
+}
+
+breedimp_bulk_cleanup_current_mode_candidate_trigger = {
+	breedimp_bulk_cleanup_base_candidate_trigger = {
+		ACTOR = $ACTOR$
+	}
+
+	OR = {
+		AND = {
+			exists = scope:breedimp_bulk_cleanup_bloodline_mode
+			breedimp_bulk_cleanup_bloodline_candidate_trigger = yes
+		}
+		AND = {
+			exists = scope:breedimp_bulk_cleanup_trait_mode
+			breedimp_bulk_cleanup_negative_congenital_trait_trigger = yes
+		}
+	}
+}
+
+breedimp_bulk_cleanup_review_candidate_trigger = {
+	breedimp_bulk_cleanup_current_mode_candidate_trigger = {
+		ACTOR = $ACTOR$
+	}
+
+	# Review still-valid candidate ancestors before their descendants.
+	NOT = {
+		any_ancestor = {
+			even_if_dead = yes
+			is_in_list = breedimp_bulk_cleanup_candidates
+			NOT = {
+				is_in_list = breedimp_bulk_cleanup_reviewed
+			}
+			breedimp_bulk_cleanup_current_mode_candidate_trigger = {
+				ACTOR = $ACTOR$
+			}
+		}
+	}
+
+	NOT = {
+		any_ancestor = {
+			even_if_dead = yes
+			is_in_list = breedimp_bulk_cleanup_selected
+			breedimp_bulk_cleanup_current_mode_candidate_trigger = {
+				ACTOR = $ACTOR$
+			}
+		}
+	}
+}

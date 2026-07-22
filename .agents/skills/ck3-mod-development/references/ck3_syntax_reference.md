@@ -530,6 +530,202 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Minimal verified example: `any_parent = { even_if_dead = yes <trigger> }`
 - Restrictions and notes: missing parent links yield no iterator member. Breed Improved's RC2 impurity rule intentionally uses exactly one `any_parent` level. This does not use `real_father` or hidden parentage secrets. Lowborn parents need an explicit branch before Dynasty comparison.
 
+### Native Decision option-list widget
+
+- Status: `VERIFIED`
+- Category: Decision UI field and controller
+- CK3 version: `1.19.0.6`
+- File family: `common/decisions/*.txt`
+- Enclosing context: `widget` at the top level of a Decision definition
+- Input scope: Decision taker character; no scope transition while options are displayed
+- Output scope or state change: selects exactly one static item; the selected `item.value` is exposed in Decision triggers/effects as `scope:<value> = yes`
+- Arguments: `gui = "decision_view_widget_option_list_generic"`, `controller = decision_option_list_controller`, optional `show_from_start = yes`, verified `decision_to_second_step_button = "<localisation_key>"`, and static `item` blocks with verified fields `value`, `is_shown`, `is_valid`, `current_description`, `localization`, `is_default`, `icon`, and `ai_chance`
+- Evidence: `common/decisions/_decisions.info:145-190`; `common/decisions/00_cultural_tradition_decisions.txt`, `recruit_terrain_specialist_decision`; `common/decisions/dlc_decisions/fp3_decisions.txt`, `struggle_persia_ending_rekindle_iran_decision`
+- Minimal verified example: `widget = { gui = "decision_view_widget_option_list_generic" controller = decision_option_list_controller item = { value = my_option localization = my_option current_description = my_option_desc } }`
+- Restrictions and notes: this is a static single-selection controller, not a dynamic character multi-select list. Translate the selected option into a saved scope or other verified event-chain state inside the Decision effect; do not assume the item scope persists independently.
+
+### Player-only Decision entry and Decision-to-event call
+
+- Status: `VERIFIED`
+- Category: Decision fields and effect
+- CK3 version: `1.19.0.6`
+- File family: `common/decisions/*.txt`
+- Enclosing context: top level of a Decision definition and its character-scoped `effect`
+- Input scope: Decision taker character
+- Output scope or state change: `trigger_event = <namespace.id>` opens the referenced event for the Decision taker
+- Arguments: verified fields include `title`, `picture`, `selection_tooltip`, `desc`, `confirm_text`, `sort_order`, `is_shown`, `is_valid_showing_failures_only`, `is_valid`, `effect`, `ai_check_interval`, `ai_potential`, and `ai_will_do`; `ai_check_interval = 0` disables AI checking
+- Evidence: `common/decisions/_decisions.info:125-143`; `common/decisions/80_major_decisions.txt`, `strengthen_bloodline_decision`; `common/decisions/00_diarchy_decisions.txt`; `common/decisions/00_dynasty_decisions.txt`
+- Minimal verified example: `effect = { trigger_event = my_namespace.1000 }`
+- Restrictions and notes: actor eligibility remains an explicit project trigger. Omitting a cost and cooldown is permitted; it does not imply a hidden resource charge.
+
+### Dynasty member iterators
+
+- Status: `VERIFIED`
+- Category: Dynasty-to-character iterators
+- CK3 version: `1.19.0.6`
+- File family: effects and triggers in Decisions, events, scripted effects, and scripted triggers
+- Enclosing context: a Dynasty scope such as `dynasty = { ... }`
+- Input scope: Dynasty
+- Output scope or state change: `any_dynasty_member` evaluates character triggers; `every_dynasty_member` runs a block on every matching character; `random_dynasty_member` enters one matching character and may save that scope
+- Arguments: verified iterator fields include `limit`, `alternative_limit` for the random form, and character effects such as `save_scope_as`
+- Evidence: `events/lifestyles/statecraft_lifestyle/diplomacy_family_events.txt:4170-4266`; `events/relations_events/parent_events.txt`, `parent.1009`; `events/activities/coronation_activity/prelude_events.txt:4603-4609`
+- Minimal verified example: `dynasty = { random_dynasty_member = { limit = { is_alive = yes } save_scope_as = candidate } }`
+- Restrictions and notes: deceased members are not assumed to be excluded; write `is_alive = yes` when required. Breed Improved permits use only after explicit player initiation.
+
+### Event-target lists
+
+- Status: `VERIFIED`
+- Category: event-chain list effects, triggers, and iterators
+- CK3 version: `1.19.0.6`
+- File family: event, Decision, and scripted-effect blocks that share the same event context
+- Enclosing context: character-scoped effects/triggers and event chains
+- Input scope: the current typed scope added to or tested against the named event-target list
+- Output scope or state change: `add_to_list` appends the current scope; `is_in_list` tests membership; `any_in_list`, `random_in_list`, and `every_in_list` enter list members; `save_scope_as` can save a randomly selected member
+- Arguments: list identifier via `add_to_list = <name>`, `is_in_list = <name>`, or `list = <name>`; the iterators accept verified `limit`, `count`, and enclosed trigger/effect blocks
+- Evidence: `tests/event_target_lists_tests.txt:45-93`; `common/scripted_effects/00_decisions_effects.txt:1511-1529`; `events/story_cycles/story_cycle_pet_animal_events.txt:834-863`; `events/dlc/fp3/fp3_misc_decision_events.txt:2534-2843`
+- Minimal verified example: `random_in_list = { list = candidates limit = { NOT = { is_in_list = reviewed } } save_scope_as = candidate }`
+- Restrictions and notes: these are context lists, not persistent character variable lists. Their continuity through the complete Breed Improved review loop is a required runtime test. Do not substitute the `variable = <name>` form unless a persistent variable list is intentionally required.
+
+### `any_ancestor` with selected-list membership
+
+- Status: `VERIFIED`
+- Category: character iterator and trigger composition
+- CK3 version: `1.19.0.6`
+- File family: character trigger blocks and scripted triggers
+- Enclosing context: character scope
+- Input scope: character
+- Output scope or state change: enters ancestors for boolean evaluation; no state change
+- Arguments: `even_if_dead = yes` and character triggers including the independently verified `is_in_list = <event_target_list>`
+- Evidence: `events/dlc/tgp/tgp_mandala_devaraja_events.txt:1222-1227`; list membership evidence in `common/scripted_effects/00_decisions_effects.txt:1511-1524`
+- Minimal verified example: `any_ancestor = { even_if_dead = yes is_in_list = selected_targets }`
+- Restrictions and notes: this supports ancestor-first ordering, actor-ancestor exclusion, and collapsing a selected descendant when a still-valid selected ancestor exists. It does not enumerate descendants, calculate a descendant count, or detect two non-ancestor roots whose descendant branches later converge.
+
+### Temporary saved scope inside a scripted trigger
+
+- Status: `VERIFIED`
+- Category: temporary scope capture and scope comparison
+- CK3 version: `1.19.0.6`
+- File family: `common/scripted_triggers/*.txt`
+- Enclosing context: scripted trigger evaluated from a typed scope
+- Input scope: current typed scope
+- Output scope or state change: saves a context-local temporary scope for later trigger comparison; no persistent character state
+- Arguments: `save_temporary_scope_as = <name>` and later `scope:<name>` access
+- Evidence: `common/scripted_triggers/07_ep3_triggers.txt:888-896`, `is_appointment_valid_trigger`; `common/scripted_triggers/00_activity_triggers.txt:140-145`
+- Minimal verified example: `save_temporary_scope_as = candidate_temp` followed by `scope:candidate_temp = { <trigger> }`
+- Restrictions and notes: use this only to preserve the caller's typed scope across nested scope changes in the same evaluation context. It is not persistent save configuration and does not establish event-chain lifetime.
+
+### Parameterized scripted trigger scope arguments
+
+- Status: `VERIFIED`
+- Category: scripted-trigger argument substitution and scope access
+- CK3 version: `1.19.0.6`
+- File family: `common/scripted_triggers/*.txt` and supported callers
+- Enclosing context: a scripted-trigger definition that declares a `$NAME$` placeholder, called with `NAME = <scope>`
+- Input scope: caller's current typed scope plus the explicitly supplied typed scope argument
+- Output scope or state change: evaluates the trigger using the supplied scope; no state change
+- Arguments: a project-chosen uppercase placeholder such as `$ACTOR$`; the call site supplies the matching name without dollar signs, for example `ACTOR = scope:actor`
+- Evidence: definition `ask_for_pardon_available_trigger` in `common/scripted_triggers/00_interaction_triggers.txt:49-61`; call in `common/character_interactions/00_vassal_interactions.txt:2293`
+- Minimal verified example: definition `$ACTOR$ = { is_alive = yes }`; call `my_trigger = { ACTOR = scope:actor }`
+- Restrictions and notes: argument names are textual parameters, not automatically created saved scopes. Pass every required argument explicitly and preserve the typed scope expected by the trigger.
+
+### `save_scope_as` in a Decision effect
+
+- Status: `VERIFIED`
+- Category: saved-scope effect
+- CK3 version: `1.19.0.6`
+- File family: `common/decisions/*.txt`
+- Enclosing context: character-scoped `effect` of a Decision
+- Input scope: Decision taker character
+- Output scope or state change: saves the current character under a named event scope for the following Decision/event context
+- Arguments: project-chosen scope name, for example `save_scope_as = actor`
+- Evidence: `common/decisions/dlc_decisions/mpo/mpo_decisions.txt:4409-4417`
+- Minimal verified example: `effect = { save_scope_as = actor trigger_event = my_namespace.1000 }`
+- Restrictions and notes: the cited form verifies capture in the Decision effect. Scope/list continuity through Breed Improved's repeated visible event loop remains a runtime test; this entry does not establish indefinite or save-persistent lifetime.
+
+### Permanent scalar character flag
+
+- Status: `VERIFIED`
+- Category: character effect and trigger
+- CK3 version: `1.19.0.6`
+- File family: character-scoped events, scripted effects, scripted triggers, and Character Interactions
+- Enclosing context: character scope
+- Input scope: character
+- Output scope or state change: `add_character_flag` adds an untimed scalar marker; `has_character_flag` tests it; `remove_character_flag` removes it
+- Arguments: a flag identifier; the verified scalar form has no character-valued payload
+- Evidence: `events/dlc/bp2/bp2_yearly_events_6.txt:5411` and `:13373`; `common/story_cycles/bp2_story_cycle_foreign_raised_reformer.txt:59`; detailed project evidence in `docs/research/Lynn_to_Jay_Exile_Consequences_Evidence.md`, section **Persistent character flag**
+- Minimal verified example: `add_character_flag = my_flag`, later `has_character_flag = my_flag`, and `remove_character_flag = my_flag`
+- Restrictions and notes: an untimed flag remains until explicitly removed by script. It does not identify the character who set it. Save/reload persistence must be confirmed by runtime testing before making a product-level persistence claim.
+
+### Exact active-trait eligibility checks
+
+- Status: `VERIFIED`
+- Category: character trigger
+- CK3 version: `1.19.0.6`
+- File family: character trigger blocks and scripted triggers
+- Enclosing context: character scope
+- Input scope: character
+- Output scope or state change: boolean; no state change
+- Arguments: exact trait database key, for example `has_trait = inbred`
+- Evidence: `common/character_interactions/00_dynast_interactions.txt:305-314`; definitions in `common/traits/00_traits.txt`; field behavior in `common/traits/_traits.info`
+- Minimal verified example: `has_trait = intellect_bad_3`
+- Restrictions and notes: an exact-key preset is narrower than a trait group or `num_of_bad_genetic_traits`. `has_inactive_trait` is a separate construct and is not implied by `has_trait`.
+
+### Character event conditional description segments
+
+- Status: `VERIFIED`
+- Category: event fields and dynamic description control structure
+- CK3 version: `1.19.0.6`
+- File family: `events/*.txt`
+- Enclosing context: a `type = character_event` event definition
+- Input scope: event root plus inherited saved scopes
+- Output scope or state change: no gameplay state change; composes event title/description/portrait/options
+- Arguments: verified event fields include `title`, `desc`, `theme`, portraits, and `option`; sibling `triggered_desc` blocks append every matching reason, while `first_valid` chooses one mutually exclusive status
+- Evidence: `events/court_position_management_events.txt:1-145`; `events/decisions_events/major_decisions_events.txt`, `major_decisions.0501`; `events/activities/chariot_race_activity/chariot_race_ongoing_events.txt:4509-4525`
+- Minimal verified example: `desc = { desc = base_desc triggered_desc = { trigger = { scope:candidate = { has_trait = inbred } } desc = inbred_reason } }`
+- Restrictions and notes: do not wrap reasons that must all display in one `first_valid`. Event confirmation uses an ordinary option; no event-level `confirm_text` field is inferred.
+
+### Saved-character event localisation
+
+- Status: `VERIFIED`
+- Category: localisation functions and saved-scope access
+- CK3 version: `1.19.0.6`
+- File family: CK3 localisation `.yml` referenced by events
+- Enclosing context: quoted localisation value under the correct language header
+- Input scope: event root plus a saved character scope such as `candidate`
+- Output scope or state change: rendered text only
+- Arguments: `[candidate.GetShortUIName]`, `[candidate.GetAge]`, `[ROOT.Char.Custom2('RelationToMe', SCOPE.sC('candidate'))]`, and `[GetTrait('<exact_key>').GetName( GetNullCharacter )]`
+- Evidence: `localization/english/event_localization/lifestyle/statecraft/diplomacy_family_events_l_english.yml`; `localization/english/dlc/ach/dlc_ach_coronation_prelude_events_l_english.yml`; `localization/english/event_localization/religion_events/other_doctrine_events_l_english.yml`; `localization/english/destiny_values_l_english.yml:114-166`
+- Minimal verified example: `"[candidate.GetShortUIName], age [candidate.GetAge], is my [ROOT.Char.Custom2('RelationToMe', SCOPE.sC('candidate'))]."`
+- Restrictions and notes: localisation uses the saved alias `candidate`, not `scope:candidate`. Do not invent a descendant-count getter or access `candidate.GetPrimaryTitle` without a landed guard.
+
+### Guarded saved-character primary-title localisation
+
+- Status: `VERIFIED`
+- Category: localisation function on a saved character scope
+- CK3 version: `1.19.0.6`
+- File family: CK3 localisation `.yml` referenced from a conditional event-description branch
+- Enclosing context: quoted localisation value rendered only after a character-scoped landed check succeeds
+- Input scope: a saved landed character scope
+- Output scope or state change: renders the character's primary title name; no gameplay state change
+- Arguments: `[saved_character.GetPrimaryTitle.GetName]`
+- Evidence: base accessor form `[CHARACTER.GetPrimaryTitle.GetName]` in `localization/english/character_l_english.yml:10`; saved-character localisation access is independently verified by the **Saved-character event localisation** entry
+- Minimal verified example: event trigger `scope:candidate = { is_landed = yes }` with guarded text `[candidate.GetPrimaryTitle.GetName]`
+- Restrictions and notes: Breed Improved uses this only in the landed branch. Do not evaluate the title accessor for an unlanded character, and do not infer an unguarded nullable-title behavior from this evidence.
+
+### `any_child` existing-child check
+
+- Status: `VERIFIED`
+- Category: character iterator and count trigger
+- CK3 version: `1.19.0.6`
+- File family: character trigger blocks, including event-description triggers
+- Enclosing context: character scope
+- Input scope: character
+- Output scope or state change: boolean; no state change
+- Arguments: `even_if_dead = yes` and `count >= 1`
+- Evidence: `events/pregnancy_events.txt:977-989`; additional count examples in `events/birth_events.txt:383-421`
+- Minimal verified example: `any_child = { even_if_dead = yes count >= 1 }`
+- Restrictions and notes: this detects whether at least one legal child scope exists, including deceased children. It is not a descendant iterator and does not provide a verified dynamic descendant-count localisation expression.
+
 ## Uncertainty Protocol
 
 When a required element is absent from the verified registry and cannot be confirmed from a higher-priority source:

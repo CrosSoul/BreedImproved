@@ -60,6 +60,19 @@ Version 0.1.0 does not include:
 - divorce or claim cleanup; or
 - background or recurring execution.
 
+## Phase 2 development status — not released
+
+A conservative Phase 2 bulk-cleanup implementation is present in the development source and has passed static review. It is **not part of the released v0.1.0 feature claim**, has not been runtime-verified, and must not be uploaded to Workshop until separately approved.
+
+The development implementation provides one player-initiated Decision with one selected mode per run:
+
+- **Bloodline Cleanup** — public bastard states or both explicitly existing legal parents outside the actor's Dynasty; and
+- **Negative Congenital Trait Cleanup** — a fixed, evidence-backed exact-trait preset with positive congenital trait warnings.
+
+Both modes use shared mandatory exclusions, optional individual direct-candidate protection, ancestor-first sequential review, and a separate final confirmation. Direct-candidate protection is not whole-descendant-branch protection. They reuse the unchanged v0.1.0 exile result and add no batch cost. No automatic scan, scheduled action, recurring action, or AI execution is present.
+
+Runtime status remains `NOT RUN`. The required manual acceptance matrix is [docs/testing/phase2_dynasty_cleanup_manual.md](docs/testing/phase2_dynasty_cleanup_manual.md).
+
 ## Installation — Steam Workshop
 
 Steam Workshop is the only supported end-user installation channel.
@@ -94,4 +107,4 @@ Advanced users may create their own CK3 local Mod entry and point it to the repo
 
 ## Roadmap
 
-Phase 2 bulk Dynasty cleanup is documented as deferred work in [the project roadmap](docs/roadmap.md). It is not part of v0.1.0 and requires separate design approval, CK3 syntax verification, implementation, and runtime testing.
+Phase 2 bulk Dynasty cleanup is tracked in [the project roadmap](docs/roadmap.md). A development implementation exists, but it is not part of v0.1.0 and still requires controlled runtime testing plus explicit Jay/Boss approval before release.

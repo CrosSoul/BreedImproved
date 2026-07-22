@@ -119,13 +119,20 @@ if (
 
 $requiredProductionFiles = @(
 	"descriptor.mod",
+	"common/character_interactions/breedimp_dynasty_cleanup_protection_interactions.txt",
 	"common/character_interactions/breedimp_exile_from_dynasty_interaction.txt",
+	"common/decisions/breedimp_dynasty_cleanup_decisions.txt",
 	"common/modifiers/breedimp_dynasty_exile_modifiers.txt",
 	"common/opinion_modifiers/breedimp_dynasty_exile_opinions.txt",
+	"common/scripted_effects/breedimp_dynasty_cleanup_effects.txt",
 	"common/scripted_effects/breedimp_dynasty_exile_effects.txt",
+	"common/scripted_triggers/breedimp_dynasty_cleanup_triggers.txt",
 	"common/scripted_triggers/breedimp_dynasty_exile_triggers.txt",
 	"common/script_values/breedimp_dynasty_exile_values.txt",
+	"events/breedimp_dynasty_cleanup_events.txt",
+	"localization/english/breedimp_dynasty_cleanup_l_english.yml",
 	"localization/english/breedimp_dynasty_exile_l_english.yml",
+	"localization/simp_chinese/breedimp_dynasty_cleanup_l_simp_chinese.yml",
 	"localization/simp_chinese/breedimp_dynasty_exile_l_simp_chinese.yml"
 )
 foreach ($relativePath in $requiredProductionFiles) {

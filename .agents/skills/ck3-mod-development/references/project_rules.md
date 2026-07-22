@@ -17,7 +17,7 @@
 
 ## Project Status and Goals
 
-Treat this repository as the Breed Improved CK3 mod project. Version `0.1.0` contains one runtime-verified production Character Interaction; future features remain design-only until separately approved.
+Treat this repository as the Breed Improved CK3 mod project. Version `0.1.0` contains one runtime-verified production Character Interaction. A Phase 2 multi-mode bulk-cleanup implementation has passed static review and is ready for controlled manual testing, but it is not runtime-verified or release-approved.
 
 Use angle-bracket values as unresolved placeholders. Do not copy them literally into runnable mod files.
 
@@ -105,17 +105,32 @@ The interface must require explicit player initiation and a confirmation step be
 
 ### Phase 2: Bulk Dynasty Cleanup
 
-Status: deferred; not implemented.
+Status: development implementation created; static review `PASS`; runtime status `NOT RUN`; not part of released v0.1.0.
 
-Apply these design boundaries:
+Approved first-implementation boundaries:
 
-- Use a separate conservative candidate trigger; do not automatically reuse the manual interaction's cost trigger.
-- Permit Dynasty-external parents to be marked as accepted founder parents only after separate approval.
-- Protect children of accepted founder parents from a future player-initiated bulk candidate set.
-- Keep manual **Exile from Dynasty** available independently.
+- Provide one player-initiated Decision for a living player-controlled Dynast.
+- Let the player choose exactly one mode per run: **Bloodline Cleanup** or **Negative Congenital Trait Cleanup**.
+- Keep candidate generation separate from the shared v0.1.0 exile effect.
+- Use a separate conservative batch candidate trigger; never reuse the manual interaction's Prestige-cost trigger as the batch rule.
+- In Bloodline Cleanup, include `bastard`, `legitimized_bastard`, or a character whose explicitly existing legal father and mother are both outside the actor's Dynasty. One outside parent or a missing parent is insufficient. Do not inspect hidden biological-parent secrets.
+- In Negative Congenital Trait Cleanup, use only the fixed exact-key preset recorded in the Phase 2 evidence. Positive preset traits warn but do not offset candidacy.
+- Apply shared mandatory exclusions before mode candidacy: actor, actor's ancestors, player-controlled recipients, Dynast, House Heads, dead characters, lowborn characters, characters outside the actor's Dynasty, and individually protected characters.
+- Provide player-managed direct-candidate protection for an individual character across both modes. This protection is not whole-branch protection and must not block manual **Exile from Dynasty**.
+- Review candidates ancestor-first and sequentially, then require a separate final confirmation before any mutation.
+- Revalidate final targets and collapse a selected descendant under a still-valid selected ancestor.
+- Reuse the unchanged `breedimp_exile_dynasty_member` effect for execution.
+- Add no batch cost in the first test implementation; do not manually subtract resources.
 - Never hardcode character names or save-specific character IDs.
-- Require separate design approval, CK3 evidence, implementation approval, and runtime testing.
-- Run any candidate scan only after explicit player initiation; never schedule or repeat it in the background.
+- Run candidate discovery only after explicit player confirmation; never schedule or repeat it in the background.
+
+Deferred until separate approval and evidence:
+
+- accepted-founder-parent or whole-branch protection;
+- combined modes, custom trait selection, scoring, or saved mode preferences;
+- an arbitrary descendant iterator or a claimed static solution for converging non-ancestor branches;
+- automatic, recurring, or background execution; and
+- release of Phase 2 before Ray's manual test matrix and Jay/Boss approval are complete.
 
 ### Phase 3: Dynasty Marriage Assistance
 
@@ -167,12 +182,17 @@ Use this confirmed repository layout:
   MyCK3Mod/
     descriptor.mod
     common/
+      character_interactions/
       decisions/
+      modifiers/
+      opinion_modifiers/
+      script_values/
       scripted_effects/
       scripted_triggers/
     events/
     localization/
       english/
+      simp_chinese/
     gfx/
     gui/
 ```
@@ -245,7 +265,8 @@ Initial namespace registry:
 
 | Purpose | Namespace | Event range | Status |
 | --- | --- | --- | --- |
-| Unassigned system | `breedimp_<system>` | `<RANGE>` | Prefix confirmed; system and range unassigned |
+| Phase 2 Dynasty cleanup review | `breedimp_dynasty_cleanup` | `1000`–`1099` | Allocated; `1001` and `1002` used; runtime `NOT RUN` |
+| Unassigned future system | `breedimp_<system>` | `<RANGE>` | Prefix confirmed; system and range unassigned |
 
 ## Event ID Naming Rules
 
@@ -346,19 +367,17 @@ Apply these rules:
 
 ## Pre-Implementation Checklist
 
-Complete these items before the first gameplay implementation:
+Complete these items before each gameplay system or material extension:
 
-- Apply the confirmed display name `Breed Improved` and internal prefix `breedimp` whenever related metadata or gameplay files are separately approved for implementation.
-- Confirm whether `1.19.*` remains the release target when gameplay work begins.
-- Define the DLC, language, compatibility, distribution, branching, and versioning policies.
-- Locate or provide same-version vanilla CK3 references.
-- Add verified examples to `ck3_vanilla_examples/`.
-- Verify the actual CK3 root directories and file formats needed by the first feature.
-- Verify target-version CK3 examples for character interactions, decisions, player-initiated candidate presentation or selection, and confirmation flows before implementing either Phase 1 interface.
-- Allocate the first namespace and event ID range only if events are required.
-- Verify decision and localisation field conventions only if those content families are required.
-- Establish validation tooling and an in-game test procedure.
-- Select one confirmed phase and create a separate, reviewed feature specification before adding gameplay files.
-- Resolve the open design terms needed by that feature without expanding the confirmed product scope.
-- Design one shared Phase 1 eligibility specification for the individual and bulk interfaces before choosing a CK3 reuse mechanism.
-- Verify all required CK3 identifiers and syntax; design-language labels are not implementation evidence.
+- Apply the confirmed display name `Breed Improved` and internal prefix `breedimp`.
+- Confirm that `1.19.*` remains the target and record the exact installed version used for evidence.
+- Preserve the approved DLC, language, compatibility, distribution, branching, and versioning boundaries.
+- Inspect existing project files from the same content family before designing new files.
+- Locate same-version vanilla CK3 references and register every newly used construct in the syntax/evidence references.
+- Verify every required CK3 root directory, file format, field, trigger, effect, scope, modifier, asset, and localisation expression.
+- Allocate and record a namespace and non-overlapping event range when events are required.
+- Maintain a separate reviewed implementation plan with explicit acceptance criteria and deferred work.
+- Keep candidate-generation, cost, validation, and mutation responsibilities separate unless an approved shared rule is truly identical.
+- Establish static validation and a manual in-game test matrix before claiming runtime support.
+- Resolve product decisions without expanding scope, automation, AI behavior, or compatibility promises.
+- Treat design-language labels as requirements, never as CK3 syntax evidence.
