@@ -9,6 +9,16 @@ breedimp_dynasty_cleanup.1001 = {
 	theme = dynasty
 
 	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					exists = scope:breedimp_bulk_cleanup_bloodline_mode
+				}
+				desc = breedimp_dynasty_cleanup.1001.intro.bloodline
+			}
+			desc = breedimp_dynasty_cleanup.1001.intro.traits
+		}
+
 		desc = breedimp_dynasty_cleanup.1001.desc
 
 		first_valid = {
@@ -178,6 +188,7 @@ breedimp_dynasty_cleanup.1001 = {
 
 	option = {
 		name = breedimp_dynasty_cleanup.1001.a
+		custom_tooltip = breedimp_dynasty_cleanup.1001.a.tt
 		trigger = {
 			scope:breedimp_bulk_cleanup_candidate = {
 				breedimp_bulk_cleanup_current_mode_candidate_trigger = {
@@ -194,16 +205,46 @@ breedimp_dynasty_cleanup.1001 = {
 
 	option = {
 		name = breedimp_dynasty_cleanup.1001.b
+		custom_tooltip = breedimp_dynasty_cleanup.1001.b.tt
 		breedimp_bulk_cleanup_continue_review_effect = yes
 	}
 
 	option = {
 		name = breedimp_dynasty_cleanup.1001.c
+		custom_tooltip = breedimp_dynasty_cleanup.1001.c.tt
 		trigger_event = breedimp_dynasty_cleanup.1002
 	}
 
 	option = {
 		name = breedimp_dynasty_cleanup.1001.d
+		custom_tooltip = breedimp_dynasty_cleanup.1001.d.tt
+		trigger = {
+			scope:breedimp_bulk_cleanup_candidate = {
+				breedimp_bulk_cleanup_current_mode_candidate_trigger = {
+					ACTOR = root
+				}
+			}
+		}
+
+		scope:breedimp_bulk_cleanup_candidate = {
+			add_to_list = breedimp_bulk_cleanup_selected
+		}
+		save_scope_as = breedimp_bulk_cleanup_has_selection
+
+		every_in_list = {
+			list = breedimp_bulk_cleanup_candidates
+			limit = {
+				NOT = {
+					is_in_list = breedimp_bulk_cleanup_reviewed
+				}
+				breedimp_bulk_cleanup_review_candidate_trigger = {
+					ACTOR = root
+				}
+			}
+			add_to_list = breedimp_bulk_cleanup_selected
+		}
+
+		trigger_event = breedimp_dynasty_cleanup.1002
 	}
 }
 
@@ -240,5 +281,6 @@ breedimp_dynasty_cleanup.1002 = {
 
 	option = {
 		name = breedimp_dynasty_cleanup.1002.b
+		custom_tooltip = breedimp_dynasty_cleanup.1002.cancel.tt
 	}
 }

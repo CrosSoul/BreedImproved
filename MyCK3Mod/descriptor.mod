@@ -3,5 +3,5 @@ tags={
 	"Utilities"
 	"Gameplay"
 }
-name="Breed Improved"
+name="Breed Improved Phase 2 test"
 supported_version="1.19.*"

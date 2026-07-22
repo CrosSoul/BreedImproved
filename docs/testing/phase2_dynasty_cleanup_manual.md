@@ -1,14 +1,31 @@
 # Breed Improved Phase 2 — Manual Runtime Test Matrix
 
-- Status: `NOT RUN`
+- First-round end-to-end status: `BOSS-REPORTED PASS — 2026-07-23`
+- Focused revision status: `NOT RUN`
 - Runtime tester: Ray
 - CK3 target: `1.19.0.6`
 - Production compatibility target: `1.19.*`
 - Build under test: Phase 2 development implementation; not release-approved
-- Matt static review: `PASS — 2026-07-22`
+- Matt static review: `PASS — gameplay/localisation; BLOCKED — Workshop descriptor name gate — 2026-07-23`
 - Runtime approval: required before Phase 2 may be described as working, verified, or released
 
-Matt did not launch CK3 while preparing this matrix. Every runtime result field below remains `NOT RUN` until Ray performs the test and records evidence.
+Matt did not launch CK3 while preparing this revision. The Boss-reported first-round results below are recorded separately from the focused revision cases, all of which remain `NOT RUN` until Ray performs them.
+
+## First-round end-to-end result record
+
+The Boss reported the following results from the first CK3 end-to-end pass. These results apply to the build tested before the present copy, layout, tooltip, and fourth-option revision:
+
+- Phase 1 individual **Exile from Dynasty** interaction: `PASS — no regression observed`;
+- **Manage Dynasty Cleanup** Decision startup: `PASS`;
+- Bloodline Cleanup candidate generation and sequential presentation: `PASS`;
+- Negative Congenital Trait Cleanup candidate generation and sequential presentation: `PASS`;
+- selecting or sparing candidates one by one: `PASS`;
+- ending review early while retaining the current list: `PASS`;
+- final confirmation presentation: `PASS`;
+- final execution for selected branch roots and descendants: `PASS`; and
+- after Negative Congenital Trait Cleanup, no member with a target negative congenital trait remained in the test Dynasty: `PASS`.
+
+These observations do not verify the revised narrative text, the six new tooltips, or the replacement fourth option. Those items remain `NOT RUN`.
 
 ## 0. Pre-test setup
 
@@ -48,7 +65,8 @@ Expected:
 
 - **Manage Dynasty Cleanup** is visible and can be opened;
 - the Decision shows exactly **Bloodline Cleanup** and **Negative Congenital Trait Cleanup**;
-- each mode has distinct explanatory text covering its candidate rule, mandatory exclusions, individual direct-candidate protection, descendant propagation, and the fact that scanning does not exile anyone;
+- the introduction matches the approved courtly narrative in English and Simplified Chinese;
+- each mode remains clearly identifiable and explains its player-facing purpose without exposing internal validation or script flow;
 - opening the Decision does not change any character; and
 - the candidate scan begins only after choosing one mode and confirming the Decision.
 
@@ -228,18 +246,19 @@ For a minor, adult, landed ruler, unlanded character, current heir, character wi
 - current mode is correct;
 - every matching candidate reason is visible;
 - positive warning appears only when applicable;
-- descendant propagation and succession warnings are clear; and
+- child or descendant impact information remains visible;
+- the former generic red warning about Dynasty replacement, relatives, titles, claims, marriage, court, government, and succession is absent; and
 - text fits the event window without broken keys, raw scope names, or severe clipping.
 
 Result: `NOT RUN`
 
 ## 8. Review and confirmation control flow
 
-### P2-FLOW-1 — Select, keep, and finish early
+### P2-FLOW-1 — Select, spare, and finish early
 
 Setup: at least three candidates.
 
-Action: select one, keep one, then finish early before reviewing the rest.
+Action: select one, spare one, then finish early before reviewing the rest.
 
 Expected:
 
@@ -249,17 +268,24 @@ Expected:
 
 Result: `NOT RUN`
 
-### P2-FLOW-2 — Cancel from candidate event
+### P2-FLOW-2 — Add current and remaining candidates
 
-Action: select one or more candidates, then use **Cancel Cleanup — No Changes**.
+Action: select one candidate, explicitly spare another, then use **Enough. Exile them all.** on the next candidate.
 
-Expected: the workflow ends and no Dynasty or v0.1 consequence changes occur.
+Expected:
+
+- earlier selections remain selected;
+- the explicitly spared character remains excluded;
+- the current and all remaining eligible branch roots are added;
+- ancestor-first handling, direct-candidate protection, and duplicate-branch-root collapse remain in force;
+- the workflow opens final confirmation; and
+- no Dynasty or v0.1 consequence changes occur until final confirmation is accepted.
 
 Result: `NOT RUN`
 
 ### P2-FLOW-3 — Cancel from final confirmation
 
-Expected: no selected candidate or descendant changes.
+Expected: no selected candidate or descendant changes, including after reaching final confirmation through **Enough. Exile them all.**
 
 Result: `NOT RUN`
 
@@ -391,7 +417,36 @@ Expected: mode scope, candidates, reviewed characters, selections, and execution
 
 Result: `NOT RUN`
 
-## 12. Error-log and final acceptance record
+## 12. Focused first-round revision regression matrix
+
+All cases in this section apply to the post-first-round revision and remain `NOT RUN`. Test both English and Simplified Chinese wherever a language is named.
+
+| Case | Check | Pass criteria | Result |
+| --- | --- | --- | --- |
+| P2-REV-01 | Manage Dynasty Cleanup introduction | The approved English and Simplified Chinese narrative appears exactly, with the paragraph break intact. | `NOT RUN` |
+| P2-REV-02 | Bloodline candidate introduction | The candidate page shows only the approved bloodline-mode steward narrative before candidate-specific information. | `NOT RUN` |
+| P2-REV-03 | Negative-trait candidate introduction | The candidate page shows only the approved negative-trait-mode steward narrative before candidate-specific information. | `NOT RUN` |
+| P2-REV-04 | Candidate generic warning removal | No generic red warning about Dynasty replacement, relatives, titles, claims, marriage, court, government, succession, or player heir appears on the candidate page. | `NOT RUN` |
+| P2-REV-05 | Final technical explanation removal | The final page contains no text about revalidation, branch roots, folding selected descendants, or applying an existing effect. | `NOT RUN` |
+| P2-REV-06 | Final red warning removal | The former red generated-Dynasty and no-rollback warning is absent. | `NOT RUN` |
+| P2-REV-07 | Four review labels | The four review options show exactly the approved courtly labels in the active language. | `NOT RUN` |
+| P2-REV-08 | Two final labels | The final confirmation and cancellation options show exactly the approved courtly labels in the active language. | `NOT RUN` |
+| P2-REV-09 | Six option tooltips | Every review and final option has the approved, non-empty tooltip; no raw localisation key appears. | `NOT RUN` |
+| P2-REV-10 | Option 1 | **Get out of my dynasty!** adds only the current candidate to the final list, continues review, and does not exile immediately. | `NOT RUN` |
+| P2-REV-11 | Option 2 | **Very well. I’ll spare you.** records the current candidate as reviewed but unselected, then continues. | `NOT RUN` |
+| P2-REV-12 | Option 3 | **That will do for now.** retains the current list, skips all remaining candidates, and opens final confirmation without exiling anyone. | `NOT RUN` |
+| P2-REV-13 | Option 4 bulk addition | **Enough. Exile them all.** adds the current candidate and every remaining eligible branch root, then opens final confirmation. | `NOT RUN` |
+| P2-REV-14 | Option 4 respects prior mercy | A candidate explicitly spared earlier in the same review remains absent from the final list. | `NOT RUN` |
+| P2-REV-15 | Option 4 branch handling | Existing ancestor-first ordering, direct-candidate protection, and duplicate branch-root collapse still apply; no branch root is added twice. | `NOT RUN` |
+| P2-REV-16 | Option 4 has no immediate consequence | Before final confirmation, House, Dynasty, descendants, stress, opinion, modifiers, flags, Hooks, titles, and all other gameplay state remain unchanged. | `NOT RUN` |
+| P2-REV-17 | Cancel after Option 4 | **I’ll think on it.** ends the workflow after bulk addition with no character or Dynasty changes and no leaked workflow state. | `NOT RUN` |
+| P2-REV-18 | Final execution regression | **So be it!** still exiles every listed valid branch root and its descendants through the existing execution effect. | `NOT RUN` |
+| P2-REV-19 | Phase 1 regression | The individual Exile from Dynasty interaction retains its verified eligibility, cost, and consequences. | `NOT RUN` |
+| P2-REV-20 | English UI integrity | English shows no Chinese text, missing/raw key, removed technical copy, or obsolete option text; layout remains readable. | `NOT RUN` |
+
+Ray should additionally repeat P2-REV-20 in Simplified Chinese to confirm no English fallback or obsolete technical copy appears there.
+
+## 13. Error-log and final acceptance record
 
 After every suite, inspect CK3 logs for:
 
@@ -419,6 +474,7 @@ After every suite, inspect CK3 logs for:
 | Large-Dynasty test passes | `NOT RUN` |
 | Save/reload tests pass | `NOT RUN` |
 | CK3 error log contains no Phase 2 errors | `NOT RUN` |
+| Focused first-round revision passes | `NOT RUN` |
 | Ray recommendation | `NOT RUN` |
 | Jay/Boss runtime approval | `NOT RUN` |
 
