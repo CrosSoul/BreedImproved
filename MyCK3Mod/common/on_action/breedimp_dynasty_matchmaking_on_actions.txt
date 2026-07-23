@@ -1,0 +1,71 @@
+# Additive cleanup hooks only. These hooks never scan candidates or create relationships.
+# CK3 evidence target: 1.19.0.6. Runtime status: NOT RUN.
+
+on_death = {
+	on_actions = {
+		breedimp_dynasty_matchmaking_on_actor_death
+	}
+}
+
+breedimp_dynasty_matchmaking_on_actor_death = {
+	effect = {
+		if = {
+			limit = {
+				exists = global_var:breedimp_dynasty_matchmaking_active_actor
+				global_var:breedimp_dynasty_matchmaking_active_actor = root
+			}
+			root = {
+				breedimp_dynasty_matchmaking_cleanup_workflow_effect = yes
+			}
+		}
+	}
+}
+
+on_became_dynasty_head = {
+	on_actions = {
+		breedimp_dynasty_matchmaking_on_dynast_changed
+	}
+}
+
+breedimp_dynasty_matchmaking_on_dynast_changed = {
+	effect = {
+		if = {
+			limit = {
+				exists = global_var:breedimp_dynasty_matchmaking_active_actor
+			}
+			global_var:breedimp_dynasty_matchmaking_active_actor = {
+				if = {
+					limit = {
+						OR = {
+							NOT = { is_dynast = yes }
+							NOT = {
+								exists = var:breedimp_dynasty_matchmaking_managed_dynasty
+								var:breedimp_dynasty_matchmaking_managed_dynasty = dynasty
+							}
+						}
+					}
+					breedimp_dynasty_matchmaking_cleanup_workflow_effect = yes
+				}
+			}
+		}
+	}
+}
+
+on_game_start_after_lobby = {
+	on_actions = {
+		breedimp_dynasty_matchmaking_on_load_cleanup
+	}
+}
+
+breedimp_dynasty_matchmaking_on_load_cleanup = {
+	effect = {
+		if = {
+			limit = {
+				exists = global_var:breedimp_dynasty_matchmaking_active_actor
+			}
+			global_var:breedimp_dynasty_matchmaking_active_actor = {
+				breedimp_dynasty_matchmaking_cleanup_workflow_effect = yes
+			}
+		}
+	}
+}

@@ -1,0 +1,67 @@
+# Breed Improved Phase 3 player-initiated Dynasty matchmaking workflow.
+# CK3 evidence target: 1.19.0.6. Runtime status: NOT RUN.
+
+breedimp_manage_dynasty_matchmaking_decision = {
+	title = breedimp_manage_dynasty_matchmaking_decision
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	}
+	selection_tooltip = breedimp_manage_dynasty_matchmaking_decision_tooltip
+	desc = breedimp_manage_dynasty_matchmaking_decision_desc
+	confirm_text = breedimp_manage_dynasty_matchmaking_decision_confirm
+	sort_order = 91
+
+	is_shown = {
+		breedimp_dynasty_matchmaking_actor_can_open_entry_trigger = yes
+	}
+
+	is_valid_showing_failures_only = {
+		custom_tooltip = {
+			text = breedimp_manage_dynasty_matchmaking_decision_invalid_tt
+			breedimp_dynasty_matchmaking_actor_can_activate_trigger = yes
+		}
+	}
+
+	effect = {
+		trigger_event = breedimp_dynasty_matchmaking.2000
+	}
+
+	ai_check_interval = 0
+	ai_potential = {
+		always = no
+	}
+	ai_will_do = {
+		base = 0
+	}
+}
+
+breedimp_recover_dynasty_matchmaking_decision = {
+	title = breedimp_recover_dynasty_matchmaking_decision
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	}
+	selection_tooltip = breedimp_recover_dynasty_matchmaking_decision_tooltip
+	desc = breedimp_recover_dynasty_matchmaking_decision_desc
+	confirm_text = breedimp_recover_dynasty_matchmaking_decision_confirm
+	sort_order = 92
+
+	is_shown = {
+		breedimp_dynasty_matchmaking_actor_owns_active_workflow_trigger = yes
+	}
+
+	is_valid_showing_failures_only = {
+		breedimp_dynasty_matchmaking_actor_owns_active_workflow_trigger = yes
+	}
+
+	effect = {
+		breedimp_dynasty_matchmaking_recover_active_workflow_effect = yes
+	}
+
+	ai_check_interval = 0
+	ai_potential = {
+		always = no
+	}
+	ai_will_do = {
+		base = 0
+	}
+}

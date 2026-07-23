@@ -1,0 +1,211 @@
+# Phase 3 fixed-slot plan integrity and relationship postcondition guards.
+# CK3 evidence target: 1.19.0.6. Runtime status: NOT RUN.
+
+breedimp_dynasty_matchmaking_slot_is_committed_trigger = {
+	exists = var:breedimp_dynasty_matchmaking_slot_$SLOT$_subject
+	exists = var:breedimp_dynasty_matchmaking_slot_$SLOT$_partner
+	exists = var:breedimp_dynasty_matchmaking_slot_$SLOT$_direction
+	exists = var:breedimp_dynasty_matchmaking_slot_$SLOT$_relationship_type
+	exists = var:breedimp_dynasty_matchmaking_slot_$SLOT$_placeholder
+	exists = var:breedimp_dynasty_matchmaking_slot_$SLOT$_reservation_id
+	var:breedimp_dynasty_matchmaking_slot_$SLOT$_reservation_id = var:breedimp_dynasty_matchmaking_slot_$SLOT$_subject
+}
+
+breedimp_dynasty_matchmaking_slot_is_empty_trigger = {
+	NOT = {
+		OR = {
+			exists = var:breedimp_dynasty_matchmaking_slot_$SLOT$_subject
+			exists = var:breedimp_dynasty_matchmaking_slot_$SLOT$_partner
+			exists = var:breedimp_dynasty_matchmaking_slot_$SLOT$_direction
+			exists = var:breedimp_dynasty_matchmaking_slot_$SLOT$_relationship_type
+			exists = var:breedimp_dynasty_matchmaking_slot_$SLOT$_placeholder
+			exists = var:breedimp_dynasty_matchmaking_slot_$SLOT$_reservation_id
+		}
+	}
+}
+
+breedimp_dynasty_matchmaking_slot_has_valid_enums_trigger = {
+	OR = {
+		var:breedimp_dynasty_matchmaking_slot_$SLOT$_direction = flag:breedimp_dynasty_matchmaking_direction_ordinary
+		var:breedimp_dynasty_matchmaking_slot_$SLOT$_direction = flag:breedimp_dynasty_matchmaking_direction_matrilineal
+	}
+	OR = {
+		var:breedimp_dynasty_matchmaking_slot_$SLOT$_relationship_type = flag:breedimp_dynasty_matchmaking_relationship_marriage
+		var:breedimp_dynasty_matchmaking_slot_$SLOT$_relationship_type = flag:breedimp_dynasty_matchmaking_relationship_betrothal
+	}
+	OR = {
+		var:breedimp_dynasty_matchmaking_slot_$SLOT$_placeholder = flag:breedimp_dynasty_matchmaking_placeholder_none
+		var:breedimp_dynasty_matchmaking_slot_$SLOT$_placeholder = flag:breedimp_dynasty_matchmaking_placeholder_zero_fertility
+	}
+}
+
+breedimp_dynasty_matchmaking_slot_type_matches_ages_trigger = {
+	OR = {
+		AND = {
+			var:breedimp_dynasty_matchmaking_slot_$SLOT$_subject = { is_adult = yes }
+			var:breedimp_dynasty_matchmaking_slot_$SLOT$_partner = { is_adult = yes }
+			var:breedimp_dynasty_matchmaking_slot_$SLOT$_relationship_type = flag:breedimp_dynasty_matchmaking_relationship_marriage
+		}
+		AND = {
+			OR = {
+				var:breedimp_dynasty_matchmaking_slot_$SLOT$_subject = { is_adult = no }
+				var:breedimp_dynasty_matchmaking_slot_$SLOT$_partner = { is_adult = no }
+			}
+			var:breedimp_dynasty_matchmaking_slot_$SLOT$_relationship_type = flag:breedimp_dynasty_matchmaking_relationship_betrothal
+		}
+	}
+}
+
+breedimp_dynasty_matchmaking_slot_placeholder_policy_is_valid_trigger = {
+	OR = {
+		AND = {
+			var:breedimp_dynasty_matchmaking_slot_$SLOT$_placeholder = flag:breedimp_dynasty_matchmaking_placeholder_none
+			var:breedimp_dynasty_matchmaking_slot_$SLOT$_subject = {
+				OR = {
+					is_adult = no
+					fertility > 0
+				}
+			}
+			var:breedimp_dynasty_matchmaking_slot_$SLOT$_partner = {
+				OR = {
+					is_adult = no
+					fertility > 0
+				}
+			}
+		}
+		AND = {
+			var:breedimp_dynasty_matchmaking_slot_$SLOT$_placeholder = flag:breedimp_dynasty_matchmaking_placeholder_zero_fertility
+			var:breedimp_dynasty_matchmaking_slot_$SLOT$_subject = {
+				breedimp_dynasty_matchmaking_subject_allows_placeholder_trigger = yes
+			}
+			var:breedimp_dynasty_matchmaking_slot_$SLOT$_partner = {
+				is_adult = yes
+				fertility <= 0
+			}
+		}
+	}
+}
+
+breedimp_dynasty_matchmaking_slot_is_currently_valid_trigger = {
+	breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = $SLOT$ }
+	breedimp_dynasty_matchmaking_slot_has_valid_enums_trigger = { SLOT = $SLOT$ }
+	breedimp_dynasty_matchmaking_slot_type_matches_ages_trigger = { SLOT = $SLOT$ }
+	breedimp_dynasty_matchmaking_slot_placeholder_policy_is_valid_trigger = { SLOT = $SLOT$ }
+	NOT = {
+		var:breedimp_dynasty_matchmaking_slot_$SLOT$_subject = var:breedimp_dynasty_matchmaking_slot_$SLOT$_partner
+	}
+	var:breedimp_dynasty_matchmaking_slot_$SLOT$_subject = {
+		breedimp_dynasty_matchmaking_pair_core_is_eligible_trigger = {
+			ACTOR = root
+			PARTNER = root.var:breedimp_dynasty_matchmaking_slot_$SLOT$_partner
+		}
+	}
+}
+
+breedimp_dynasty_matchmaking_slot_is_valid_or_empty_trigger = {
+	OR = {
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = $SLOT$ }
+		breedimp_dynasty_matchmaking_slot_is_currently_valid_trigger = { SLOT = $SLOT$ }
+	}
+}
+
+breedimp_dynasty_matchmaking_current_plan_anchor_matches_trigger = {
+	exists = scope:breedimp_dynasty_matchmaking_plan_anchor_subject
+	exists = scope:breedimp_dynasty_matchmaking_plan_anchor_partner
+	breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 1 }
+	var:breedimp_dynasty_matchmaking_slot_1_subject = scope:breedimp_dynasty_matchmaking_plan_anchor_subject
+	var:breedimp_dynasty_matchmaking_slot_1_partner = scope:breedimp_dynasty_matchmaking_plan_anchor_partner
+}
+
+breedimp_dynasty_matchmaking_slot_relationship_exists_trigger = {
+	breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = $SLOT$ }
+	OR = {
+		AND = {
+			var:breedimp_dynasty_matchmaking_slot_$SLOT$_relationship_type = flag:breedimp_dynasty_matchmaking_relationship_marriage
+			var:breedimp_dynasty_matchmaking_slot_$SLOT$_subject = {
+				is_spouse_of = root.var:breedimp_dynasty_matchmaking_slot_$SLOT$_partner
+			}
+		}
+		AND = {
+			var:breedimp_dynasty_matchmaking_slot_$SLOT$_relationship_type = flag:breedimp_dynasty_matchmaking_relationship_betrothal
+			var:breedimp_dynasty_matchmaking_slot_$SLOT$_subject = {
+				is_betrothed = yes
+				betrothed = root.var:breedimp_dynasty_matchmaking_slot_$SLOT$_partner
+			}
+		}
+	}
+}
+
+breedimp_dynasty_matchmaking_plan_has_empty_slot_trigger = {
+	OR = {
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 1 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 2 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 3 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 4 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 5 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 6 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 7 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 8 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 9 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 10 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 11 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 12 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 13 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 14 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 15 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 16 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 17 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 18 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 19 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 20 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 21 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 22 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 23 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 24 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 25 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 26 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 27 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 28 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 29 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 30 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 31 }
+		breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 32 }
+	}
+}
+
+breedimp_dynasty_matchmaking_plan_has_committed_pair_trigger = {
+	OR = {
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 1 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 2 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 3 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 4 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 5 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 6 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 7 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 8 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 9 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 10 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 11 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 12 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 13 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 14 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 15 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 16 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 17 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 18 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 19 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 20 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 21 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 22 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 23 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 24 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 25 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 26 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 27 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 28 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 29 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 30 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 31 }
+		breedimp_dynasty_matchmaking_slot_is_committed_trigger = { SLOT = 32 }
+	}
+}

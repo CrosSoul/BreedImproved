@@ -1,0 +1,73 @@
+# Phase 3 repeatable workflow ownership and phase guards.
+# CK3 evidence target: 1.19.0.6. Runtime status: NOT RUN.
+
+breedimp_dynasty_matchmaking_actor_can_open_entry_trigger = {
+	is_alive = yes
+	is_ai = no
+	is_dynast = yes
+	exists = dynasty
+	NOT = { exists = global_var:breedimp_dynasty_matchmaking_active_actor }
+}
+
+breedimp_dynasty_matchmaking_actor_can_activate_trigger = {
+	breedimp_dynasty_matchmaking_actor_can_open_entry_trigger = yes
+}
+
+breedimp_dynasty_matchmaking_actor_owns_active_workflow_trigger = {
+	exists = global_var:breedimp_dynasty_matchmaking_active_actor
+	global_var:breedimp_dynasty_matchmaking_active_actor = root
+}
+
+breedimp_dynasty_matchmaking_actor_authority_is_valid_trigger = {
+	is_alive = yes
+	is_ai = no
+	is_dynast = yes
+	exists = dynasty
+	exists = var:breedimp_dynasty_matchmaking_managed_dynasty
+	var:breedimp_dynasty_matchmaking_managed_dynasty = dynasty
+}
+
+breedimp_dynasty_matchmaking_workflow_is_valid_trigger = {
+	breedimp_dynasty_matchmaking_actor_owns_active_workflow_trigger = yes
+	breedimp_dynasty_matchmaking_actor_authority_is_valid_trigger = yes
+	exists = var:breedimp_dynasty_matchmaking_current_token
+	exists = global_var:breedimp_dynasty_matchmaking_phase
+}
+
+breedimp_dynasty_matchmaking_workflow_has_token_trigger = {
+	breedimp_dynasty_matchmaking_workflow_is_valid_trigger = yes
+	var:breedimp_dynasty_matchmaking_current_token = flag:$TOKEN$
+}
+
+breedimp_dynasty_matchmaking_workflow_is_review_token_trigger = {
+	breedimp_dynasty_matchmaking_workflow_has_token_trigger = { TOKEN = $TOKEN$ }
+	global_var:breedimp_dynasty_matchmaking_phase = flag:breedimp_dynasty_matchmaking_phase_review
+}
+
+breedimp_dynasty_matchmaking_workflow_is_final_token_trigger = {
+	breedimp_dynasty_matchmaking_workflow_has_token_trigger = { TOKEN = $TOKEN$ }
+	global_var:breedimp_dynasty_matchmaking_phase = flag:breedimp_dynasty_matchmaking_phase_final
+	breedimp_dynasty_matchmaking_current_plan_anchor_matches_trigger = yes
+}
+
+breedimp_dynasty_matchmaking_workflow_is_capacity_token_trigger = {
+	breedimp_dynasty_matchmaking_workflow_is_review_token_trigger = { TOKEN = $TOKEN$ }
+	breedimp_dynasty_matchmaking_current_plan_anchor_matches_trigger = yes
+}
+
+breedimp_dynasty_matchmaking_workflow_is_executing_trigger = {
+	breedimp_dynasty_matchmaking_workflow_is_valid_trigger = yes
+	global_var:breedimp_dynasty_matchmaking_phase = flag:breedimp_dynasty_matchmaking_phase_executing
+}
+
+breedimp_dynasty_matchmaking_workflow_is_completed_token_trigger = {
+	breedimp_dynasty_matchmaking_workflow_has_token_trigger = { TOKEN = $TOKEN$ }
+	global_var:breedimp_dynasty_matchmaking_phase = flag:breedimp_dynasty_matchmaking_phase_completed
+	breedimp_dynasty_matchmaking_current_plan_anchor_matches_trigger = yes
+}
+
+breedimp_dynasty_matchmaking_workflow_is_failed_token_trigger = {
+	breedimp_dynasty_matchmaking_workflow_has_token_trigger = { TOKEN = $TOKEN$ }
+	global_var:breedimp_dynasty_matchmaking_phase = flag:breedimp_dynasty_matchmaking_phase_failed
+	breedimp_dynasty_matchmaking_current_plan_anchor_matches_trigger = yes
+}

@@ -1,0 +1,614 @@
+# Phase 3 candidate generation, deterministic ranking, review, and plan commits.
+# No effect in this file creates a marriage or betrothal.
+# CK3 evidence target: 1.19.0.6. Runtime status: NOT RUN.
+
+breedimp_dynasty_matchmaking_clear_partner_list_effect = {
+	every_in_list = {
+		list = breedimp_dynasty_matchmaking_partner_candidates
+		remove_from_list = breedimp_dynasty_matchmaking_partner_candidates
+	}
+	if = {
+		limit = { exists = var:breedimp_dynasty_matchmaking_current_placeholder }
+		remove_variable = breedimp_dynasty_matchmaking_current_placeholder
+	}
+	if = {
+		limit = { exists = var:breedimp_dynasty_matchmaking_displayed_subject }
+		remove_variable = breedimp_dynasty_matchmaking_displayed_subject
+	}
+	if = {
+		limit = { exists = var:breedimp_dynasty_matchmaking_displayed_partner }
+		remove_variable = breedimp_dynasty_matchmaking_displayed_partner
+	}
+	if = {
+		limit = { exists = var:breedimp_dynasty_matchmaking_displayed_subject_fertility_percent }
+		remove_variable = breedimp_dynasty_matchmaking_displayed_subject_fertility_percent
+	}
+	if = {
+		limit = { exists = var:breedimp_dynasty_matchmaking_displayed_partner_fertility_percent }
+		remove_variable = breedimp_dynasty_matchmaking_displayed_partner_fertility_percent
+	}
+}
+
+breedimp_dynasty_matchmaking_trigger_review_event_effect = {
+	set_variable = {
+		name = breedimp_dynasty_matchmaking_displayed_subject
+		value = scope:breedimp_dynasty_matchmaking_current_subject
+	}
+	set_variable = {
+		name = breedimp_dynasty_matchmaking_displayed_partner
+		value = scope:breedimp_dynasty_matchmaking_current_partner
+	}
+	set_variable = {
+		name = breedimp_dynasty_matchmaking_displayed_subject_fertility_percent
+		value = {
+			value = scope:breedimp_dynasty_matchmaking_current_subject.fertility
+			multiply = 100
+		}
+	}
+	set_variable = {
+		name = breedimp_dynasty_matchmaking_displayed_partner_fertility_percent
+		value = {
+			value = scope:breedimp_dynasty_matchmaking_current_partner.fertility
+			multiply = 100
+		}
+	}
+
+	if = {
+		limit = {
+			var:breedimp_dynasty_matchmaking_current_token = flag:breedimp_dynasty_matchmaking_token_a
+		}
+		trigger_event = breedimp_dynasty_matchmaking.2020
+	}
+	else_if = {
+		limit = {
+			var:breedimp_dynasty_matchmaking_current_token = flag:breedimp_dynasty_matchmaking_token_b
+		}
+		trigger_event = breedimp_dynasty_matchmaking.2021
+	}
+}
+
+breedimp_dynasty_matchmaking_trigger_final_event_effect = {
+	breedimp_dynasty_matchmaking_save_plan_anchor_effect = yes
+	if = {
+		limit = {
+			var:breedimp_dynasty_matchmaking_current_token = flag:breedimp_dynasty_matchmaking_token_a
+		}
+		trigger_event = breedimp_dynasty_matchmaking.2100
+	}
+	else_if = {
+		limit = {
+			var:breedimp_dynasty_matchmaking_current_token = flag:breedimp_dynasty_matchmaking_token_b
+		}
+		trigger_event = breedimp_dynasty_matchmaking.2101
+	}
+}
+
+breedimp_dynasty_matchmaking_trigger_capacity_event_effect = {
+	breedimp_dynasty_matchmaking_save_plan_anchor_effect = yes
+	if = {
+		limit = {
+			var:breedimp_dynasty_matchmaking_current_token = flag:breedimp_dynasty_matchmaking_token_a
+		}
+		trigger_event = breedimp_dynasty_matchmaking.2140
+	}
+	else_if = {
+		limit = {
+			var:breedimp_dynasty_matchmaking_current_token = flag:breedimp_dynasty_matchmaking_token_b
+		}
+		trigger_event = breedimp_dynasty_matchmaking.2141
+	}
+}
+
+breedimp_dynasty_matchmaking_finish_capacity_plan_effect = {
+	if = {
+		limit = {
+			OR = {
+				breedimp_dynasty_matchmaking_workflow_is_capacity_token_trigger = { TOKEN = breedimp_dynasty_matchmaking_token_a }
+				breedimp_dynasty_matchmaking_workflow_is_capacity_token_trigger = { TOKEN = breedimp_dynasty_matchmaking_token_b }
+			}
+		}
+		breedimp_dynasty_matchmaking_prepare_final_confirmation_effect = yes
+	}
+}
+
+breedimp_dynasty_matchmaking_cancel_capacity_plan_effect = {
+	if = {
+		limit = {
+			OR = {
+				breedimp_dynasty_matchmaking_workflow_is_capacity_token_trigger = { TOKEN = breedimp_dynasty_matchmaking_token_a }
+				breedimp_dynasty_matchmaking_workflow_is_capacity_token_trigger = { TOKEN = breedimp_dynasty_matchmaking_token_b }
+			}
+		}
+		breedimp_dynasty_matchmaking_cleanup_workflow_effect = yes
+	}
+}
+
+breedimp_dynasty_matchmaking_build_subject_list_effect = {
+	var:breedimp_dynasty_matchmaking_managed_dynasty = {
+		every_dynasty_member = {
+			limit = {
+				breedimp_dynasty_matchmaking_subject_candidate_trigger = { ACTOR = root }
+			}
+			add_to_list = breedimp_dynasty_matchmaking_subjects
+			root = {
+				change_variable = {
+					name = breedimp_dynasty_matchmaking_subject_count
+					add = 1
+				}
+			}
+		}
+	}
+
+	breedimp_dynasty_matchmaking_select_next_subject_effect = yes
+}
+
+breedimp_dynasty_matchmaking_build_partner_list_effect = {
+	breedimp_dynasty_matchmaking_clear_partner_list_effect = yes
+
+	var:breedimp_dynasty_matchmaking_managed_dynasty = {
+		every_dynasty_member = {
+			limit = {
+				breedimp_dynasty_matchmaking_character_base_eligible_trigger = { ACTOR = root }
+				breedimp_dynasty_matchmaking_character_is_unreserved_trigger = { ACTOR = root }
+			}
+			save_temporary_scope_as = breedimp_dynasty_matchmaking_partner_candidate_temp
+			if = {
+				limit = {
+					scope:breedimp_dynasty_matchmaking_current_subject = {
+						breedimp_dynasty_matchmaking_pair_core_is_eligible_trigger = {
+							ACTOR = root
+							PARTNER = scope:breedimp_dynasty_matchmaking_partner_candidate_temp
+						}
+					}
+			}
+			add_to_list = breedimp_dynasty_matchmaking_partner_candidates
+		}
+	}
+	}
+
+	breedimp_dynasty_matchmaking_select_partner_for_current_subject_effect = yes
+}
+
+breedimp_dynasty_matchmaking_select_next_subject_effect = {
+	if = {
+		limit = {
+			any_in_list = {
+				list = breedimp_dynasty_matchmaking_subjects
+				NOT = { is_in_list = breedimp_dynasty_matchmaking_reviewed_subjects }
+				breedimp_dynasty_matchmaking_subject_candidate_trigger = { ACTOR = root }
+			}
+		}
+		ordered_in_list = {
+			list = breedimp_dynasty_matchmaking_subjects
+			limit = {
+				NOT = { is_in_list = breedimp_dynasty_matchmaking_reviewed_subjects }
+				breedimp_dynasty_matchmaking_subject_candidate_trigger = { ACTOR = root }
+			}
+			order_by = breedimp_dynasty_matchmaking_subject_order_value
+			max = 1
+			check_range_bounds = no
+			save_scope_as = breedimp_dynasty_matchmaking_current_subject
+			add_to_list = breedimp_dynasty_matchmaking_reviewed_subjects
+		}
+		breedimp_dynasty_matchmaking_build_partner_list_effect = yes
+	}
+	else_if = {
+		limit = {
+			any_in_list = {
+				list = breedimp_dynasty_matchmaking_deferred_subjects
+				breedimp_dynasty_matchmaking_subject_candidate_trigger = { ACTOR = root }
+			}
+		}
+		ordered_in_list = {
+			list = breedimp_dynasty_matchmaking_deferred_subjects
+			limit = {
+				breedimp_dynasty_matchmaking_subject_candidate_trigger = { ACTOR = root }
+			}
+			order_by = breedimp_dynasty_matchmaking_subject_order_value
+			max = 1
+			check_range_bounds = no
+			save_scope_as = breedimp_dynasty_matchmaking_current_subject
+			remove_from_list = breedimp_dynasty_matchmaking_deferred_subjects
+		}
+		breedimp_dynasty_matchmaking_build_partner_list_effect = yes
+	}
+	else = {
+		if = {
+			limit = { breedimp_dynasty_matchmaking_plan_has_committed_pair_trigger = yes }
+			breedimp_dynasty_matchmaking_prepare_final_confirmation_effect = yes
+		}
+		else_if = {
+			limit = { var:breedimp_dynasty_matchmaking_subject_count > 0 }
+			breedimp_dynasty_matchmaking_cleanup_workflow_effect = yes
+			trigger_event = breedimp_dynasty_matchmaking.2181
+		}
+		else = {
+			breedimp_dynasty_matchmaking_cleanup_workflow_effect = yes
+			trigger_event = breedimp_dynasty_matchmaking.2180
+		}
+	}
+}
+
+breedimp_dynasty_matchmaking_select_partner_for_current_subject_effect = {
+	scope:breedimp_dynasty_matchmaking_current_subject = {
+		save_scope_as = comparator
+	}
+
+	if = {
+		limit = {
+			any_in_list = {
+				list = breedimp_dynasty_matchmaking_partner_candidates
+				save_temporary_scope_as = breedimp_dynasty_matchmaking_partner_candidate_temp
+				scope:breedimp_dynasty_matchmaking_current_subject = {
+					breedimp_dynasty_matchmaking_normal_pair_is_eligible_trigger = {
+						ACTOR = root
+						PARTNER = scope:breedimp_dynasty_matchmaking_partner_candidate_temp
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				scope:breedimp_dynasty_matchmaking_current_subject = { is_adult = yes }
+			}
+			ordered_in_list = {
+				list = breedimp_dynasty_matchmaking_partner_candidates
+				limit = {
+					save_temporary_scope_as = breedimp_dynasty_matchmaking_partner_candidate_temp
+					scope:breedimp_dynasty_matchmaking_current_subject = {
+						breedimp_dynasty_matchmaking_normal_pair_is_eligible_trigger = {
+							ACTOR = root
+							PARTNER = scope:breedimp_dynasty_matchmaking_partner_candidate_temp
+						}
+					}
+				}
+				order_by = breedimp_dynasty_matchmaking_fertility_order_value
+				max = 1
+				check_range_bounds = no
+				save_scope_as = breedimp_dynasty_matchmaking_best_fertility_partner
+			}
+			ordered_in_list = {
+				list = breedimp_dynasty_matchmaking_partner_candidates
+				limit = {
+					save_temporary_scope_as = breedimp_dynasty_matchmaking_partner_candidate_temp
+					scope:breedimp_dynasty_matchmaking_current_subject = {
+						breedimp_dynasty_matchmaking_normal_pair_is_eligible_trigger = {
+							ACTOR = root
+							PARTNER = scope:breedimp_dynasty_matchmaking_partner_candidate_temp
+						}
+					}
+					fertility >= {
+						value = scope:breedimp_dynasty_matchmaking_best_fertility_partner.fertility
+						subtract = 0.05
+					}
+					fertility <= scope:breedimp_dynasty_matchmaking_best_fertility_partner.fertility
+				}
+				order_by = breedimp_dynasty_matchmaking_partner_rank_value
+				max = 1
+				check_range_bounds = no
+				save_scope_as = breedimp_dynasty_matchmaking_current_partner
+			}
+		}
+		else = {
+			ordered_in_list = {
+				list = breedimp_dynasty_matchmaking_partner_candidates
+				limit = {
+					save_temporary_scope_as = breedimp_dynasty_matchmaking_partner_candidate_temp
+					scope:breedimp_dynasty_matchmaking_current_subject = {
+						breedimp_dynasty_matchmaking_normal_pair_is_eligible_trigger = {
+							ACTOR = root
+							PARTNER = scope:breedimp_dynasty_matchmaking_partner_candidate_temp
+						}
+					}
+				}
+				order_by = breedimp_dynasty_matchmaking_partner_rank_value
+				max = 1
+				check_range_bounds = no
+				save_scope_as = breedimp_dynasty_matchmaking_current_partner
+			}
+		}
+		set_variable = {
+			name = breedimp_dynasty_matchmaking_current_placeholder
+			value = flag:breedimp_dynasty_matchmaking_placeholder_none
+		}
+		breedimp_dynasty_matchmaking_trigger_review_event_effect = yes
+	}
+	else_if = {
+		limit = {
+			scope:breedimp_dynasty_matchmaking_current_subject = {
+				breedimp_dynasty_matchmaking_subject_allows_placeholder_trigger = yes
+			}
+			any_in_list = {
+				list = breedimp_dynasty_matchmaking_partner_candidates
+				save_temporary_scope_as = breedimp_dynasty_matchmaking_partner_candidate_temp
+				scope:breedimp_dynasty_matchmaking_current_subject = {
+					breedimp_dynasty_matchmaking_placeholder_pair_is_eligible_trigger = {
+						ACTOR = root
+						PARTNER = scope:breedimp_dynasty_matchmaking_partner_candidate_temp
+					}
+				}
+			}
+		}
+		ordered_in_list = {
+			list = breedimp_dynasty_matchmaking_partner_candidates
+			limit = {
+				save_temporary_scope_as = breedimp_dynasty_matchmaking_partner_candidate_temp
+				scope:breedimp_dynasty_matchmaking_current_subject = {
+					breedimp_dynasty_matchmaking_placeholder_pair_is_eligible_trigger = {
+						ACTOR = root
+						PARTNER = scope:breedimp_dynasty_matchmaking_partner_candidate_temp
+					}
+				}
+			}
+			order_by = breedimp_dynasty_matchmaking_partner_rank_value
+			max = 1
+			check_range_bounds = no
+			save_scope_as = breedimp_dynasty_matchmaking_current_partner
+		}
+		set_variable = {
+			name = breedimp_dynasty_matchmaking_current_placeholder
+			value = flag:breedimp_dynasty_matchmaking_placeholder_zero_fertility
+		}
+		breedimp_dynasty_matchmaking_trigger_review_event_effect = yes
+	}
+	else = {
+		breedimp_dynasty_matchmaking_select_next_subject_effect = yes
+	}
+}
+
+breedimp_dynasty_matchmaking_commit_slot_effect = {
+	set_variable = {
+		name = breedimp_dynasty_matchmaking_slot_$SLOT$_subject
+		value = scope:breedimp_dynasty_matchmaking_current_subject
+	}
+	set_variable = {
+		name = breedimp_dynasty_matchmaking_slot_$SLOT$_partner
+		value = scope:breedimp_dynasty_matchmaking_current_partner
+	}
+	set_variable = {
+		name = breedimp_dynasty_matchmaking_slot_$SLOT$_direction
+		value = flag:$DIRECTION$
+	}
+	if = {
+		limit = {
+			scope:breedimp_dynasty_matchmaking_current_subject = { is_adult = yes }
+			scope:breedimp_dynasty_matchmaking_current_partner = { is_adult = yes }
+		}
+		set_variable = {
+			name = breedimp_dynasty_matchmaking_slot_$SLOT$_relationship_type
+			value = flag:breedimp_dynasty_matchmaking_relationship_marriage
+		}
+	}
+	else = {
+		set_variable = {
+			name = breedimp_dynasty_matchmaking_slot_$SLOT$_relationship_type
+			value = flag:breedimp_dynasty_matchmaking_relationship_betrothal
+		}
+	}
+	set_variable = {
+		name = breedimp_dynasty_matchmaking_slot_$SLOT$_placeholder
+		value = var:breedimp_dynasty_matchmaking_current_placeholder
+	}
+
+	# Commit marker is deliberately written last.
+	set_variable = {
+		name = breedimp_dynasty_matchmaking_slot_$SLOT$_reservation_id
+		value = scope:breedimp_dynasty_matchmaking_current_subject
+	}
+	change_variable = {
+		name = breedimp_dynasty_matchmaking_accepted_pair_count
+		add = 1
+	}
+}
+
+breedimp_dynasty_matchmaking_accept_current_pair_effect = {
+	if = {
+		limit = { breedimp_dynasty_matchmaking_current_pair_can_be_committed_trigger = yes }
+		if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 1 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 1 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 2 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 2 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 3 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 3 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 4 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 4 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 5 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 5 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 6 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 6 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 7 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 7 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 8 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 8 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 9 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 9 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 10 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 10 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 11 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 11 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 12 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 12 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 13 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 13 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 14 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 14 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 15 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 15 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 16 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 16 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 17 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 17 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 18 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 18 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 19 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 19 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 20 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 20 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 21 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 21 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 22 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 22 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 23 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 23 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 24 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 24 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 25 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 25 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 26 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 26 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 27 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 27 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 28 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 28 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 29 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 29 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 30 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 30 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = { limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 31 } } breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 31 DIRECTION = $DIRECTION$ } breedimp_dynasty_matchmaking_select_next_subject_effect = yes }
+		else_if = {
+			limit = { breedimp_dynasty_matchmaking_slot_is_empty_trigger = { SLOT = 32 } }
+			breedimp_dynasty_matchmaking_commit_slot_effect = { SLOT = 32 DIRECTION = $DIRECTION$ }
+			breedimp_dynasty_matchmaking_trigger_capacity_event_effect = yes
+		}
+		else = {
+			breedimp_dynasty_matchmaking_trigger_capacity_event_effect = yes
+		}
+	}
+}
+
+breedimp_dynasty_matchmaking_commit_rejection_effect = {
+	set_variable = {
+		name = breedimp_dynasty_matchmaking_rejection_$SLOT$_subject
+		value = scope:breedimp_dynasty_matchmaking_current_subject
+	}
+	set_variable = {
+		name = breedimp_dynasty_matchmaking_rejection_$SLOT$_partner
+		value = scope:breedimp_dynasty_matchmaking_current_partner
+	}
+	set_variable = {
+		name = breedimp_dynasty_matchmaking_rejection_$SLOT$_marker
+		value = scope:breedimp_dynasty_matchmaking_current_subject
+	}
+}
+
+breedimp_dynasty_matchmaking_commit_rejection_and_select_partner_effect = {
+	if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 1 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 1 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 2 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 2 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 3 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 3 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 4 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 4 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 5 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 5 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 6 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 6 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 7 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 7 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 8 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 8 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 9 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 9 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 10 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 10 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 11 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 11 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 12 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 12 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 13 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 13 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 14 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 14 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 15 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 15 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 16 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 16 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 17 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 17 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 18 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 18 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 19 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 19 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 20 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 20 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 21 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 21 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 22 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 22 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 23 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 23 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 24 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 24 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 25 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 25 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 26 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 26 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 27 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 27 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 28 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 28 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 29 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 29 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 30 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 30 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 31 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 31 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 32 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 32 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 33 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 33 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 34 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 34 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 35 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 35 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 36 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 36 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 37 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 37 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 38 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 38 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 39 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 39 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 40 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 40 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 41 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 41 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 42 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 42 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 43 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 43 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 44 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 44 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 45 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 45 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 46 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 46 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 47 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 47 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 48 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 48 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 49 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 49 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 50 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 50 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 51 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 51 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 52 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 52 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 53 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 53 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 54 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 54 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 55 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 55 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 56 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 56 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 57 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 57 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 58 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 58 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 59 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 59 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 60 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 60 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 61 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 61 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 62 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 62 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 63 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 63 } }
+	else_if = { limit = { NOT = { breedimp_dynasty_matchmaking_rejection_is_committed_trigger = { SLOT = 64 } } } breedimp_dynasty_matchmaking_commit_rejection_effect = { SLOT = 64 } }
+
+	breedimp_dynasty_matchmaking_select_partner_for_current_subject_effect = yes
+}
+
+breedimp_dynasty_matchmaking_reject_current_partner_effect = {
+	if = {
+		limit = {
+			breedimp_dynasty_matchmaking_current_review_page_is_active_trigger = yes
+			breedimp_dynasty_matchmaking_current_pair_is_eligible_trigger = yes
+			breedimp_dynasty_matchmaking_rejection_has_empty_slot_trigger = yes
+		}
+		breedimp_dynasty_matchmaking_commit_rejection_and_select_partner_effect = yes
+	}
+}
+
+breedimp_dynasty_matchmaking_recover_invalid_current_pair_effect = {
+	if = {
+		limit = {
+			exists = scope:breedimp_dynasty_matchmaking_current_subject
+			scope:breedimp_dynasty_matchmaking_current_subject = {
+				breedimp_dynasty_matchmaking_subject_candidate_trigger = { ACTOR = root }
+			}
+		}
+		breedimp_dynasty_matchmaking_build_partner_list_effect = yes
+	}
+	else = {
+		breedimp_dynasty_matchmaking_select_next_subject_effect = yes
+	}
+}
+
+breedimp_dynasty_matchmaking_skip_current_subject_effect = {
+	if = {
+		limit = {
+			breedimp_dynasty_matchmaking_current_review_page_is_active_trigger = yes
+		}
+		scope:breedimp_dynasty_matchmaking_current_subject = {
+			add_to_list = breedimp_dynasty_matchmaking_skipped_subjects
+		}
+		breedimp_dynasty_matchmaking_select_next_subject_effect = yes
+	}
+}
+
+breedimp_dynasty_matchmaking_defer_current_subject_effect = {
+	if = {
+		limit = {
+			breedimp_dynasty_matchmaking_current_review_page_is_active_trigger = yes
+		}
+		scope:breedimp_dynasty_matchmaking_current_subject = {
+			add_to_list = breedimp_dynasty_matchmaking_deferred_subjects
+		}
+		breedimp_dynasty_matchmaking_select_next_subject_effect = yes
+	}
+}
+
+breedimp_dynasty_matchmaking_finish_current_review_effect = {
+	if = {
+		limit = {
+			breedimp_dynasty_matchmaking_current_review_page_is_active_trigger = yes
+		}
+		breedimp_dynasty_matchmaking_prepare_final_confirmation_effect = yes
+	}
+}
+
+breedimp_dynasty_matchmaking_cancel_current_review_effect = {
+	if = {
+		limit = {
+			breedimp_dynasty_matchmaking_current_review_page_is_active_trigger = yes
+		}
+		breedimp_dynasty_matchmaking_cleanup_workflow_effect = yes
+	}
+}
+
+breedimp_dynasty_matchmaking_prepare_final_confirmation_effect = {
+	if = {
+		limit = { breedimp_dynasty_matchmaking_plan_has_committed_pair_trigger = yes }
+		set_global_variable = {
+			name = breedimp_dynasty_matchmaking_phase
+			value = flag:breedimp_dynasty_matchmaking_phase_final
+		}
+		breedimp_dynasty_matchmaking_trigger_final_event_effect = yes
+	}
+	else = {
+		breedimp_dynasty_matchmaking_cleanup_workflow_effect = yes
+		trigger_event = breedimp_dynasty_matchmaking.2181
+	}
+}

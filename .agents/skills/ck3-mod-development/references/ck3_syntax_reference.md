@@ -1160,6 +1160,62 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Minimal verified example: one BOM-prefixed file beginning with `l_english:`
 - Restrictions and notes: UTF-8 BOM is an observed vanilla property and an established project convention, not an asserted universal engine requirement. The isolated prototype's English and Simplified Chinese files follow this project convention; runtime rendering remains `NOT RUN`.
 
+### Conservative candidate availability constructs
+
+- Status: `VERIFIED FORMS`
+- Category: character triggers and one vanilla scripted trigger
+- CK3 version: `1.19.0.6`
+- File family: candidate scripted triggers and final-preflight scripted triggers
+- Enclosing context: character scope for each proposed participant
+- Input scope: character
+- Output scope or state change: Boolean only
+- Arguments: `is_available = yes`, `is_incapable = no`, `is_travelling = no`, `is_pool_guest = no`, and `NOT = { has_trait = celibate }`
+- Evidence: `common/scripted_triggers/00_available_for_events_triggers.txt:78-108`; `common/decisions/dlc_decisions/ep3_decisions.txt:1149-1153`; `common/character_interactions/00_education_interactions.txt:304-319`; `common/character_interactions/00_marriage_interactions.txt:1495-1507,2498-2507`; `common/traits/00_traits.txt:8360-8366`
+- Minimal verified example: `is_travelling = no`
+- Restrictions and notes: these exact forms are verified. Their combination is Breed Improved's conservative supported-class policy, not a universal CK3 marriage rule. `is_available` also excludes several activity and availability states. No generic character-scope `is_missing` trigger was found; do not invent one.
+
+### `any_former_spouse`
+
+- Status: `VERIFIED`
+- Category: character relation iterator
+- CK3 version: `1.19.0.6`
+- File family: event or scripted-trigger character blocks
+- Enclosing context: character scope
+- Input scope: character
+- Output scope or state change: Boolean when used with a body such as `always = yes`
+- Arguments: iterator body
+- Evidence: `events/birth_events.txt:249-255`; `events/court_events/court_events_new.txt:63-69`
+- Minimal verified example: `any_former_spouse = { always = yes }`
+- Restrictions and notes: deceased former spouses are included by the evidence. This does not reliably distinguish divorce from widowhood.
+
+### Coarse kinship relationship triggers
+
+- Status: `VERIFIED`
+- Category: character relationship triggers
+- CK3 version: `1.19.0.6`
+- File family: character scripted triggers and script values
+- Enclosing context: character scope with a character comparison target
+- Input scope: character plus character target
+- Output scope or state change: Boolean only
+- Arguments: exact forms include `is_close_family_of = <character>`, `is_uncle_or_aunt_of = <character>`, `is_nibling_of = <character>`, `is_cousin_of = <character>`, and `is_extended_family_of = <character>`
+- Evidence: `common/trigger_localization/00_character_triggers.txt:376-419,1288-1331`; `common/scripted_triggers/00_family_triggers.txt:17-62`
+- Minimal verified example: `is_close_family_of = scope:comparator`
+- Restrictions and notes: these are coarse categories, not a relatedness coefficient. A character outside the detected categories must not automatically be called unrelated.
+
+### Relationship existence after direct creation
+
+- Status: `VERIFIED`
+- Category: character relationship triggers
+- CK3 version: `1.19.0.6`
+- File family: scripted triggers used after a direct relationship effect
+- Enclosing context: the first participant is current character scope
+- Input scope: current character and expected second participant
+- Output scope or state change: Boolean only
+- Arguments: marriage `is_spouse_of = <character>`; betrothal `is_betrothed = yes` and `betrothed = <character>`
+- Evidence: `common/scripted_triggers/00_marriage_triggers.txt:133-136,183-190`; `common/character_interactions/00_marriage_interactions.txt:639`
+- Minimal verified example: `is_spouse_of = scope:partner`
+- Restrictions and notes: these checks observe relationship existence only. No direct effect success return, rollback operation, or verified post-creation matrilineal-direction query was found.
+
 ## Uncertainty Protocol
 
 When a required element is absent from the verified registry and cannot be confirmed from a higher-priority source:

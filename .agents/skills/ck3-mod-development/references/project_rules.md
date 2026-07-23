@@ -144,11 +144,13 @@ Deferred until separate approval and evidence:
 - Phase 3 P0 is `CORRECTED AND CLOSED`.
 - Phase 3 P1-P5 are `STATIC COMPLETE`; the work exists only in the standalone isolated prototype.
 - Phase 3 P6 records 40 mapped `PASS`, 0 `FAIL`, 116 `NOT RUN`, and 0 `BLOCKED` cases. The repaired accepted-character reservation defect passed Ray's retest.
-- Phase 3 status is `PROTOTYPE ACCEPTED — PRODUCTION DESIGN MAY PROCEED`. Production implementation remains `NOT APPROVED`.
+- Phase 3 production implementation is authorized through the Ray runtime gate. The current production candidate is `CK3 RUNTIME: NOT RUN` and must not be presented as released or runtime-verified.
 - The P0 storage design uses one global workflow coordinator and sixteen actor-owned fixed pair slots. This is a prototype constraint, not a production pair limit.
 - The prototype uses a separate permanent one-workflow-per-save global activation lock because numeric run identity remains `NOT VERIFIED`. The lock is never a grant of authority.
 - An unexpectedly closed visible event is treated as orphaned and permanently locked. No generic close callback, immediate cleanup, resume, reauthorization, delayed execution, or background execution is claimed.
-- Keep final scoring rules, relationship-distance thresholds, presentation, special-state policy, multiplayer consent, and production player controls open until the isolated prototype and later product decisions are approved.
+- The production candidate replaces the prototype lock with one active global coordinator, alternating actor-owned event tokens, explicit phase guards, central cleanup, and a visible recovery Decision. This is a conservative project composition and remains a runtime gate.
+- The production candidate uses 32 explicit accepted-pair slots and 64 exact rejected-pair records. The limits are player-visible, never wrap, and do not modify the 16-slot prototype.
+- Multiplayer consent beyond excluding all other player-controlled participants remains out of scope.
 
 ### Phase 4: Advanced Breeding Assistant
 
@@ -279,7 +281,8 @@ Initial namespace registry:
 | Purpose | Namespace | Event range | Status |
 | --- | --- | --- | --- |
 | Phase 2 Dynasty cleanup review | `breedimp_dynasty_cleanup` | `1000`-`1099` | Allocated; `1001` and `1002` used; final v0.2.0 runtime acceptance `PASS`; published on Workshop item `3769010534` |
-| Phase 3 isolated matchmaking validation | `breedimp_p3_proto_matchmaking` | `1000`-`1199` | Prototype-only; P0 corrected and closed; P1-P5 static complete; 40 mapped runtime cases pass; production design pending; production not approved |
+| Phase 3 isolated matchmaking validation | `breedimp_p3_proto_matchmaking` | `1000`-`1199` | Prototype-only; P0 corrected and closed; P1-P5 static complete; 40 mapped runtime cases pass; retained as isolated evidence |
+| Phase 3 production Dynasty matchmaking | `breedimp_dynasty_matchmaking` | `2000`-`2399` | Allocated for the first production runtime candidate; runtime `NOT RUN`; no release approval |
 | Unassigned future system | `breedimp_<system>` | `<RANGE>` | Prefix confirmed; system and range unassigned |
 
 ## Event ID Naming Rules

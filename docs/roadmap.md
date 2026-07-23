@@ -35,6 +35,36 @@ Deferred Phase 2 extensions include accepted-founder-parent and whole-branch pro
 
 ## Phase 3 - Dynasty Matchmaking Management
 
+### Current production-candidate status
+
+Status:
+`PRODUCTION CANDIDATE IMPLEMENTED IN SOURCE — FINAL STATIC RECORD PENDING`.
+
+CK3 runtime: `NOT RUN`.
+
+The one-shot Phase 3 production pass is authorized through the next Ray
+runtime gate. The production candidate adds a repeatable, player-initiated
+**Manage Dynasty Matchmaking** Decision for a living current Dynast. Its
+authority override is limited to one active workflow and to eligible
+AI-controlled members of the actor's current Dynasty.
+
+The candidate uses alternating A/B stale-event tokens, explicit interrupted
+workflow recovery, a visible 32-pair capacity, 64 bounded rejected-pair
+records, deterministic adult/minor ranking, ordinary or matrilineal marriage
+and betrothal plans, complete final preflight, and stop-on-first-unexpected-
+failure execution. It adds no background scan or recurring matchmaking.
+
+Phase 1 and Phase 2 release states remain unchanged. Phase 3 does not change
+the released version, descriptors, packages, or Workshop item. The required
+next gate is completion of the static review record followed by Ray's targeted
+production runtime plan. Release and Workshop publication remain unapproved.
+
+Current engineering stop state after static validation:
+
+`AWAITING RAY PHASE 3 PRODUCTION RUNTIME TEST`
+
+### Accepted isolated-prototype record
+
 Phase 3 isolated prototype:
 `STATIC IMPLEMENTATION COMPLETE — PARTIAL RUNTIME ACCEPTANCE COMPLETE`.
 
@@ -57,7 +87,8 @@ Ray's post-fix runtime sequences passed the mapped smoke/lifecycle paths, all fo
 Formal status:
 `PROTOTYPE ACCEPTED — PRODUCTION DESIGN MAY PROCEED`.
 
-Production implementation remains unapproved. The matrix records 40 `PASS`,
+At that prototype checkpoint, production implementation remained unapproved.
+The matrix records 40 `PASS`,
 0 `FAIL`, 116 `NOT RUN`, and 0 `BLOCKED`; no full-matrix or clean-error-log
 claim is made. Direct-effect side effects, broader lifecycle/invalidation
 variants, special states, external-court and ruler cases, Phase 1/2 regression,
@@ -70,9 +101,10 @@ tiers, exact kinship calculation, special-state policy, multiplayer consent,
 Grand Weddings, and other product refinements remain deferred rather than
 cancelled. No automatic or background matchmaking is planned.
 
-The next recommended task is **Phase 3 production implementation design and
-gap-closure specification**. It requires Jay/Boss approval. Production coding,
-integration, release, and Workshop publication remain unapproved.
+The prototype checkpoint's next recommended task was **Phase 3 production
+implementation design and gap-closure specification**. The later one-shot
+instruction superseded that production-code approval gate, but did not approve
+release or Workshop publication.
 
 ## Later phases
 

@@ -1,0 +1,26 @@
+# The only Phase 3 relationship-changing operations.
+# CK3 evidence target: 1.19.0.6. Runtime status: NOT RUN.
+
+breedimp_dynasty_matchmaking_create_ordinary_marriage_effect = {
+	$SUBJECT$ = {
+		marry = $PARTNER$
+	}
+}
+
+breedimp_dynasty_matchmaking_create_matrilineal_marriage_effect = {
+	$SUBJECT$ = {
+		marry_matrilineal = $PARTNER$
+	}
+}
+
+breedimp_dynasty_matchmaking_create_ordinary_betrothal_effect = {
+	$SUBJECT$ = {
+		create_betrothal = $PARTNER$
+	}
+}
+
+breedimp_dynasty_matchmaking_create_matrilineal_betrothal_effect = {
+	$SUBJECT$ = {
+		create_betrothal_matrilineal = $PARTNER$
+	}
+}
