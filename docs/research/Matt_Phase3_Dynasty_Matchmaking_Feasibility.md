@@ -2,6 +2,9 @@
 
 - Target: CK3 `1.19.0.6 (Scribe)`
 - Research status: `COMPLETE FOR STATIC FEASIBILITY`
+- Prototype approval: `APPROVED WITH P0 CHECKPOINT`
+- P0 evidence/design checkpoint: `P0 COMPLETE — CHECKPOINT REVIEW REQUIRED`
+- P1 implementation: `P1 NOT STARTED / NOT AUTHORIZED`
 - Production implementation: `NOT APPROVED`
 - CK3 runtime: `NOT RUN`
 
@@ -15,13 +18,15 @@ This report evaluates Phase 3 against the installed same-version vanilla files. 
 - **NOT FEASIBLE** - verified vanilla behavior contradicts the proposed form.
 - **NOT VERIFIED** - sufficient same-version evidence was not established.
 
-CK3 provides the individual building blocks for an authority-limited prototype: Dynasty iteration, sequential review, fertility and age values, marriage-legality checks, coarse kinship categories, native UI preselection, and direct ordinary/matrilineal marriage or betrothal effects.
+CK3 provides the individual building blocks for a guarded prototype: Dynasty iteration, sequential review, fertility and age values, marriage-legality checks, coarse kinship categories, native UI preselection, and direct ordinary/matrilineal marriage or betrothal effects.
 
-Production implementation is blocked because the native window has no verified completion/cancel callback, the Dynast has no blanket vanilla marriage authority, direct effects need side-effect comparison, Phase 2 lists do not represent pairs, the dynamic fertility tier needs a prototype, and no exact relatedness value is exposed. Recommended status: `RESEARCH COMPLETE - PROTOTYPE AND PRODUCT DECISIONS REQUIRED`.
+The approved isolated-prototype model is **Dynast override, limited to one explicitly initiated workflow**, using direct Approach B only after final confirmation. This is a Breed Improved test power, not vanilla authority. Production implementation remains blocked because direct effects need side-effect comparison, the dynamic fertility tier and the selected pair-state lifetime need runtime proof, abnormal event closure has no verified generic callback, and no exact relatedness value is exposed. Recommended status: `P0 COMPLETE — CHECKPOINT REVIEW REQUIRED; P1 NOT STARTED / NOT AUTHORIZED; PRODUCTION NOT APPROVED`.
 
 ## 2. Vanilla evidence inventory
 
-Paths are relative to the CK3 `game/` directory.
+Paths are relative to the CK3 `game/` directory except the version file, whose
+`launcher/launcher-settings.json` path is relative to the CK3 installation
+root.
 
 | Area | Exact source | Verified identifier or behavior |
 | --- | --- | --- |
@@ -30,9 +35,10 @@ Paths are relative to the CK3 `game/` directory.
 | Marriage schema | `common/character_interactions/_character_interactions.info:576-587,677-706` | Special UI, mutable spouses, matchmaker redirect, validation, alliances, Prestige |
 | Marriage interaction | `common/character_interactions/00_marriage_interactions.txt:12-566,758-981,1200-1491` | Lists, redirect, validity, availability, direction, Grand Wedding, authority |
 | Window continuation | `common/character_interactions/06_ep3_laamp_interactions.txt:3532-3543` | Enclosing effects continue after opening |
-| Marriage triggers | `common/scripted_triggers/00_marriage_triggers.txt:17-210,354-429,464-497` | General/pair legality and adult/betrothal branch |
-| Direct effects | `events/interaction_events/marriage_interaction_events.txt:1016-1032` | `marry`, `marry_matrilineal`, `create_betrothal`, `create_betrothal_matrilineal` |
-| Adult/minor split | `events/activities/tournaments/tournament_events.txt:1631-1644` | Betrothal if either participant is a minor |
+| Marriage triggers | `common/scripted_triggers/00_marriage_triggers.txt:17-210,354-429,464-497` | General/pair legality; a mutually betrothed pair can pass `can_marry_character_trigger`, so independent availability checks remain mandatory |
+| Independent relationship availability | `events/activities/tournaments/tournament_events.txt:4819-4824` | Exact `is_betrothed = no` and `is_married = no` checks |
+| Direct effects | `common/scripted_effects/00_game_rule_effects.txt:22-28`; `common/scripted_effects/04_dlc_ep2_wedding_effects.txt:97-111` | `marry`, `marry_matrilineal`, `create_betrothal`, `create_betrothal_matrilineal` |
+| Adult/minor split | `events/activities/tournaments/tournament_events.txt:1159-1177` | Betrothal if either participant is a minor, marriage otherwise |
 | Matchmaker model | `events/interaction_events/marriage_interaction_events.txt:104-132` | Unlanded, landed-child, and self-controlled cases |
 | Grand Wedding helper | `common/scripted_effects/04_dlc_ep2_wedding_effects.txt:93-120`; `events/government_events/clan_events.txt:96-121` | DLC/context-dependent betrothal setup |
 | Fertility | `common/decisions/90_minor_decisions.txt:1669-1677`; `events/health_events.txt:12544-12548` | Numeric `fertility`; comparison with zero |
@@ -47,6 +53,21 @@ Paths are relative to the CK3 `game/` directory.
 | `pure_blooded` | `common/traits/00_traits.txt:7700-7723` | Fertility/inbreeding modifiers; no legality override |
 | Availability | `common/scripted_triggers/05_bp2_hostage_triggers.txt:230-241`; `common/character_interactions/00_marriage_interactions.txt:514-542,1457-1491` | Hostage, transfer, and prison checks |
 | Phase 2 lists | `tests/event_target_lists_tests.txt:45-93`; `docs/research/Matt_Phase2_Vanilla_Evidence.md` | Character lists and sequential review, not pair tuples |
+| Global coordinator values | `common/decisions/00_major_decisions_iberia_north_africa.txt:243-249`; `events/dlc/ep1/ep1_fund_inspiration_events.txt:945-956`; `events/religion_events/great_holy_war_events.txt:818-824`; `events/dlc/ep3/ep3_frankokratia_events.txt:4255-4266` | A global variable can hold, directly compare, enter, and guardedly remove a character reference |
+| Global phase flag | `common/scripted_effects/05_dlc_fp3_scripted_effects.txt:249-254`; `common/script_values/99_steward_values.txt:694-698` | A global variable can hold and compare a `flag:` phase value |
+| Actor-owned character variables | `events/yearly_events/bp1_yearly_james.txt:1067-1071,1153-1167`; `events/board_game_events.txt:1173-1187`; `events/relations_events/adultery_events.txt:2696-2700` | A character can store, dereference, compare, and guardedly remove an explicitly named character-valued variable |
+| Actor-owned flag variables | `events/board_game_events.txt:61-82,170-180` | A character variable can hold and later compare a `flag:` value |
+| Saved Dynasty scope | `events/court_maintenance_events.txt:609`; `events/religion_events/faith_conversion_events.txt:339-340` | A character's Dynasty scope can be captured with `save_scope_as`; long-chain continuity remains context-dependent |
+| Numeric serial research lead | `events/religion_events/great_holy_war_events.txt:618-621`; `common/decisions/dlc_decisions/mpo/mpo_decisions.txt:4410-4413` | Increment and capture components exist, but no exact saved/global equality example was found; numeric run identity is not selected or approved |
+| Additive lifecycle registration | `common/on_action/_on_actions.info:102-117` | A Mod can append a child on-action without replacing a vanilla effect block |
+| Actor death lifecycle | `common/on_action/death.txt:1-6` | `on_death` root is the character about to die |
+| Dynasty-head lifecycle | `common/on_action/dynasty_on_actions.txt:13-17` | `on_became_dynasty_head` root is the new Dynast and `scope:dynasty` is the affected Dynasty; no former-head scope is supplied |
+| Load/start cleanup opportunity | `common/on_action/game_start.txt:2590-2592` | `on_game_start_after_lobby` runs after the host/player exits the lobby; exact save-load timing remains a runtime gate |
+| Decision/event entry fields | `common/decisions/_decisions.info:125-143`; `common/decisions/dlc_decisions/mpo/mpo_decisions.txt:4409-4417`; `common/decisions/00_major_decisions_iberia_north_africa.txt:72-78`; `events/_events.info:5-38,156-164` | Decision actor capture and event dispatch, namespace, generic event fields, and player-option schema |
+| Failed event dispatch cleanup | `events/_events.info:125-129`; `events/board_game_events.txt:1902-1910` | `on_trigger_fail` exists for a queued/instant event that fails trigger checks; it is not a general visible-window close callback |
+| Event namespace form | `MyCK3Mod/events/breedimp_dynasty_cleanup_events.txt:1-6` | The project has a loaded namespace declaration and four-digit numeric event IDs in CK3 `1.19.0.6` |
+| Test descriptor and English localisation form | `tests/phase1_create_dynasty/BreedImprovedPhase1Test.mod`; `tests/phase1_create_dynasty/BreedImprovedPhase1Test/descriptor.mod`; `tests/phase1_create_dynasty/BreedImprovedPhase1Test/localization/english/breedimp_test_create_dynasty_l_english.yml` | Portable outer launcher descriptor, path-free inner descriptor, `l_english:` header, and UTF-8 BOM are established project patterns |
+| Simplified Chinese localisation form | `MyCK3Mod/localization/simp_chinese/breedimp_dynasty_cleanup_l_simp_chinese.yml` | `l_simp_chinese:` header and UTF-8 BOM are established by the runtime-accepted project file |
 
 ## 3. Key feasibility findings
 
@@ -58,10 +79,10 @@ Each row records evidence, recommended use, limitations, and the required runtim
 | Lock both spouses in stock UI | **NOT FEASIBLE** through verified stock form | `_character_interactions.info:582-587` explicitly allows changes | No locking argument found |
 | Continue a native-UI batch | **NOT FEASIBLE** through stock call; alternative **REQUIRES PROTOTYPE** | EP3 source continues immediately; use an explicit Resume design only if approved | No result/setup-cancel callback or general betrothal-created on-action; test close/send/reject/save |
 | Native legality/options/consequences | **CONFIRMED FEASIBLE** through native interaction | Use `arrange_marriage_interaction` | External matchmakers can refuse; test ordinary, matrilineal, minor, and Grand Wedding availability |
-| Direct ordinary/matrilineal marriage/betrothal | **CONFIRMED FEASIBLE** for relationship operations | Four effects in `marriage_interaction_events.txt:1016-1032` | Test each adult/minor direction and persistence |
+| Direct ordinary/matrilineal marriage/betrothal | **CONFIRMED FEASIBLE** for relationship operations | Four direct effects in `00_game_rule_effects.txt:22-28`, `04_dlc_ep2_wedding_effects.txt:97-111`, and the adult/minor branch at `tournament_events.txt:1159-1177` | Test each adult/minor direction and persistence |
 | Direct parity with native interaction | **FEASIBLE WITH LIMITATIONS** | Recheck `can_marry_character_trigger`; do not call `marriage_interaction_on_accept_effect` as a shortcut | Compare alliances, Prestige, matchmaker, court, titles, government, succession, memories, on-actions |
 | All-or-nothing final batch | **REQUIRES PROTOTYPE** | Complete preflight before the first effect | No rollback verified; test invalidation and partial-execution protection |
-| Universal Dynast marriage authority | **NOT FEASIBLE** under vanilla rules | `00_marriage_interactions.txt:94-159,1417-1449`; restrict MVP to verified player matchmaker authority | Test own court, other court, child-vassal, ruler, minor, and other player |
+| Universal Dynast marriage authority | **NOT FEASIBLE** under vanilla rules | `00_marriage_interactions.txt:94-159,1417-1449`; the approved prototype deliberately supplies a workflow-scoped Mod override | Test own court, other court, child-vassal, ruler, minor, and other player; never describe the result as vanilla authority |
 | Rulers/external courts | **FEASIBLE WITH LIMITATIONS** | Native proposals can redirect to their matchmaker | Acceptance, range, war, movement, and authority require tests |
 | Current fertility/zero check | **CONFIRMED FEASIBLE** | Read `fertility`; use the verified zero comparison | Values may be negative or over `1.0`; exact UI formatting requires testing |
 | Dynamic best-minus-0.05 tier | **REQUIRES PROTOTYPE** | Order legal candidates, save best, derive threshold, staged-filter | Test `.50/.45/.449`, `1/.95/.949`, negative, zero, >1, next partner, save/reload |
@@ -70,12 +91,12 @@ Each row records evidence, recommended use, limitations, and the required runtim
 | Never married vs previously married | **CONFIRMED FEASIBLE** | Current spouse/betrothal state plus `any_former_spouse` | Test living/dead former spouses |
 | Exact divorce vs widowhood | **NOT VERIFIED** | Use broader “previously married” fallback only if Ray accepts | Memories are not permanent proof; test save histories |
 | Genetic ranking | **FEASIBLE WITH LIMITATIONS** | Exact approved trait keys can be ranked lexicographically | Phase 2 warning set is not automatically a Phase 3 scoring model |
-| Vanilla kinship legality | **CONFIRMED FEASIBLE** | Call vanilla pair trigger rather than copying doctrine logic | Mixed-faith courtier exception needs runtime coverage |
+| Vanilla kinship legality | **CONFIRMED FEASIBLE** | Call the vanilla pair trigger rather than copying doctrine logic; independently require both participants to be unmarried and unbetrothed | A mutually betrothed pair can pass the pair trigger; mixed-faith courtier exception needs runtime coverage |
 | Coarse kinship ranking | **FEASIBLE WITH LIMITATIONS** | Use verified close/extended, cousin, avuncular, and direct categories | Lowest bucket means “no close/extended relation detected,” not “unrelated” |
 | Exact relatedness/genetic risk | **NOT VERIFIED** | Do not simulate CK3's internal coefficient | No script-visible numeric accessor found |
 | Half siblings | **CONFIRMED FEASIBLE** with sufficient legal-parent data | Use verified family pattern | Missing legal parents limit classification; test incomplete records |
 | `pure_blooded` | **CONFIRMED FEASIBLE** as trait input | May contribute after legality | Never overrides doctrine or hard age exclusions |
-| Arbitrary pair records | **REQUIRES PROTOTYPE** | Store subject, partner, direction, relationship type, placeholder, reservations | Parallel lists are not assumed tuples; test cleanup, summary, save/reload, consecutive runs |
+| Bounded pair records | **FEASIBLE WITH LIMITATIONS; REQUIRES PROTOTYPE** | Use the P0-selected actor-owned 16-slot design; every slot has six separately named fields and is committed by writing `reservation_id` last | The component variable types are verified; tuple lifetime, interruption behavior, save/reload, summary access, and consecutive runs remain runtime gates |
 | Large-Dynasty ranking | **REQUIRES PROTOTYPE** | Filter pools before pair legality and lexicographic stages | Measure build/review/preflight time; no threshold claimed |
 
 Faith effect on same-Dynasty pairing:
@@ -98,7 +119,7 @@ This is not a final product decision.
 | --- | --- |
 | Illegal pair; `can_not_marry`; forbidden clergy; mercenary holder; peasant/populist leader; herder government | Vanilla hard prohibition |
 | Prisoner, hostage, active guardian/ward transfer | Vanilla hard prohibition in native interaction |
-| Married/betrothed; concubine pending decision; direct ancestor/descendant; other player; outside approved authority; pregnant pending tests | Recommended hard product exclusion |
+| Married/betrothed; concubine pending decision; direct ancestor/descendant; other player; outside the current Dynasty; pregnant pending tests | Recommended hard product exclusion |
 | Female `>=30` or male `>=40` with any minor | Confirmed hard product exclusion |
 | Dynast, House Head, landed ruler, heir, lover, context-limited landless adventurer | Display with warning or exclude after Ray's decision |
 | `celibate` | Warning/placeholder-only; not a verified `can_not_marry` trait |
@@ -121,16 +142,70 @@ Recommended staged performance design: build active/normal/placeholder pools; re
 | Approach | Classification | Recommendation |
 | --- | --- | --- |
 | A: native UI per pair | **FEASIBLE WITH LIMITATIONS** | Later one-pair advisory handoff; not the batch executor |
-| B: direct final-confirmation effects | **FEASIBLE WITH LIMITATIONS; REQUIRES PROTOTYPE** | Preferred isolated prototype, limited to vanilla player authority |
+| B: direct final-confirmation effects | **FEASIBLE WITH LIMITATIONS; REQUIRES PROTOTYPE** | Approved isolated prototype under the workflow-scoped Dynast override |
 | Hybrid | **REQUIRES PROTOTYPE** | Defer; mixed completion semantics are harder to explain and recover |
 
-Proposed prototype boundary: current Dynasty only; player-initiated; vanilla matchmaker authority only; ordinary/matrilineal; full-plan preflight; no Grand Wedding; no accept-all-remaining action; no background execution.
+Approved prototype boundary: current Dynasty only; player-initiated by a living player Dynast; one global workflow at a time; workflow-scoped override of matchmaker authority and AI acceptance only; ordinary/matrilineal; full-plan preflight; no Grand Wedding; no accept-all-remaining action; no background execution.
 
-Expected later production families, if approved: additive files under `common/decisions/`, `common/scripted_triggers/`, `common/script_values/`, `common/scripted_effects/`, `events/`, and both verified localisation directories. Exact provisional paths are in `docs/Matt_to_Jay_Phase3_Technical_Approach_Comparison.md`; no ID or namespace is allocated here.
+Expected later production families, if approved: additive files under `common/decisions/`, `common/scripted_triggers/`, `common/script_values/`, `common/scripted_effects/`, `events/`, and both verified localisation directories. Production IDs remain unallocated. The isolated prototype reserves namespace `breedimp_matchmaking_validation` and event IDs `1000-1199`.
+
+### 5.1 P0 pair-state design closure
+
+P0 selects one **global prototype coordinator** and one **actor-owned bounded plan**. Only one Phase 3 prototype workflow may be active globally. Multiplayer-concurrent workflows are deliberately unsupported by this prototype and remain a product/runtime question.
+
+The global coordinator records only the active actor and active phase. The active event chain retains the recorded Dynasty as a saved Dynasty scope. The actor owns 16 numbered pair slots. Participant characters receive no reservation variables or permanent markers.
+
+Each numbered slot contains exactly these six fields, in this order:
+
+| Field | Stored value | Integrity rule |
+| --- | --- | --- |
+| `subject` | Character scope | Must exist and differ from `partner` |
+| `partner` | Character scope | Must exist and differ from `subject` |
+| `direction` | Flag value: ordinary or matrilineal | Must be one of the two prototype directions |
+| `relationship_type` | Flag value: marriage or betrothal | Must match both participants' current ages at preflight |
+| `placeholder_state` | Flag value: normal or placeholder | Records presentation/ranking class only; it grants no legality exception |
+| `reservation_id` | Slot-specific flag value | Written last and treated as the record commit marker |
+
+A slot without the expected `reservation_id` is incomplete and must be ignored by review, summary, preflight, and execution, then removed by cleanup. Writing the commit marker last prevents a partially populated slot from becoming executable.
+
+The maximum of 16 accepted pairs is a prototype-only capacity, not a product limit. It bounds the design at 96 pair-field variables, 120 unordered slot-pair comparisons, and up to 480 subject/partner role comparisons. This permits exhaustive static enumeration and cleanup and is large enough to exercise multi-pair preflight and summary behavior without claiming large-Dynasty scalability. A seventeenth acceptance must produce an explicit capacity result; it must never be silently truncated or overwrite a prior slot.
+
+Every cleanup branch must test `exists = var:<static_name>` before removing a
+slot field. The verified removal example does not establish unguarded removal
+of an absent variable.
+
+Duplicate and mirror prevention is closed as follows:
+
+1. reject a self-pair before storage;
+2. before committing a slot, compare both proposed characters against both character fields of every committed slot;
+3. reject the proposal if either character appears anywhere in the accepted plan;
+4. because both positions are checked, accepting `A-B` also blocks `B-A`, `A-C`, and `C-B`;
+5. write into the first empty numbered slot and write its `reservation_id` last;
+6. repeat the same all-slot uniqueness check during complete final preflight.
+
+This design does not derive identity from save-game numeric character IDs and does not assume index alignment across parallel lists.
+
+### 5.2 P0 lifecycle closure
+
+Every internal entry remains guarded by active actor, phase, matching event-chain actor and saved Dynasty, actor alive/player-controlled, actor still the Dynast of the recorded Dynasty, and participant membership in that Dynasty. A global marker alone never grants authorization.
+
+| Path | P0 cleanup strategy | Evidence status |
+| --- | --- | --- |
+| Normal completion | After all approved operations, one centralized cleanup removes all 16 slots, actor workflow metadata, then the global coordinator | Component removal is **CONFIRMED FEASIBLE**; combined ordering is **REQUIRES PROTOTYPE** |
+| Review cancel; final cancel; no candidates | Call the same centralized cleanup before the terminal event exits; no relationship operation is reachable | **CONFIRMED FEASIBLE** structure; runtime event-chain behavior remains `NOT RUN` |
+| Preflight failure | Execute zero relationship operations, retain only enough context to show failure, then call centralized cleanup | Static all-before-any structure is **FEASIBLE WITH LIMITATIONS**; atomic runtime behavior is **REQUIRES PROTOTYPE** |
+| Actor death | Every later entry rechecks `is_alive`; an additive child of `on_death` cleans when its root matches the active actor | Hook and root scope are **CONFIRMED FEASIBLE**; exact state timing and saved-state behavior are **REQUIRES PROTOTYPE** |
+| Actor loses Dynast status or changes Dynasty | Every later entry rechecks Dynast/Dynasty identity; an additive child of `on_became_dynasty_head` cleans when the new head is the active actor or the recorded active actor is no longer Dynast | Hook exists but supplies no former head; transition ordering and complete engine-cause coverage are **NOT VERIFIED - RUNTIME PROTOTYPE REQUIRED** |
+| Unexpected queued/instant event trigger failure | Event-specific `on_trigger_fail` invokes centralized cleanup | **CONFIRMED FEASIBLE** only for the documented event path |
+| Abnormal visible-event close | Required contract: immediate logical invalidation and zero reachable relationship operations; no verified close callback or window-open predicate proves how to enforce it; the next new-run entry must purge residue and load/start recovery is tested separately | Invalidation enforcement and cleanup timing are **NOT VERIFIED - RUNTIME PROTOTYPE REQUIRED** |
+| Load/start with residual state | Additive `on_game_start_after_lobby` child clears any prototype coordinator and actor plan | Hook exists; exact save-load timing is **NOT VERIFIED - RUNTIME PROTOTYPE REQUIRED** |
+| New workflow start | Reject a different actor while the recorded actor passes the available global guard; permit a same-actor restart or invalid-residue recovery only after cleaning old actor state, incoming actor slots, and the coordinator | Component operations are verified; the saved-Dynasty/run-identity gap and stale delayed-event collision protection are **REQUIRES PROTOTYPE** |
+
+No cleanup hook scans candidates, ranks pairs, creates relationships, or performs recurring matchmaking.
 
 ## 6. Ray decisions and runtime gates
 
-Ray must decide: authority model; A/B/hybrid prototype; invalid-pair policy; exact/qualitative fertility display; Phase 3 trait set; kinship labels; tie and subject order; lower fertility tiers; zero-fertility never-married handling; previously-married fallback; Skip/Next/Defer behavior; accepted-pair revision; special-state protection; and Grand Wedding deferral.
+The prototype authority model, Approach B execution direction, whole-plan failure policy, and 16-slot P0 storage design are closed. Ray must still decide later production policy for exact/qualitative fertility display, the Phase 3 trait set, kinship labels, tie and subject order, lower fertility tiers, zero-fertility never-married handling, previously-married fallback, accepted-pair revision, special-state protection, Grand Weddings, and whether a production system may allow more than 16 pairs or concurrent multiplayer workflows.
 
 The prospective runtime matrix is `docs/testing/phase3_dynasty_matchmaking_manual.md`. It covers native UI lifecycle, direct/native side-effect comparison, fertility and age boundaries, marriage histories, doctrines and kinship, authority classes, special states, pair integrity, cancellation, invalidation, save/reload, large Dynasties, Phase 1/2 regression, localisation, and the CK3 error log. Every result remains `NOT RUN`.
 
@@ -171,10 +246,10 @@ The prospective runtime matrix is `docs/testing/phase3_dynasty_matchmaking_manua
 
 ## 8. Closeout
 
-Phase 3 is **not ready for production implementation**. It is ready for Ray/Jay/Boss decisions and a separately approved isolated prototype plan.
+Phase 3 is **not ready for production implementation**. The isolated prototype plan is `APPROVED WITH P0 CHECKPOINT`; P0 is complete, and P1 remains `P1 NOT STARTED / NOT AUTHORIZED` pending checkpoint review.
 
-Implementation-ready recommendation: prototype authority-limited Approach B; retain Approach A only as a separately tested advisory handoff.
+Approved prototype recommendation: use workflow-scoped Dynast override Approach B with the bounded P0 storage and cleanup design above. Retain Approach A only as a separately tested advisory handoff.
 
-Evidence-index updates: none. The task's allowed-file boundary excludes `.agents`; reusable evidence registration requires a separate approved pass.
+Evidence-index updates: the Phase 3 P0 variable, lifecycle, event, legality, ranking, relationship-effect, and descriptor evidence is registered under `.agents/skills/ck3-mod-development/references/`.
 
-Deliberately unresolved: final trait weights, exact relatedness, unsupported same-sex direct-effect syntax, custom GUI, maximum age gaps, final localisation, and all runtime behavior.
+Deliberately unresolved: an exact run-identity mechanism for distinguishing stale visible event contexts; save/reload persistence of the combined coordinator and slots; immediate abnormal-close cleanup; complete Dynast-loss hook coverage; final trait weights; exact relatedness; unsupported same-sex direct-effect syntax; custom GUI; maximum age gaps; final player-facing localisation; and all CK3 runtime behavior.

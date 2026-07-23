@@ -1,12 +1,15 @@
 # Breed Improved Phase 3 - Technical Approach Comparison
 
-Status: `ISOLATED PROTOTYPE DIRECTION APPROVED - PRODUCTION IMPLEMENTATION NOT APPROVED`
+Status: `APPROVED WITH P0 CHECKPOINT`
 
 Target: Crusader Kings III `1.19.0.6 (Scribe)`
 
 Runtime status: `NOT RUN`
 
-This document compares technical approaches for Phase 3 Dynasty Matchmaking Management and records the approved direction for a future isolated prototype. The prototype direction is a **Dynast-override model limited to the current, explicitly initiated workflow**. This is a guarded Breed Improved direct-execution pathway, not a vanilla CK3 permission, not evidence that a Dynast is every member's matchmaker, and not approval for production gameplay.
+P0 status: `P0 COMPLETE — CHECKPOINT REVIEW REQUIRED`.
+P1 status: `P1 NOT STARTED / NOT AUTHORIZED`.
+
+This document compares technical approaches for Phase 3 Dynasty Matchmaking Management and records the approved direction for a future isolated prototype. The prototype direction is a **Dynast-override model limited to the current, explicitly initiated workflow**. This is a guarded Breed Improved direct-execution pathway, not a vanilla CK3 permission, not evidence that a Dynast is every member's matchmaker, and not approval for production gameplay. It supersedes the earlier recommendation to limit the prototype to the actor's vanilla matchmaker authority.
 
 ## 1. Required product behavior
 
@@ -42,13 +45,16 @@ All paths in this section are relative to the CK3 `game/` directory.
 | Keep both proposed spouses fixed in that window | **NOT FEASIBLE** through the verified stock form | `common/character_interactions/_character_interactions.info:582-587` | The schema explicitly says the secondary participants may be changed in the interface. No verified locking argument was found. |
 | Receive a completion or setup-cancel callback from `open_interaction_window` | **NOT VERIFIED** | `common/character_interactions/06_ep3_laamp_interactions.txt:3532-3543`; targeted stock usages | The call opens a window and the enclosing effect continues. No result, close, or cancel callback was found. |
 | Native marriage legality and side effects | **CONFIRMED FEASIBLE** through the native interaction | `_character_interactions.info:576-587`; `common/character_interactions/00_marriage_interactions.txt:563-566` | The special interaction performs its own validation and handles marriage or betrothal, alliances, and Prestige. |
-| Direct ordinary and matrilineal marriage | **CONFIRMED FEASIBLE** for the relationship operation | `events/interaction_events/marriage_interaction_events.txt:1016-1032` | `marry` and `marry_matrilineal` exist as character effects. |
-| Direct ordinary and matrilineal betrothal | **CONFIRMED FEASIBLE** for the relationship operation | `events/interaction_events/marriage_interaction_events.txt:1016-1032`; `events/activities/tournaments/tournament_events.txt:1631-1644` | `create_betrothal` and `create_betrothal_matrilineal` exist; vanilla selects betrothal when either party is a minor in the cited event. |
+| Direct ordinary and matrilineal marriage | **CONFIRMED FEASIBLE** for the relationship operation | `common/scripted_effects/00_game_rule_effects.txt:22-28` | `marry` and `marry_matrilineal` exist as character effects. |
+| Direct ordinary and matrilineal betrothal | **CONFIRMED FEASIBLE** for the relationship operation | `common/scripted_effects/04_dlc_ep2_wedding_effects.txt:97-111`; `events/activities/tournaments/tournament_events.txt:1159-1177` | Both `create_betrothal` forms exist; vanilla selects betrothal when either party is a minor in the cited tournament effect. |
 | Direct-effect parity with the native interaction | **FEASIBLE WITH LIMITATIONS** | Sources above and `_character_interactions.info:576-587` | Static evidence does not prove identical alliances, Prestige, matchmaker ownership, movement, memories, or other side effects. |
-| Pair legality trigger | **CONFIRMED FEASIBLE** | `common/scripted_triggers/00_marriage_triggers.txt:17-210,362-429` | `can_marry_character_trigger` is available for pair legality. Native participant availability has additional interaction checks. |
+| Pair legality trigger | **CONFIRMED FEASIBLE** | `common/scripted_triggers/00_marriage_triggers.txt:183-212,412-427` | `can_marry_character_trigger` is available for pair legality, but can pass a pair already betrothed to each other. It is not a standalone unbetrothed check. |
+| Independent unmarried/unbetrothed checks | **CONFIRMED FEASIBLE** | `events/activities/tournaments/tournament_events.txt:4819-4824` | Apply both `is_married = no` and `is_betrothed = no` to each participant. |
 | Universal Dynast marriage authority | **NOT FEASIBLE** under verified vanilla rules | `common/character_interactions/00_marriage_interactions.txt:94-159,1417-1449` | Dynasty membership does not make the Dynast every member's matchmaker. The approved prototype deliberately tests a Mod-owned override rather than claiming this authority exists. |
 | Dynamic best-minus-0.05 fertility tier | **REQUIRES PROTOTYPE** | `common/decisions/90_minor_decisions.txt:1669-1677`; `events/diarchy_events/vizierate_events.txt:200-229`; `common/script_values/_script_values.info` | Fertility and ordered-list components exist, but the complete dynamic filtering and scope lifetime have not been runtime-proven. |
-| Arbitrary accepted-pair state | **REQUIRES PROTOTYPE** | Phase 2 event-list evidence in `tests/event_target_lists_tests.txt:45-93` and `docs/research/Matt_Phase2_Vanilla_Evidence.md` | A list can store characters, but one list does not encode subject, partner, direction, and reservation as an atomic pair. |
+| Bounded accepted-pair state | **FEASIBLE WITH LIMITATIONS; REQUIRES PROTOTYPE** | Character variables: `events/yearly_events/bp1_yearly_james.txt:1067-1071,1153-1167`; identity equality: `events/board_game_events.txt:1173-1187`; flags: `events/board_game_events.txt:61-82,170-180`; guarded removal: `events/relations_events/adultery_events.txt:2696-2700` | P0 selects actor-owned numbered slots rather than character lists. Component types and comparisons are verified; combined tuple lifetime is not a runtime result. |
+| Single global coordinator | **FEASIBLE WITH LIMITATIONS; REQUIRES PROTOTYPE** | active actor storage/equality: `common/decisions/00_major_decisions_iberia_north_africa.txt:243-249`, `events/dlc/ep1/ep1_fund_inspiration_events.txt:945-956`; phase storage/equality: `common/scripted_effects/05_dlc_fp3_scripted_effects.txt:249-254`, `common/script_values/99_steward_values.txt:694-698`; guarded cleanup: `events/dlc/ep3/ep3_frankokratia_events.txt:4255-4266` | Actor and phase components are verified. Full lifecycle and multiplayer behavior require prototype validation. |
+| Additive lifecycle cleanup | **FEASIBLE WITH LIMITATIONS; REQUIRES PROTOTYPE** | `common/on_action/_on_actions.info:102-117`; `common/on_action/death.txt:1-6`; `common/on_action/dynasty_on_actions.txt:13-17`; `common/on_action/game_start.txt:2590-2592`; `events/_events.info:125-129`; `events/board_game_events.txt:1902-1910` | Additive child on-actions, actor-death root, new-Dynast root, load/start hook, and event `on_trigger_fail` exist. There is no verified generic visible-event close callback. |
 
 ## 3. Approach A - Open the native marriage interface
 
@@ -117,7 +123,7 @@ The prototype must use two conceptual phases:
 
 This reduces, but does not eliminate, partial-execution risk. CK3 may still change state while the execution loop is running, and no rollback mechanism is claimed.
 
-Every pair must still pass the verified `can_marry_character_trigger` legality check and all approved product safeguards, including:
+Every pair must still pass the verified `can_marry_character_trigger` legality check, independent `is_married = no` and `is_betrothed = no` checks on both participants, and all approved product safeguards, including:
 
 - both participants are alive, single, unbetrothed, and still in the actor's Dynasty;
 - neither participant is already reserved by another accepted pair;
@@ -132,19 +138,23 @@ The prototype must include external-court and landed same-Dynasty cases. Their i
 
 ### 4.5 Authorization lifecycle and cleanup
 
-The exact CK3 storage and invalidation syntax is not approved by this document. Conceptually, the prototype authorization must follow this lifecycle:
+P0 selects a single global coordinator. Only one Phase 3 prototype workflow may be active globally. The coordinator stores only the active actor and phase. The active event chain holds its actor and recorded Dynasty scopes, and the actor owns review state and all accepted-pair slots. A second actor cannot start concurrently. This is a deliberate prototype limit, not a production multiplayer decision.
 
-1. **Open:** create a single actor-owned workflow only after an eligible player Dynast explicitly starts Phase 3.
-2. **Collect:** keep pair recommendations and review choices as temporary workflow state; do not change relationships.
-3. **Lock:** prevent the same actor from starting a second concurrent Phase 3 workflow.
-4. **Preflight:** confirm the original actor still owns the workflow, remains the living player Dynast, and every accepted participant remains inside the same Dynasty and passes every legality rule.
-5. **Execute:** apply only the four approved relationship operations and only after the full plan passes.
-6. **Close:** clear authorization, pair records, reservations, review state, and any continuation marker after success.
-7. **Cancel or empty exit:** perform the same cleanup after review cancellation, final-confirmation cancellation, an empty accepted plan, or no valid candidates.
-8. **Invalidate:** make the authorization unusable and clean its state when the actor dies, stops being player-controlled, loses Dynast status, changes Dynasty, a participant invalidates the plan, the event chain ends unexpectedly, or preflight fails.
-9. **Recover:** before a new run, detect and clear any stale Phase 3 authorization or pair-plan state instead of reusing it.
+Every mutable entry requires the same conjunction: matching coordinator actor and phase; matching event-chain actor and recorded Dynasty; actor alive and player-controlled; actor still Dynast of that Dynasty; and any participants still inside it. Stale storage alone therefore cannot grant the override.
 
-Save/reload and abnormal event-chain termination are mandatory prototype tests. No unverified on-action, timeout, variable lifetime, or cleanup hook is presented here as valid CK3 syntax.
+| Exit or invalidation | Physical cleanup strategy | Remaining gate |
+| --- | --- | --- |
+| Success | Central cleanup after the final operation removes actor slots/workflow metadata, then the coordinator | Combined runtime ordering |
+| Review cancel; final cancel; no candidates | The same cleanup runs before the terminal event exits; no relationship effect is reachable | Event-chain runtime |
+| Preflight failure | No relationship operation runs; show failure, then use the same cleanup | All-before-any behavior under runtime state changes |
+| Actor death | Every later entry rechecks `is_alive`; an additive child of `on_death` cleans when root is the coordinator actor | Exact hook/state timing and save/reload |
+| Actor loses Dynast status or changes Dynasty | Every later entry rechecks Dynast/Dynasty identity; an additive child of `on_became_dynasty_head` cleans if the new head is the active actor or the active actor is no longer Dynast | The vanilla hook has no former-head scope; transition ordering and coverage of every engine cause need runtime proof |
+| Queued/instant event trigger failure | Event-specific `on_trigger_fail` uses central cleanup | Only the documented event path is covered |
+| Abnormal visible-event close | Required contract: immediate logical invalidation and zero reachable relationship operations; stored coordinator/slot state may remain until recovery | No generic close callback or window-open predicate is verified, so enforcement of logical invalidation and timing of physical cleanup both require prototype proof |
+| Load/start with residue | An additive child of `on_game_start_after_lobby` clears residual coordinator and actor state | Exact save-load timing |
+| New start | Reject a different actor while the recorded actor passes the available global guard; allow a same-actor restart or invalid-residue recovery only after cleaning old actor state, incoming actor slots, and coordinator | Saved-Dynasty/run-identity gap and stale delayed-event collision test |
+
+Save/reload, hook timing, stale event-context isolation, and abnormal event-chain termination remain mandatory runtime tests. No recurring pulse, timeout, candidate scan, or background matchmaking is part of cleanup.
 
 ### 4.6 Explicit non-effects
 
@@ -247,18 +257,28 @@ Each accepted record must conceptually contain:
 - whether the partner is a zero-fertility placeholder; and
 - enough reservation state to prevent either character entering another accepted pair.
 
-The preferred conceptual owner is the initiating actor: one temporary pair plan attached to the actor's active workflow, rather than unrelated persistent markers distributed across every candidate. Each record must remain addressable as one pair plus its direction.
+P0 selects the initiating actor as the sole pair-plan owner. Participant characters receive no reservation variables. The actor has 16 explicitly numbered slots. Every slot contains exactly six separately named fields:
 
-The exact storage representation is **NOT VERIFIED** and requires an evidence check before prototype code is written. This document does not assert that an actor-owned scope list, variable list, saved scope, bounded slot, or on-action cleanup form is valid for the required lifetime. Parallel character lists are not accepted as an implicit index-based tuple system. Any verified representation must prove:
+1. `subject` - character;
+2. `partner` - character;
+3. `direction` - ordinary or matrilineal flag value;
+4. `relationship_type` - marriage or betrothal flag value;
+5. `placeholder_state` - normal or placeholder flag value; and
+6. `reservation_id` - slot-specific flag value, written last.
 
-- pair integrity across the complete event chain;
-- exclusive ownership by the initiating actor and current workflow;
-- cleanup on every exit;
-- no collision between consecutive runs;
-- no concurrent second plan for the same actor;
-- save/reload behavior;
-- no persistent gameplay-visible residue; and
-- stable final-summary access.
+`reservation_id` is the commit marker. A slot is usable only when all five prior fields exist and the final value matches that slot's expected prefixed flag. An interrupted partial write is therefore not a pair and must be ignored and cleaned.
+
+Every field removal must first check `exists = var:<static_name>`. The exact
+vanilla removal evidence does not establish that removing an absent variable is
+safe.
+
+Sixteen pairs are the prototype-only capacity. This creates 96 bounded pair fields, 120 unordered slot-pair comparisons, and at most 480 subject/partner role comparisons. The slots can be explicitly cleared and preflighted while still exercising multi-pair behavior. This does not set a production limit. A seventeenth acceptance must be rejected explicitly or route the player to final confirmation; it must not overwrite, truncate, or wrap.
+
+Before committing a slot, both proposed characters are compared with both participant fields in every committed slot. A match in any position rejects the new pair. This one rule prevents character reuse, mirror pairs, and overlap cycles: after `A-B`, neither `B-A`, `A-C`, nor `C-B` can be accepted. Final preflight repeats the complete cross-slot uniqueness check.
+
+The global coordinator permits only one active plan across the prototype. P0 does not select a numeric run serial: although increment and capture components exist, no exact CK3 `1.19.0.6` comparison was found between a saved numeric workflow identity and a global serial. That possible stale-context discriminator remains **NOT VERIFIED** and cannot enter runnable script without separate evidence or approval.
+
+The selected representation remains subject to runtime proof for save/reload persistence, visible final-summary access, interrupted writes, cleanup timing, and consecutive runs. It does not use save-game numeric character IDs and does not treat parallel lists as tuples.
 
 ## 9. Candidate generation and performance
 
@@ -273,7 +293,36 @@ Naively comparing every Dynasty member with every other member is quadratic. A l
 
 The dynamic tier, staged ranking, and large-Dynasty responsiveness are **REQUIRES PROTOTYPE**. No acceptable dynasty-size or elapsed-time threshold is asserted without a measured baseline.
 
-## 10. Provisional production file scope
+## 10. Isolated prototype path and metadata contract
+
+P0 reserves the following future test-only root:
+
+```text
+tests/phase3_dynasty_matchmaking/
+  BreedImprovedPhase3Prototype.mod
+  BreedImprovedPhase3Prototype/
+    descriptor.mod
+    common/
+      decisions/
+      on_action/
+      scripted_effects/
+      scripted_triggers/
+      script_values/
+    events/
+    localization/
+      english/
+      simp_chinese/
+```
+
+This is an allocation, not authorization to create the files. P1 is not started or authorized.
+
+The outer `.mod` will use the established portable `<LOCAL_MOD_PATH>` launcher placeholder. The inner `descriptor.mod` will contain no `path` and no `remote_file_id`. Both identify **Breed Improved Phase 3 Prototype**, use `version="0.1.0"` and `supported_version="1.19.*"`, and remain test-only/non-release. No prototype file may enter production or Workshop staging.
+
+The English and Simplified Chinese files will use matching key sets, the exact headers `l_english:` and `l_simp_chinese:`, quoted values with the established one-space indentation, `.yml` extensions in their respective directories, and UTF-8 with BOM. These requirements follow the existing Phase 1 test localisation and runtime-accepted production bilingual files; they do not approve any final player-facing text.
+
+The test event namespace is allocated as `breedimp_matchmaking_validation`, with the non-overlapping range `1000-1199`. This range is prototype-only. It was checked against current repository identifiers and does not allocate any production namespace.
+
+### 10.1 Provisional production file scope
 
 If a later prototype is approved and passes, production would likely require additive, project-prefixed files in these existing CK3 content families:
 
@@ -297,22 +346,34 @@ These paths are architectural estimates, not permission to create files. Namespa
 | Landed same-Dynasty targets | Production exclude; warn and allow; or direct override | Test now, decide later | Marriage may affect courts, alliances, succession, and political state even without explicit Mod effects. |
 | Player-controlled recipients | Always exclude; or permit explicit self-consent | Exclude from the isolated prototype unless separately approved | The actor's confirmation is not necessarily consent for another human player. |
 | Side-effect acceptance | Require native parity; accept documented differences; or reject direct execution | Require evidence before choosing | Direct effects are not statically proven equivalent to the native interaction. |
-| Pair-plan persistence | Disallow save/reload mid-flow; or support verified persistence and cleanup | Decide after storage evidence and prototype | Actor-owned storage and cleanup hooks are not yet verified. |
+| Pair-plan persistence | Disallow save/reload mid-flow; or support the selected actor-owned slots after runtime proof | Decide after prototype | P0 selected the representation, but combined save/reload persistence and lifecycle cleanup are not runtime-verified. |
 | Exact fertility display | Show exact script value; or show qualitative tiers | Qualitative tiers until runtime presentation and information disclosure are approved | Exact display may expose normally opaque values and needs formatting tests. |
 | Genetic trait model | Reuse Phase 2 warning set; approve a new Phase 3 set; or omit genetics initially | Approve a dedicated Phase 3 set after research | Phase 2 traits were selected for warnings, not matchmaking weights. |
 | Exact-score ties | Treat as equivalent; add a neutral tiebreak; or let order remain unspecified | Treat as equivalent and let the player cycle choices | Stable engine ordering is not verified; names and save IDs must not be used. |
 | Grand Weddings | Include; native-UI-only; or defer | Defer | Direct setup is DLC- and context-dependent. |
 
-## 12. Stop condition
+## 12. P0 checkpoint and stop condition
+
+P0 evidence registration and design closure is complete. The checkpoint records:
+
+- approved prototype direction: workflow-scoped Dynast override with Approach B;
+- one global workflow coordinator;
+- actor-owned 16-slot pair plan with six fields per slot and `reservation_id` written last;
+- centralized explicit cleanup plus additive death, Dynasty-head, and load/start lifecycle hooks;
+- namespace `breedimp_matchmaking_validation`, event IDs `1000-1199`;
+- isolated test path, descriptor, localisation-header, encoding, and BOM contract; and
+- CK3 runtime `NOT RUN`.
+
+P1 is `P1 NOT STARTED / NOT AUTHORIZED`. Work stops for checkpoint review.
 
 No production implementation should begin until:
 
-- the isolated prototype receives separate implementation approval;
-- exact actor-owned pair-plan storage and cleanup syntax is verified;
+- P1 and each later prototype stage receives the required approval;
+- the remaining context-dependent pair-plan and cleanup forms pass static implementation review;
 - the four relationship modes, external-court targets, and landed targets complete their runtime matrix;
 - direct-effect side effects are compared with native-interaction behavior;
 - the genetic trait model is separately approved;
 - the selected prototype passes its runtime matrix; and
 - Jay and Ray approve the resulting production authority and architecture.
 
-Evidence-index updates: none. The task's permitted file boundary excludes `.agents`; reusable evidence registration requires a separate approved pass.
+Evidence-index updates: the Phase 3 P0 evidence is registered in `.agents/skills/ck3-mod-development/references/ck3_evidence_index.md` and the accompanying syntax/provenance references.

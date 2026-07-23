@@ -34,17 +34,21 @@ Deferred Phase 2 extensions include accepted-founder-parent and whole-branch pro
 
 ## Phase 3 - Dynasty Matchmaking Management
 
-Status: `STATIC FEASIBILITY COMPLETE - ISOLATED PROTOTYPE DIRECTION APPROVED; PRODUCTION NOT APPROVED`.
+Status: `P0 COMPLETE — CHECKPOINT REVIEW REQUIRED`.
+
+P1 status: `P1 NOT STARTED / NOT AUTHORIZED`.
 
 Phase 3 is a proposed player-initiated workflow for reviewing same-Dynasty marriage and betrothal recommendations. Static CK3 `1.19.0.6` research confirms individual building blocks for native marriage-window preselection, direct marriage and betrothal effects, current fertility, age comparison, vanilla marriage legality, and coarse kinship categories.
 
 The approved isolated-prototype direction is the **Dynast-override model, with authority limited to the current workflow**, combined with direct execution after final confirmation (Approach B). A living player-controlled Dynast must explicitly start and confirm the workflow. Breed Improved then supplies a temporary internal authority for that run only. This is an intentional Mod power: verified vanilla evidence does not grant a Dynast general marriage authority over every Dynasty member.
 
-The prototype must preserve all non-authority legality and safety rules, store only an unexecuted temporary plan during review, and perform complete all-or-nothing preflight validation before creating any relationship. If any planned pair is invalid, the whole plan stops without creating a marriage or betrothal. The prototype must also prove temporary-authority cleanup, pair-state integrity, ordinary and matrilineal adult marriages and minor betrothals, direct-effect side effects, dynamic fertility tiers, large-Dynasty performance, save/reload behavior, and Phase 1/2 regression safety.
+P0 has registered the CK3 `1.19.0.6` evidence and closed a test-only design with one global actor/phase coordinator, sixteen actor-owned six-field pair slots, a slot-specific commit marker, a 16-pair capacity, duplicate/mirror prevention, lifecycle guards, namespace `breedimp_matchmaking_validation`, and the future standalone test-file contract. The full P0 submission is `docs/Matt_to_Jay_Phase3_P0_Checkpoint_Report.md`.
+
+Any later prototype must preserve all non-authority legality and safety rules, store only an unexecuted temporary plan during review, and perform complete all-or-nothing preflight validation before creating any relationship. If any planned pair is invalid, the whole plan stops without creating a marriage or betrothal. It must also prove temporary-authority cleanup, pair-state integrity, ordinary and matrilineal adult marriages and minor betrothals, direct-effect side effects, dynamic fertility tiers, large-Dynasty performance, save/reload behavior, and Phase 1/2 regression safety.
 
 Production implementation remains unapproved. Native marriage-window batch continuation, final trait scoring, lower fertility tiers, exact kinship calculation, special-state policy, multiplayer consent, Grand Weddings, and other product refinements remain deferred rather than cancelled. No automatic or background matchmaking is planned.
 
-The next gate is approval of `docs/Matt_to_Jay_Phase3_Prototype_Implementation_Plan.md`. Only after that approval may an isolated test-only prototype be created. CK3 runtime status remains `NOT RUN`.
+The next gate is Jay/Boss review of `docs/Matt_to_Jay_Phase3_P0_Checkpoint_Report.md` and a new, explicit authorization to begin P1. The previously approved implementation plan does not itself authorize P1 after this checkpoint. Production implementation remains unapproved, and CK3 runtime status remains `NOT RUN`.
 
 ## Later phases
 

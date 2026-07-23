@@ -138,7 +138,10 @@ Deferred until separate approval and evidence:
 - Reduce repetitive manual marriage management in large dynasties.
 - Consider age compatibility, traits, and genetic risks when assisting the player.
 - Avoid excessively close blood relationships.
-- Keep scoring rules, relationship-distance thresholds, candidate scope, presentation, and player controls open for later design and CK3 syntax verification.
+- The isolated-prototype authority model is **Dynast override limited to the current, explicitly initiated workflow**. This is an approved Mod-owned test authority, not a vanilla Dynast permission.
+- Phase 3 P0 evidence registration and design closure are complete and await checkpoint review. P1 is not started or authorized, production implementation is not approved, and CK3 runtime remains `NOT RUN`.
+- The P0 storage design uses one global workflow coordinator and sixteen actor-owned fixed pair slots. This is a prototype constraint, not a production pair limit.
+- Keep final scoring rules, relationship-distance thresholds, presentation, special-state policy, multiplayer consent, and production player controls open until the isolated prototype and later product decisions are approved.
 
 ### Phase 4: Advanced Breeding Assistant
 
@@ -267,6 +270,7 @@ Initial namespace registry:
 | Purpose | Namespace | Event range | Status |
 | --- | --- | --- | --- |
 | Phase 2 Dynasty cleanup review | `breedimp_dynasty_cleanup` | `1000`–`1099` | Allocated; `1001` and `1002` used; final v0.2.0 runtime acceptance `PASS`; ready for Ray upload |
+| Phase 3 isolated matchmaking validation | `breedimp_matchmaking_validation` | `1000`–`1199` | Prototype-only allocation recorded at P0; no events created; checkpoint review required; P1 not authorized |
 | Unassigned future system | `breedimp_<system>` | `<RANGE>` | Prefix confirmed; system and range unassigned |
 
 ## Event ID Naming Rules

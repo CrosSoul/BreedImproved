@@ -11,12 +11,13 @@ This is a prospective manual test specification for the proposed Phase 3 Dynasty
 
 The approved isolated-prototype model is **Approach B: Dynast override + authority limited to the current workflow**. The override may exist only after a living player Dynast explicitly confirms and enters the active matchmaking workflow. It must become inert and be cleaned up whenever that workflow completes, is canceled, becomes invalid, or cannot safely resume. This temporary override permits otherwise eligible same-Dynasty AI recipients—including external-court members and landed rulers—to be processed without vanilla matchmaker ownership or AI acceptance. It does not waive any other approved eligibility, marriage-legality, availability, age, kinship, duplicate-pair, or final-prevalidation rule.
 
-The original 111-case matrix is preserved, and ten workflow-authorization
-lifecycle cases have been added for a total of 121 cases. Cases covering
-post-prototype product refinements remain `NOT RUN` as future coverage; they are
-not mandatory gates for the first infrastructure prototype unless its approved
-implementation scope includes that feature. Approach A is retained only as
-deferred comparison coverage and is not the selected prototype executor.
+The original 111-case matrix is preserved. Twelve workflow-authorization
+lifecycle cases and seven fixed-slot integrity cases bring the total to 130.
+Cases covering post-prototype product refinements remain `NOT RUN` as future
+coverage; they are not mandatory gates for the first infrastructure prototype
+unless its approved implementation scope includes that feature. Approach A is
+retained only as deferred comparison coverage and is not the selected
+prototype executor.
 
 ## 0. Test discipline and environment record
 
@@ -153,6 +154,8 @@ Every case in this suite must inspect both player-visible behavior and the imple
 | P3-LIFE-08 | Seed stale workflow state in a separately approved test harness, or interrupt one run and then begin another; also complete two normal runs consecutively. | Start a new confirmed workflow after each prior state. | Cleanup timing, actor ownership, candidates, accepted/reserved pairs, and authority state across runs. | New entry clears or rejects stale state before candidate construction; consecutive runs never share authority, pairs, reservations, or execution state. | `NOT RUN` |
 | P3-LIFE-09 | Active workflow at several points: review, final confirmation, and immediately before execution. | Close abnormally where possible, save/reload, and advance time without explicitly resuming. | Visible event state, authority state, relationships, recurring behavior, and error log. | If exact resumption is unsupported, state remains inert and cannot execute; load or next entry safely cleans it. No automatic or delayed matchmaking occurs. | `NOT RUN` |
 | P3-LIFE-10 | No active confirmed workflow, plus an isolated test-only way to invoke the internal final execution entry point or preserved stale pair data. | Attempt internal execution before entry and again after a completed/canceled workflow. | Guard result, all relationships, authority state, and error log. | Internal execution is rejected with zero mutations whenever the matching active workflow authority is absent, invalid, stale, or already consumed. | `NOT RUN` |
+| P3-LIFE-11 | One active workflow owned by player Dynast A, plus a second eligible player Dynast B in an isolated multiplayer or equivalent test setup. | Attempt to start a second Phase 3 workflow while A's coordinator remains active. | Entry availability, active actor and phase, both actors' slots, candidates, relationships, and error log. | The single-global-workflow lock rejects B without replacing or contaminating A's state; no relationship changes and no cross-actor slot ownership occur. | `NOT RUN` |
+| P3-LIFE-12 | Active workflow with at least one fully committed pair and one uncommitted review state. | Save, reload, inspect immediately, then attempt only the resume/cancel/new-entry paths approved for the prototype. | Coordinator actor/phase, saved Dynasty, all six fields per committed slot, uncommitted state, UI reachability, relationships, and error log. | Behavior matches the later approved P1 lifecycle policy: state either resumes under the full guard or is made non-executable and cleaned. No stale or partial state can execute, and no background relationship change occurs. | `NOT RUN` |
 
 ## 8. Review workflow and pair-state integrity
 
@@ -170,6 +173,21 @@ Every case in this suite must inspect both player-visible behavior and the imple
 | P3-STATE-10 | Accepted list containing ordinary, matrilineal, marriage, and betrothal entries where supported. | Cancel from final confirmation. | Relationship, alliance, Prestige, court, title, government, succession, and temporary state. | Entire operation ends with no gameplay changes and a later new run starts cleanly. | `NOT RUN` |
 | P3-STATE-11 | Same candidate state in two consecutive independent runs. | Cancel the first run, then start a second. | Skipped, deferred, accepted, reserved, and current-person state. | No temporary state leaks from the first run. | `NOT RUN` |
 | P3-STATE-12 | Accept the same logical set in different review orders. | Reach final confirmation in both controlled saves. | Normalized pair set and execution order. | No duplicate, mirror, or person reuse appears; deterministic rules yield an equivalent valid pair set where tie-break state is identical. | `NOT RUN` |
+
+### 8.1 Fixed-slot storage checkpoint
+
+These cases validate the P0-selected actor-owned capacity. They do not approve
+the combined lifecycle before P1.
+
+| ID | Setup | Action | Required observations | Pass criteria | Result |
+| --- | --- | --- | --- | --- | --- |
+| P3-SLOT-01 | Clean workflow with one eligible accepted pair. | Commit the first pair to slot 01 and open the review/final summary path without executing it. | Slot 01 `subject`, `partner`, `direction`, `relationship_type`, `placeholder`, `reservation_id`, display identity, and relationship state. | All six fields preserve their intended values; the slot-specific marker is present only after the five payload fields; the pair is readable but causes no relationship change. | `NOT RUN` |
+| P3-SLOT-02 | Fifteen valid committed pairs and one additional eligible pair. | Commit the sixteenth pair to slot 16 and reach final preflight without execution. | Every field in slots 01-16, especially slot 16, summary count, reservations, comparison result, and error log. | Slot 16 behaves identically to slot 01; all 16 pairs remain distinct and intact; no field wraps to another slot. | `NOT RUN` |
+| P3-SLOT-03 | Sixteen valid committed pairs and a seventeenth eligible proposal. | Attempt to accept pair 17. | Capacity presentation/result, all 96 existing fields, summary, reservations, and relationships. | The seventeenth pair is rejected or routed through the approved capacity path; slots 01-16 remain byte-for-byte/logically unchanged; nothing is overwritten, truncated, wrapped, or executed. | `NOT RUN` |
+| P3-SLOT-04 | Separately approved diagnostic setup with payload fields in one slot but its `reservation_id` absent; repeat with other required fields missing. | Enter review, summary, preflight, cancellation, and cleanup paths. | Whether the partial slot reserves either character, appears in UI, reaches execution, and whether every existing field is guardedly removed. | An uncommitted/partial slot is ignored for reservation, summary, and execution; preflight never treats it as valid; cleanup removes each existing field without errors. | `NOT RUN` |
+| P3-SLOT-05 | One committed `A-B` pair and proposals reusing A or B in either subject/partner position. | Attempt `A-C`, `C-A`, `B-C`, and `C-B`. | Identity comparisons against both roles, accepted count, stored fields, and errors. | Every reused-character proposal is rejected before commit; one character appears in at most one accepted pair. | `NOT RUN` |
+| P3-SLOT-06 | One committed `A-B` pair with `B-A` otherwise legal and highly ranked. | Attempt to propose, accept, or inject the mirrored pair. | Candidate presentation, role comparisons, committed slots, final preflight, and errors. | `B-A` is neither committed nor executable. Mirror prevention follows from the same two-role character reservation invariant. | `NOT RUN` |
+| P3-SLOT-07 | Separately approved diagnostic setup with all five payload fields present but a missing, wrong-slot, or stale `reservation_id`. | Enter summary and final preflight, then cancel/clean. | Marker comparison, plan validity, relationship state, field cleanup, and error log. | The slot is not committed; no relationship operation is reachable; the whole plan follows the approved failure path; guarded cleanup removes residue without touching another slot. | `NOT RUN` |
 
 ## 9. Final prevalidation and invalidation safety
 
@@ -275,9 +293,12 @@ Inspect the CK3 error log after every suite for:
 | Doctrine and kinship legality | `NOT RUN` |
 | Authority, matchmaker, ruler, and external-court cases | `NOT RUN` |
 | Workflow-scoped authorization lifecycle and cleanup | `NOT RUN` |
+| Single-global-workflow lock | `NOT RUN` |
 | Out-of-workflow and stale-authorization execution guards | `NOT RUN` |
 | Special-state exclusions | `NOT RUN` |
 | Pair-state and duplicate protection | `NOT RUN` |
+| Fixed slots 01/16 and seventeenth-pair capacity boundary | `NOT RUN` |
+| Partial records and reservation-marker integrity | `NOT RUN` |
 | Cancel and no-preconfirmation consequences | `NOT RUN` |
 | Full prevalidation and invalidation safety | `NOT RUN` |
 | Approach A advisory comparison (deferred, not selected) | `NOT RUN` |

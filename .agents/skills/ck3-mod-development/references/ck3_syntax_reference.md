@@ -552,10 +552,10 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - File family: `common/decisions/*.txt`
 - Enclosing context: top level of a Decision definition and its character-scoped `effect`
 - Input scope: Decision taker character
-- Output scope or state change: `trigger_event = <namespace.id>` opens the referenced event for the Decision taker
-- Arguments: verified fields include `title`, `picture`, `selection_tooltip`, `desc`, `confirm_text`, `sort_order`, `is_shown`, `is_valid_showing_failures_only`, `is_valid`, `effect`, `ai_check_interval`, `ai_potential`, and `ai_will_do`; `ai_check_interval = 0` disables AI checking
-- Evidence: `common/decisions/_decisions.info:125-143`; `common/decisions/80_major_decisions.txt`, `strengthen_bloodline_decision`; `common/decisions/00_diarchy_decisions.txt`; `common/decisions/00_dynasty_decisions.txt`
-- Minimal verified example: `effect = { trigger_event = my_namespace.1000 }`
+- Output scope or state change: the Decision `effect` runs on the Decision taker, may save that actor scope, and may dispatch a namespaced event
+- Arguments: verified fields include `title`, `picture`, `selection_tooltip`, `desc`, `confirm_text`, `sort_order`, `is_shown`, `is_valid_showing_failures_only`, `is_valid`, `effect`, `ai_check_interval`, `ai_potential`, and `ai_will_do`; verified effect components include `save_scope_as = <name>` and `trigger_event = <namespace.id>`; `ai_check_interval = 0` disables AI checking
+- Evidence: character-scoped Decision `effect` at `common/decisions/_decisions.info:125-143`; actor capture at `common/decisions/dlc_decisions/mpo/mpo_decisions.txt:4409-4417`; event dispatch at `common/decisions/00_major_decisions_iberia_north_africa.txt:72-78`
+- Minimal verified example: `effect = { save_scope_as = actor trigger_event = my_namespace.1000 }`
 - Restrictions and notes: actor eligibility remains an explicit project trigger. Omitting a cost and cooldown is permitted; it does not imply a hidden resource charge.
 
 ### Dynasty member iterators
@@ -725,6 +725,314 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Evidence: `events/pregnancy_events.txt:977-989`; additional count examples in `events/birth_events.txt:383-421`
 - Minimal verified example: `any_child = { even_if_dead = yes count >= 1 }`
 - Restrictions and notes: this detects whether at least one legal child scope exists, including deceased children. It is not a descendant iterator and does not provide a verified dynamic descendant-count localisation expression.
+
+### Scope-owned character variables
+
+- Status: `VERIFIED`
+- Category: variable effects, trigger access, and stored-scope access
+- CK3 version: `1.19.0.6`
+- File family: character-scoped events and effects
+- Enclosing context: an effect block on the variable-owning character; later trigger/effect blocks on the same owner
+- Input scope: character owner plus a character value to store
+- Output scope or state change: `set_variable` stores the character reference; `var:<name>` dereferences it; `remove_variable` deletes the variable
+- Arguments: `set_variable = { name = <static_name> value = <character_scope> }`, `exists = var:<static_name>`, `var:<static_name> = { ... }`, and guarded `remove_variable = <static_name>`
+- Evidence: `events/yearly_events/bp1_yearly_james.txt:1067-1071,1153-1167`; guarded removal at `events/relations_events/adultery_events.txt:2696-2700`
+- Minimal verified example: `set_variable = { name = stored_character value = scope:target }`, later `exists = var:stored_character`
+- Restrictions and notes: the owner and every static variable name must be known. Guard every removal with `exists = var:<static_name>`; safety of removing an absent variable is not established by the cited evidence. The examples establish later dereferencing in event script; they do not prove the complete Phase 3 multi-event or save/reload lifetime.
+
+### Character-reference equality through a variable
+
+- Status: `VERIFIED`
+- Category: stored character-reference trigger comparison
+- CK3 version: `1.19.0.6`
+- File family: character-scoped event triggers and triggered descriptions
+- Enclosing context: the character that owns the variable is current scope
+- Input scope: variable-owning character and expected character scope
+- Output scope or state change: boolean identity result; no state change
+- Arguments: `var:<static_name> = <character_scope>`
+- Evidence: `events/board_game_events.txt:1173-1187`
+- Minimal verified example: `var:stored_character = scope:expected_character`
+- Restrictions and notes: existence should be checked before equality. This establishes the identity comparison needed to search subject and partner roles; it does not make a six-field slot atomic.
+
+### Flag-valued variables and equality
+
+- Status: `VERIFIED`
+- Category: variable effect and trigger comparison
+- CK3 version: `1.19.0.6`
+- File family: character-scoped events and effects
+- Enclosing context: an effect block on the variable owner and a later trigger on that owner
+- Input scope: character owner
+- Output scope or state change: stores a flag value and later compares the stored value with an expected flag
+- Arguments: `set_variable = { name = <static_name> value = flag:<value> }` and `<character_scope>.var:<static_name> = flag:<value>`
+- Evidence: `events/board_game_events.txt:61-82,170-180`
+- Minimal verified example: `set_variable = { name = result value = flag:success }`
+- Restrictions and notes: this verifies enum-like flag values. It does not make a multi-field record atomic. Breed Improved's Phase 3 reservation marker must be written last and checked with every other required field.
+
+### Global character variables and identity
+
+- Status: `VERIFIED`
+- Category: global-variable effects, existence trigger, and stored-scope access
+- CK3 version: `1.19.0.6`
+- File family: Decisions, events, scripted effects, and on_action effects
+- Enclosing context: an effect or trigger block
+- Input scope: any context with access to the character or flag value being stored
+- Output scope or state change: stores globally addressable character state; direct equality compares its identity; a block enters the stored character; guarded `remove_global_variable` deletes it
+- Arguments: `set_global_variable = { name = <static_name> value = <character_scope> }`, `exists = global_var:<static_name>`, `global_var:<static_name> = <character_scope>`, `global_var:<static_name> = { ... }`, and guarded `remove_global_variable = <static_name>`
+- Evidence: `common/decisions/00_major_decisions_iberia_north_africa.txt:243-249`; direct identity at `events/dlc/ep1/ep1_fund_inspiration_events.txt:945-956`; entered scope at `events/religion_events/great_holy_war_events.txt:818-824`; guarded removal at `events/dlc/ep3/ep3_frankokratia_events.txt:4255-4266`
+- Minimal verified example: `set_global_variable = { name = active_actor value = scope:actor }`
+- Restrictions and notes: guard removal with an existence check. The Phase 3 prototype may use one global actor pointer only after P1 approval. Save/reload persistence and cleanup timing remain runtime tests.
+
+### Global flag-valued phase and equality
+
+- Status: `VERIFIED`
+- Category: global variable effect and trigger comparison
+- CK3 version: `1.19.0.6`
+- File family: scripted effects, script values, Decisions, events, and on_actions
+- Enclosing context: an effect that stores a phase and a later trigger that checks it
+- Input scope: global variable name plus a flag value
+- Output scope or state change: stores a global flag or returns a boolean equality result
+- Arguments: `set_global_variable = { name = <static_name> value = flag:<value> }` and `global_var:<static_name> = flag:<value>`
+- Evidence: set at `common/scripted_effects/05_dlc_fp3_scripted_effects.txt:249-254`; compare at `common/script_values/99_steward_values.txt:694-698`
+- Minimal verified example: `global_var:active_phase = flag:review`
+- Restrictions and notes: existence should be checked before equality. This verifies a phase component, not the combined workflow lifecycle.
+
+### Dynasty scope capture with `save_scope_as`
+
+- Status: `VERIFIED`
+- Category: Dynasty scope link and saved-scope effect
+- CK3 version: `1.19.0.6`
+- File family: events and effect blocks
+- Enclosing context: character scope with a valid `dynasty` scope link, followed by a Dynasty-scoped effect block
+- Input scope: highborn character with a Dynasty
+- Output scope or state change: saves the current Dynasty scope under a named event scope
+- Arguments: `dynasty = { save_scope_as = <name> }`
+- Evidence: `events/court_maintenance_events.txt:609`; `events/religion_events/faith_conversion_events.txt:339-340`
+- Minimal verified example: `dynasty = { save_scope_as = workflow_dynasty }`
+- Restrictions and notes: exact scope capture is verified. Continuity across a long visible-event chain, abnormal closure, and save/reload remains a runtime prototype question.
+
+### Event namespace declaration and namespaced numeric ID
+
+- Status: `VERIFIED`
+- Category: event file structure
+- CK3 version: `1.19.0.6`
+- File family: `events/*.txt`
+- Enclosing context: namespace declaration at the event file top level and event definitions in the same file
+- Input scope: not applicable
+- Output scope or state change: registers the namespace and its event IDs
+- Arguments: `namespace = <namespace>` followed by `<namespace>.<numeric_id> = { ... }`
+- Evidence: `events/_events.info:5-10`; existing project events in `MyCK3Mod/events/breedimp_dynasty_cleanup_events.txt`
+- Minimal verified example: `namespace = my_events`, followed by `my_events.1001 = { type = character_event ... }`
+- Restrictions and notes: the approved Phase 3 test namespace is `breedimp_matchmaking_validation`, range `1000`-`1199`. P0 allocates the range but creates no event.
+
+### Generic event fields and player options
+
+- Status: `VERIFIED`
+- Category: event definition schema
+- CK3 version: `1.19.0.6`
+- File family: `events/*.txt`
+- Enclosing context: top level of a namespaced event definition
+- Input scope: event root, whose default is character unless overridden
+- Output scope or state change: declares event type/scope, text, trigger/effect phases, visibility, and player options
+- Arguments: verified fields include `type`, `scope`, `title`, `desc`, `trigger`, `immediate`, `after`, `hidden`, and `option = { name = <key> ... }`
+- Evidence: `events/_events.info:10-38,156-164`
+- Minimal verified example: `type = character_event`, `trigger = { ... }`, and `option = { name = my_option ... }`
+- Restrictions and notes: this is static schema evidence only. It establishes neither window lifecycle callbacks nor save/reload continuity.
+
+### Event `on_trigger_fail`
+
+- Status: `VERIFIED`
+- Category: event effect field
+- CK3 version: `1.19.0.6`
+- File family: `events/*.txt`
+- Enclosing context: top level of an event definition
+- Input scope: the event context available when a queued or instant event fails trigger checks
+- Output scope or state change: runs the enclosed effects after that documented trigger failure
+- Arguments: an effect block
+- Evidence: `events/_events.info:125-129`; exact vanilla use at `events/board_game_events.txt:1902-1910`
+- Minimal verified example: `on_trigger_fail = { <verified cleanup effect> }`
+- Restrictions and notes: the schema explicitly limits the field to queued/instant event trigger failure. It is not evidence for a generic callback when a player closes an already displayed event.
+
+### Mod-safe on_action child registration
+
+- Status: `VERIFIED`
+- Category: on_action file structure and composition
+- CK3 version: `1.19.0.6`
+- File family: `common/on_action/*.txt`
+- Enclosing context: top-level named on_action definitions
+- Input scope: inherited from the vanilla parent on_action
+- Output scope or state change: appends a Mod-owned child on_action without replacing the vanilla parent effect
+- Arguments: `<vanilla_on_action> = { on_actions = { <mod_child> } }`; the child may contain one verified `effect` block
+- Evidence: `common/on_action/_on_actions.info:102-117`
+- Minimal verified example: `on_death = { on_actions = { my_death_cleanup } }`
+- Restrictions and notes: do not add a second `effect` or `trigger` block directly to a named vanilla on_action that already owns one. Every inherited scope must be verified against that parent.
+
+### `on_death` character context
+
+- Status: `VERIFIED`
+- Category: code-triggered on_action
+- CK3 version: `1.19.0.6`
+- File family: `common/on_action/*.txt`
+- Enclosing context: the named `on_death` on_action or a Mod child invoked from it
+- Input scope: root is the character just about to die; optional `scope:killer` exists when known
+- Output scope or state change: runs on_action effects before the character is fully dead
+- Arguments: no caller arguments; code-triggered
+- Evidence: `common/on_action/death.txt:1-6`
+- Minimal verified example: a Mod child registered through the independently verified `on_actions` composition
+- Restrictions and notes: the exact point at which a complete Phase 3 coordinator and actor-owned slots can be cleaned requires runtime testing. This evidence does not authorize recurring death scans.
+
+### `on_became_dynasty_head` context
+
+- Status: `VERIFIED`
+- Category: code-triggered on_action
+- CK3 version: `1.19.0.6`
+- File family: `common/on_action/*.txt`
+- Enclosing context: the named `on_became_dynasty_head` on_action or a Mod child invoked from it
+- Input scope: root is the new Dynast; `scope:dynasty` is the affected Dynasty
+- Output scope or state change: runs effects for that Dynasty-head change
+- Arguments: no caller arguments; code-triggered
+- Evidence: `common/on_action/dynasty_on_actions.txt:13-17`
+- Minimal verified example: a Mod child registered through the independently verified `on_actions` composition
+- Restrictions and notes: no former-Dynast scope is documented. No `on_lost_dynasty_head` or generic Dynasty-change on_action was found in the same-version files. Coverage of every engine cause of Dynast transfer requires runtime testing.
+
+### `on_game_start_after_lobby`
+
+- Status: `VERIFIED`
+- Category: code-triggered on_action
+- CK3 version: `1.19.0.6`
+- File family: `common/on_action/*.txt`
+- Enclosing context: the named on_action or a Mod child invoked from it
+- Input scope: game-start context after the host or single player exits the lobby
+- Output scope or state change: runs enclosed effects once at that documented point
+- Arguments: no caller arguments; code-triggered
+- Evidence: `common/on_action/game_start.txt:2590-2592`
+- Minimal verified example: a Mod child registered through the independently verified `on_actions` composition
+- Restrictions and notes: static evidence does not establish exact ordering for every save/reload path or an already open Phase 3 event chain.
+
+### `can_marry_character_trigger`
+
+- Status: `VERIFIED`
+- Category: parameterized scripted character trigger
+- CK3 version: `1.19.0.6`
+- File family: definition in `common/scripted_triggers/00_marriage_triggers.txt`; supported character-trigger callers
+- Enclosing context: character scope with the proposed partner passed through `CHARACTER`
+- Input scope: one character as current scope and one character argument
+- Output scope or state change: boolean current-availability and pair-legality result; no state change
+- Arguments: `can_marry_character_trigger = { CHARACTER = <character_scope> }`
+- Evidence: definition at `common/scripted_triggers/00_marriage_triggers.txt:183-212`; use for marriage and betrothal validation at `:412-427`
+- Minimal verified example: `can_marry_character_trigger = { CHARACTER = scope:partner }`
+- Restrictions and notes: the trigger delegates gender, recent-divorce, allowed-marriage, and consanguinity checks to `could_marry_character_trigger`. Its availability branch also permits a pair already betrothed to each other, so it is not sufficient by itself to prove that both participants are unbetrothed. The Phase 3 Dynast override bypasses matchmaker authority only; it must not bypass this trigger, the independent relationship-availability checks below, or approved product safeguards.
+
+### Independent `is_married` and `is_betrothed` availability checks
+
+- Status: `VERIFIED`
+- Category: character triggers
+- CK3 version: `1.19.0.6`
+- File family: event, Decision, scripted-trigger, and interaction trigger blocks
+- Enclosing context: each proposed participant's character scope
+- Input scope: character
+- Output scope or state change: boolean current relationship state; no state change
+- Arguments: `is_married = no` and `is_betrothed = no`
+- Evidence: both checks together at `events/activities/tournaments/tournament_events.txt:4819-4824`
+- Minimal verified example: `is_betrothed = no` followed by `is_married = no`
+- Restrictions and notes: the approved Phase 3 policy requires both checks on both participants in addition to `can_marry_character_trigger`.
+
+### Character `fertility` value
+
+- Status: `VERIFIED`
+- Category: character numeric value and numeric trigger
+- CK3 version: `1.19.0.6`
+- File family: numeric value blocks, scripted values, Decisions, and event trigger modifiers
+- Enclosing context: character evaluation scope
+- Input scope: character
+- Output scope or state change: returns or compares the character's evaluated fertility; no state change
+- Arguments: bare numeric value `fertility` or a comparison such as `fertility <= 0`
+- Evidence: `common/decisions/90_minor_decisions.txt:1669-1677`; `events/health_events.txt:12544-12548`
+- Minimal verified example: `value = fertility`
+- Restrictions and notes: values may require handling below zero or above `1.0`. The full dynamic best-minus-`0.05` tier, capture lifetime, inclusive boundary, and presentation remain prototype tests.
+
+### `age_difference` and `ordered_in_list`
+
+- Status: `VERIFIED`
+- Category: scripted numeric value and ordered event-list iterator
+- CK3 version: `1.19.0.6`
+- File family: `common/script_values/*.txt` and effect blocks using an event-target list
+- Enclosing context: character scope with `scope:comparator`; ordered iteration over a previously built list
+- Input scope: current character and comparator for `age_difference`; list members for `ordered_in_list`
+- Output scope or state change: returns a negative absolute age difference and orders list members by a numeric value
+- Arguments: `age_difference` reads `scope:comparator`; verified iterator fields include `list`, `order_by`, `max`, and `check_range_bounds`
+- Evidence: `common/script_values/00_age_values.txt:82-88`; `events/diarchy_events/vizierate_events.txt:200-229`
+- Minimal verified example: `ordered_in_list = { list = candidates order_by = age_difference }`
+- Restrictions and notes: component syntax is verified, but the complete Phase 3 lexicographic pipeline and deterministic tie behavior require the isolated prototype.
+
+### Direct marriage and betrothal effects
+
+- Status: `VERIFIED`
+- Category: character relationship effects
+- CK3 version: `1.19.0.6`
+- File family: event and scripted-effect character effect blocks
+- Enclosing context: the first participant is current character scope; the effect value is the second participant character scope
+- Input scope: character plus character target
+- Output scope or state change: creates the requested ordinary/matrilineal marriage or betrothal relationship
+- Arguments: `marry = <character_scope>`, `marry_matrilineal = <character_scope>`, `create_betrothal = <character_scope>`, or `create_betrothal_matrilineal = <character_scope>`
+- Evidence: ordinary/matrilineal marriage at `common/scripted_effects/00_game_rule_effects.txt:22-28`; ordinary/matrilineal betrothal at `common/scripted_effects/04_dlc_ep2_wedding_effects.txt:97-111`; adult/minor execution branch at `events/activities/tournaments/tournament_events.txt:1159-1177`
+- Minimal verified example: `scope:subject = { marry = scope:partner }`
+- Restrictions and notes: each individual operation exists. Static evidence does not prove parity with the native arrange-marriage interaction for alliances, Prestige, court movement, succession, memories, on_actions, or other side effects. P0 creates no executable call.
+
+### Global numeric serial components
+
+- Status: `UNVERIFIED` for the proposed run-identity combination
+- Category: global numeric-variable effects and saved numeric scope value
+- CK3 version: `1.19.0.6`
+- File family: events and Decisions
+- Enclosing context: effect blocks
+- Input scope: context with access to the global numeric variable
+- Output scope or state change: `change_global_variable` can increment a global number; `save_scope_value_as` can copy a global numeric value into an event scope value
+- Arguments: verified components are `change_global_variable = { name = <name> add = 1 }` and `save_scope_value_as = { name = <name> value = global_var:<name> }`
+- Evidence: `events/religion_events/great_holy_war_events.txt:618-621`; `common/decisions/dlc_decisions/mpo/mpo_decisions.txt:4410-4413`
+- Minimal verified example: none approved for Phase 3
+- Restrictions and notes: no same-context CK3 `1.19.0.6` example was found for comparing the saved numeric scope value with the active global serial. `UNVERIFIED CK3 SYNTAX`: do not implement a Phase 3 numeric run identity until that comparison is separately evidenced or tested under explicit approval.
+
+### Phase 3 fixed-slot commit protocol
+
+- Status: `VERIFIED COMPONENTS; COMPOSED LIFECYCLE REQUIRES PROTOTYPE`
+- Category: project storage design composed from verified character variables
+- CK3 version: `1.19.0.6`
+- File family: future isolated-prototype Decision/event/effect contexts only
+- Enclosing context: the recorded workflow actor owns sixteen explicitly named slots
+- Input scope: actor, subject, partner, and three approved enum-like flag values
+- Output scope or state change: one committed pair record per slot
+- Arguments: six static variables per slot: `subject`, `partner`, `direction`, `relationship_type`, `placeholder`, and slot-specific `reservation_id`
+- Evidence: character storage at `events/yearly_events/bp1_yearly_james.txt:1067-1071,1153-1167`; character identity at `events/board_game_events.txt:1173-1187`; flag values at `events/board_game_events.txt:61-82,170-180`; guarded removal at `events/relations_events/adultery_events.txt:2696-2700`
+- Minimal verified example: none; this is a composed project protocol, not a vanilla command
+- Restrictions and notes: write `reservation_id` last. A slot is committed only if its expected marker and all five payload fields exist and all enum values are approved. Guard every field removal with `exists`. Multi-variable atomicity, interrupted writes, cross-event persistence, and save/reload behavior require the isolated prototype.
+
+### Standalone test Mod descriptor pair
+
+- Status: `VERIFIED`
+- Category: project file structure and launcher metadata
+- CK3 version: `1.19.0.6`
+- File family: one outer `.mod` launcher template plus an inner `descriptor.mod` at the test Mod content root
+- Enclosing context: repository-owned standalone test harness
+- Input scope: not applicable
+- Output scope or state change: launcher metadata only
+- Arguments: verified fields are `version`, `name`, and `supported_version`; only the outer local launcher template contains `path="<LOCAL_MOD_PATH>"`
+- Evidence: `tests/phase1_create_dynasty/BreedImprovedPhase1Test.mod`; `tests/phase1_create_dynasty/BreedImprovedPhase1Test/descriptor.mod`; Phase 1 test-harness runtime history
+- Minimal verified example: outer template with `path="<LOCAL_MOD_PATH>"`, inner descriptor without `path`
+- Restrictions and notes: the future Phase 3 test descriptors are recorded as version `0.1.0`, compatibility `1.19.*`, no Workshop ID, and no absolute committed path. P0 does not create them.
+
+### Standalone test Mod localisation contract
+
+- Status: `VERIFIED PROJECT CONVENTION`
+- Category: localisation file header, bilingual key parity, and encoding
+- CK3 version: `1.19.0.6`
+- File family: `localization/english/*.yml` and `localization/simp_chinese/*.yml`
+- Enclosing context: test-only Mod content root
+- Input scope: not applicable
+- Output scope or state change: localised player-facing strings only
+- Arguments: first-line headers `l_english:` and `l_simp_chinese:`; identical key sets; UTF-8 BOM
+- Evidence: `tests/phase1_create_dynasty/BreedImprovedPhase1Test/localization/english/breedimp_test_create_dynasty_l_english.yml`; `MyCK3Mod/localization/simp_chinese/breedimp_dynasty_exile_l_simp_chinese.yml`
+- Minimal verified example: one BOM-prefixed file beginning with `l_english:`
+- Restrictions and notes: UTF-8 BOM is an observed vanilla property and an established project convention, not an asserted universal engine requirement. P0 creates no localisation file.
 
 ## Uncertainty Protocol
 
