@@ -10,7 +10,8 @@ The target and descendants enter a generated replacement Dynasty. The interactio
 
 ## v0.2.0 — Multi-Mode Dynasty Cleanup
 
-Status: implemented and runtime-accepted for v0.2.0; Ray recommends release and Jay/Boss approved the final artifact. Ready for Ray's manual update of the existing Workshop item; not yet published.
+Status: implemented, runtime-accepted, approved, and published to the existing
+Steam Workshop item `3769010534`.
 
 Version 0.2.0 adds:
 
@@ -28,27 +29,34 @@ Direct-candidate protection is not whole-branch protection. It prevents a protec
 
 The first release has no batch cost. Candidate discovery begins only after explicit player confirmation and never runs on a schedule, in the background, or through AI.
 
-The final candidate-page layout, quoted option labels, tooltips, complete cleanup matrix, CK3 error log, and release approval are recorded as passing in `docs/testing/phase2_dynasty_cleanup_manual.md`. No Workshop upload is performed by repository automation, and v0.2.0 must not be described as published until Ray completes the existing-item update.
+The final candidate-page layout, quoted option labels, tooltips, complete cleanup matrix, CK3 error log, and release approval are recorded as passing in `docs/testing/phase2_dynasty_cleanup_manual.md`. GitHub is the project source and release-record channel; Steam Workshop item `3769010534` is the player-distribution channel. Repository automation does not upload Workshop content.
 
 Deferred Phase 2 extensions include accepted-founder-parent and whole-branch protection, combined modes, arbitrary trait selection, scoring, saved mode preferences, and broader descendant-topology handling. No character names or save-specific character IDs will be hardcoded.
 
 ## Phase 3 - Dynasty Matchmaking Management
 
-Status: `P0 COMPLETE — CHECKPOINT REVIEW REQUIRED`.
+Phase 3 isolated prototype:
+`STATIC IMPLEMENTATION COMPLETE — RUNTIME TEST REQUIRED`.
 
-P1 status: `P1 NOT STARTED / NOT AUTHORIZED`.
+Status: `P0 CORRECTED AND CLOSED`.
+
+P1-P5 status: `STATIC COMPLETE`.
+
+P6 status: `AWAITING RAY RUNTIME APPROVAL`.
 
 Phase 3 is a proposed player-initiated workflow for reviewing same-Dynasty marriage and betrothal recommendations. Static CK3 `1.19.0.6` research confirms individual building blocks for native marriage-window preselection, direct marriage and betrothal effects, current fertility, age comparison, vanilla marriage legality, and coarse kinship categories.
 
 The approved isolated-prototype direction is the **Dynast-override model, with authority limited to the current workflow**, combined with direct execution after final confirmation (Approach B). A living player-controlled Dynast must explicitly start and confirm the workflow. Breed Improved then supplies a temporary internal authority for that run only. This is an intentional Mod power: verified vanilla evidence does not grant a Dynast general marriage authority over every Dynasty member.
 
-P0 has registered the CK3 `1.19.0.6` evidence and closed a test-only design with one global actor/phase coordinator, sixteen actor-owned six-field pair slots, a slot-specific commit marker, a 16-pair capacity, duplicate/mirror prevention, lifecycle guards, namespace `breedimp_matchmaking_validation`, and the future standalone test-file contract. The full P0 submission is `docs/Matt_to_Jay_Phase3_P0_Checkpoint_Report.md`.
+P0 has registered the CK3 `1.19.0.6` evidence and closed a test-only design with one global actor/phase coordinator, a permanent one-workflow-per-save lock, sixteen actor-owned six-field pair slots, a subject-reference commit marker stored in each slot's `reservation_id`, a 16-pair capacity, duplicate/mirror prevention, lifecycle guards, namespace `breedimp_p3_proto_matchmaking`, event range `1000-1199`, and the standalone test-file contract. Numeric run identity remains unverified and is not used. The full P0 submission is `docs/Matt_to_Jay_Phase3_P0_Checkpoint_Report.md`.
 
-Any later prototype must preserve all non-authority legality and safety rules, store only an unexecuted temporary plan during review, and perform complete all-or-nothing preflight validation before creating any relationship. If any planned pair is invalid, the whole plan stops without creating a marriage or betrothal. It must also prove temporary-authority cleanup, pair-state integrity, ordinary and matrilineal adult marriages and minor betrothals, direct-effect side effects, dynamic fertility tiers, large-Dynasty performance, save/reload behavior, and Phase 1/2 regression safety.
+The isolated prototype must preserve all non-authority legality and safety rules, store only an unexecuted temporary plan during review, and perform complete all-or-nothing preflight validation before creating any relationship. If any planned pair is invalid, the whole plan stops without creating a marriage or betrothal. Opening the Decision only dispatches a pre-activation confirmation event; its explicit activation option sets the permanent lock before coordinator state or candidate scanning, while cancelling that event consumes nothing. The lock is never removed. Because no generic visible-event close callback is verified, an abnormally closed workflow is orphaned and locked: it has no delayed/background continuation, resume, or reauthorization path. P6 must verify pair-state integrity, ordinary and matrilineal adult marriages and minor betrothals, direct-effect side effects, dynamic fertility tiers, large-Dynasty performance, save/reload behavior, lifecycle cleanup, lock persistence, and Phase 1/2 regression safety.
 
 Production implementation remains unapproved. Native marriage-window batch continuation, final trait scoring, lower fertility tiers, exact kinship calculation, special-state policy, multiplayer consent, Grand Weddings, and other product refinements remain deferred rather than cancelled. No automatic or background matchmaking is planned.
 
-The next gate is Jay/Boss review of `docs/Matt_to_Jay_Phase3_P0_Checkpoint_Report.md` and a new, explicit authorization to begin P1. The previously approved implementation plan does not itself authorize P1 after this checkpoint. Production implementation remains unapproved, and CK3 runtime status remains `NOT RUN`.
+The next gate is Ray's approval and execution of P6 CK3 runtime validation against the approved manual
+matrix. Production implementation remains unapproved, and CK3 runtime status
+remains `NOT RUN`.
 
 ## Later phases
 

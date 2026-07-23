@@ -1,0 +1,27 @@
+# The only four relationship-changing operations in the isolated prototype.
+# Their runtime side effects versus native arrange-marriage remain NOT VERIFIED.
+# Test-only, non-release, CK3 1.19.0.6. Runtime status: NOT RUN.
+
+breedimp_p3_proto_create_ordinary_marriage_effect = {
+	$SUBJECT$ = {
+		marry = $PARTNER$
+	}
+}
+
+breedimp_p3_proto_create_matrilineal_marriage_effect = {
+	$SUBJECT$ = {
+		marry_matrilineal = $PARTNER$
+	}
+}
+
+breedimp_p3_proto_create_ordinary_betrothal_effect = {
+	$SUBJECT$ = {
+		create_betrothal = $PARTNER$
+	}
+}
+
+breedimp_p3_proto_create_matrilineal_betrothal_effect = {
+	$SUBJECT$ = {
+		create_betrothal_matrilineal = $PARTNER$
+	}
+}

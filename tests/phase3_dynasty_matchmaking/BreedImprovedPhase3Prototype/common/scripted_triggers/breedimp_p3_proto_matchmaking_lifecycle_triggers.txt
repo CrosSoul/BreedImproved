@@ -1,0 +1,47 @@
+# Breed Improved Phase 3 isolated prototype lifecycle guards.
+# Test-only, non-release, CK3 1.19.0.6. Runtime status: NOT RUN.
+
+breedimp_p3_proto_actor_can_open_entry_trigger = {
+	is_alive = yes
+	is_ai = no
+	is_dynast = yes
+	exists = dynasty
+	NOT = { exists = global_var:breedimp_p3_proto_active_actor }
+	NOT = { exists = global_var:breedimp_p3_proto_used_in_save }
+}
+
+breedimp_p3_proto_actor_can_activate_trigger = {
+	breedimp_p3_proto_actor_can_open_entry_trigger = yes
+}
+
+breedimp_p3_proto_active_actor_identity_trigger = {
+	exists = global_var:breedimp_p3_proto_used_in_save
+	global_var:breedimp_p3_proto_used_in_save = flag:breedimp_p3_proto_used
+	exists = global_var:breedimp_p3_proto_active_actor
+	global_var:breedimp_p3_proto_active_actor = root
+}
+
+breedimp_p3_proto_actor_authority_is_valid_trigger = {
+	is_alive = yes
+	is_ai = no
+	is_dynast = yes
+	exists = dynasty
+	exists = var:breedimp_p3_proto_managed_dynasty
+	var:breedimp_p3_proto_managed_dynasty = dynasty
+}
+
+breedimp_p3_proto_workflow_is_valid_trigger = {
+	breedimp_p3_proto_active_actor_identity_trigger = yes
+	breedimp_p3_proto_actor_authority_is_valid_trigger = yes
+	exists = global_var:breedimp_p3_proto_phase
+}
+
+breedimp_p3_proto_workflow_is_review_phase_trigger = {
+	breedimp_p3_proto_workflow_is_valid_trigger = yes
+	global_var:breedimp_p3_proto_phase = flag:breedimp_p3_proto_phase_review
+}
+
+breedimp_p3_proto_workflow_is_final_phase_trigger = {
+	breedimp_p3_proto_workflow_is_valid_trigger = yes
+	global_var:breedimp_p3_proto_phase = flag:breedimp_p3_proto_phase_final
+}

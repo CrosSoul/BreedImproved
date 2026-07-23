@@ -1,15 +1,19 @@
 # Breed Improved Phase 3 - Technical Approach Comparison
 
-Status: `APPROVED WITH P0 CHECKPOINT`
+Status: `P0 CORRECTED AND CLOSED`
 
 Target: Crusader Kings III `1.19.0.6 (Scribe)`
 
+Phase 3 isolated prototype:
+`STATIC IMPLEMENTATION COMPLETE — RUNTIME TEST REQUIRED`
+
 Runtime status: `NOT RUN`
 
-P0 status: `P0 COMPLETE — CHECKPOINT REVIEW REQUIRED`.
-P1 status: `P1 NOT STARTED / NOT AUTHORIZED`.
+P0 status: `P0 CORRECTED AND CLOSED`.
+P1-P5 status: `STATIC COMPLETE`.
+P6 status: `AWAITING RAY RUNTIME APPROVAL`.
 
-This document compares technical approaches for Phase 3 Dynasty Matchmaking Management and records the approved direction for a future isolated prototype. The prototype direction is a **Dynast-override model limited to the current, explicitly initiated workflow**. This is a guarded Breed Improved direct-execution pathway, not a vanilla CK3 permission, not evidence that a Dynast is every member's matchmaker, and not approval for production gameplay. It supersedes the earlier recommendation to limit the prototype to the actor's vanilla matchmaker authority.
+This document compares technical approaches for Phase 3 Dynasty Matchmaking Management and records the approved direction for the isolated prototype. The prototype direction is a **Dynast-override model limited to the current, explicitly initiated workflow**. This is a guarded Breed Improved direct-execution pathway, not a vanilla CK3 permission, not evidence that a Dynast is every member's matchmaker, and not approval for production gameplay. It supersedes the earlier recommendation to limit the prototype to the actor's vanilla matchmaker authority. Static work through P5 is complete; CK3 runtime remains `NOT RUN`.
 
 ## 1. Required product behavior
 
@@ -33,7 +37,7 @@ The approved prototype authority model is:
 - it applies only to the reviewed and finally confirmed same-Dynasty pairs;
 - it never grants a reusable global marriage permission or alters vanilla matchmaker ownership;
 - it performs no relationship change before final confirmation; and
-- every completion, cancellation, invalidation, or failure path must clear all workflow authorization and pair-plan state.
+- every reachable completion, cancellation, invalidation, or failure path must clear active workflow authorization and pair-plan state; the permanent prototype lock is retained.
 
 ## 2. Evidence baseline
 
@@ -54,6 +58,7 @@ All paths in this section are relative to the CK3 `game/` directory.
 | Dynamic best-minus-0.05 fertility tier | **REQUIRES PROTOTYPE** | `common/decisions/90_minor_decisions.txt:1669-1677`; `events/diarchy_events/vizierate_events.txt:200-229`; `common/script_values/_script_values.info` | Fertility and ordered-list components exist, but the complete dynamic filtering and scope lifetime have not been runtime-proven. |
 | Bounded accepted-pair state | **FEASIBLE WITH LIMITATIONS; REQUIRES PROTOTYPE** | Character variables: `events/yearly_events/bp1_yearly_james.txt:1067-1071,1153-1167`; identity equality: `events/board_game_events.txt:1173-1187`; flags: `events/board_game_events.txt:61-82,170-180`; guarded removal: `events/relations_events/adultery_events.txt:2696-2700` | P0 selects actor-owned numbered slots rather than character lists. Component types and comparisons are verified; combined tuple lifetime is not a runtime result. |
 | Single global coordinator | **FEASIBLE WITH LIMITATIONS; REQUIRES PROTOTYPE** | active actor storage/equality: `common/decisions/00_major_decisions_iberia_north_africa.txt:243-249`, `events/dlc/ep1/ep1_fund_inspiration_events.txt:945-956`; phase storage/equality: `common/scripted_effects/05_dlc_fp3_scripted_effects.txt:249-254`, `common/script_values/99_steward_values.txt:694-698`; guarded cleanup: `events/dlc/ep3/ep3_frankokratia_events.txt:4255-4266` | Actor and phase components are verified. Full lifecycle and multiplayer behavior require prototype validation. |
+| Permanent one-workflow-per-save lock | **FEASIBLE WITH LIMITATIONS; REQUIRES PROTOTYPE** | once-only pattern: `events/yearly_events/yearly_events_3.txt:3337-3350,3432-3448`; global flag form: `common/scripted_effects/05_dlc_fp3_scripted_effects.txt:249-254`, `common/script_values/99_steward_values.txt:694-698`; long-lived achievement globals: `common/scripted_effects/00_achievement_effects.txt:33-44`, `common/on_action/game_start.txt:5039-5042`, `common/achievements/fp1_achievements.txt:1-4` | `global_var:breedimp_p3_proto_used_in_save = flag:breedimp_p3_proto_used` composes the verified forms. The prototype's entry event sets it first only from the explicit activation option; opening the Decision or cancelling that event does not. It is never removed. Save/reload persistence remains a runtime gate. |
 | Additive lifecycle cleanup | **FEASIBLE WITH LIMITATIONS; REQUIRES PROTOTYPE** | `common/on_action/_on_actions.info:102-117`; `common/on_action/death.txt:1-6`; `common/on_action/dynasty_on_actions.txt:13-17`; `common/on_action/game_start.txt:2590-2592`; `events/_events.info:125-129`; `events/board_game_events.txt:1902-1910` | Additive child on-actions, actor-death root, new-Dynast root, load/start hook, and event `on_trigger_fail` exist. There is no verified generic visible-event close callback. |
 
 ## 3. Approach A - Open the native marriage interface
@@ -138,23 +143,32 @@ The prototype must include external-court and landed same-Dynasty cases. Their i
 
 ### 4.5 Authorization lifecycle and cleanup
 
-P0 selects a single global coordinator. Only one Phase 3 prototype workflow may be active globally. The coordinator stores only the active actor and phase. The active event chain holds its actor and recorded Dynasty scopes, and the actor owns review state and all accepted-pair slots. A second actor cannot start concurrently. This is a deliberate prototype limit, not a production multiplayer decision.
+P0 selects a single global coordinator and a separate permanent
+one-workflow-per-save lock. The coordinator stores only the active actor and
+phase. The actor stores the recorded Dynasty in a typed variable and owns
+review state and all accepted-pair slots. Opening the Decision only dispatches
+the pre-activation confirmation event; its explicit activation option writes
+the lock first, before coordinator state or candidate scanning. Cancelling that
+event consumes nothing. The lock grants no authorization, is never removed,
+and blocks every later workflow in that save. This conservative prototype limit
+avoids inventing the still-unverified numeric run identity; it is not a
+production multiplayer decision.
 
-Every mutable entry requires the same conjunction: matching coordinator actor and phase; matching event-chain actor and recorded Dynasty; actor alive and player-controlled; actor still Dynast of that Dynasty; and any participants still inside it. Stale storage alone therefore cannot grant the override.
+Every mutable entry requires the same conjunction: the current event root matches the coordinator actor and phase; the actor-owned `breedimp_p3_proto_managed_dynasty` variable exists and resolves to the recorded Dynasty; the actor is alive and player-controlled; the actor is still Dynast of that Dynasty; and any participants remain inside it. Stale storage alone therefore cannot grant the override.
 
 | Exit or invalidation | Physical cleanup strategy | Remaining gate |
 | --- | --- | --- |
-| Success | Central cleanup after the final operation removes actor slots/workflow metadata, then the coordinator | Combined runtime ordering |
-| Review cancel; final cancel; no candidates | The same cleanup runs before the terminal event exits; no relationship effect is reachable | Event-chain runtime |
-| Preflight failure | No relationship operation runs; show failure, then use the same cleanup | All-before-any behavior under runtime state changes |
-| Actor death | Every later entry rechecks `is_alive`; an additive child of `on_death` cleans when root is the coordinator actor | Exact hook/state timing and save/reload |
-| Actor loses Dynast status or changes Dynasty | Every later entry rechecks Dynast/Dynasty identity; an additive child of `on_became_dynasty_head` cleans if the new head is the active actor or the active actor is no longer Dynast | The vanilla hook has no former-head scope; transition ordering and coverage of every engine cause need runtime proof |
-| Queued/instant event trigger failure | Event-specific `on_trigger_fail` uses central cleanup | Only the documented event path is covered |
-| Abnormal visible-event close | Required contract: immediate logical invalidation and zero reachable relationship operations; stored coordinator/slot state may remain until recovery | No generic close callback or window-open predicate is verified, so enforcement of logical invalidation and timing of physical cleanup both require prototype proof |
-| Load/start with residue | An additive child of `on_game_start_after_lobby` clears residual coordinator and actor state | Exact save-load timing |
-| New start | Reject a different actor while the recorded actor passes the available global guard; allow a same-actor restart or invalid-residue recovery only after cleaning old actor state, incoming actor slots, and coordinator | Saved-Dynasty/run-identity gap and stale delayed-event collision test |
+| Success | Central cleanup after the final operation removes actor slots/workflow metadata, then the coordinator; permanent lock remains | Combined runtime ordering |
+| Review cancel; final cancel; no candidates | The same active-state cleanup runs before the terminal event exits; no relationship effect is reachable; permanent lock remains | Event-chain runtime |
+| Preflight failure | No relationship operation runs; actor variables retain the first failing numeric slot and reason for the failure page; acknowledging it uses the same active-state cleanup; permanent lock remains | All-before-any behavior and failure-result lifecycle under runtime state changes |
+| Actor death | Every later entry rechecks `is_alive`; an additive child of `on_death` cleans when root is the coordinator actor; permanent lock remains | Exact hook/state timing and save/reload |
+| Actor loses Dynast status or changes Dynasty | Every later entry rechecks Dynast/Dynasty identity; an additive child of `on_became_dynasty_head` cleans if the new head is the active actor or the active actor is no longer Dynast; permanent lock remains | The vanilla hook has no former-head scope; transition ordering and coverage of every engine cause need runtime proof |
+| Queued/instant event trigger failure | Event-specific `on_trigger_fail` uses central active-state cleanup; permanent lock remains | Only the documented event path is covered |
+| Abnormal visible-event close | No close callback or immediate-cleanup claim. The workflow has no delayed/background continuation, resume, or reauthorization path, so residual state is orphaned and cannot advance | UI-close behavior remains a runtime gate; the permanent lock blocks every later run |
+| Load/start with residue | An additive child of `on_game_start_after_lobby` may clear residual coordinator and actor state but never removes the lock or resumes the workflow | Exact save-load timing |
+| New start | If the permanent lock exists, reject every actor before activation | No restart, stale-run adoption, or numeric run-identity comparison exists |
 
-Save/reload, hook timing, stale event-context isolation, and abnormal event-chain termination remain mandatory runtime tests. No recurring pulse, timeout, candidate scan, or background matchmaking is part of cleanup.
+Save/reload, lock persistence, hook timing, stale event-context isolation, and abnormal event-chain termination remain mandatory runtime tests. No recurring pulse, timeout, delayed continuation, candidate scan, background matchmaking, resume, or reauthorization is part of cleanup.
 
 ### 4.6 Explicit non-effects
 
@@ -209,9 +223,9 @@ Replacing or cloning the large stock marriage interaction would create high comp
 
 ## 7. Selected isolated-prototype direction
 
-Jay and Ray's approved technical direction for the next separately authorized test implementation is Approach B with a **Dynast override limited to the current workflow**. This selects what the isolated prototype should investigate; it does not approve production implementation.
+Jay and Ray approved Approach B with a **Dynast override limited to the current workflow** for the isolated prototype. P1-P5 are now statically implemented; P6 runtime execution still requires Ray's explicit approval. This does not approve production implementation.
 
-The prototype should prove:
+P6 runtime validation must determine:
 
 1. all four adult/minor and ordinary/matrilineal relationship modes;
 2. full-plan preflight followed by multi-pair execution;
@@ -263,10 +277,18 @@ P0 selects the initiating actor as the sole pair-plan owner. Participant charact
 2. `partner` - character;
 3. `direction` - ordinary or matrilineal flag value;
 4. `relationship_type` - marriage or betrothal flag value;
-5. `placeholder_state` - normal or placeholder flag value; and
-6. `reservation_id` - slot-specific flag value, written last.
+5. `placeholder` - the explicit `none` flag in this infrastructure prototype;
+   and
+6. `reservation_id` - a second character reference to that slot's `subject`,
+   written last.
 
-`reservation_id` is the commit marker. A slot is usable only when all five prior fields exist and the final value matches that slot's expected prefixed flag. An interrupted partial write is therefore not a pair and must be ignored and cleaned.
+`reservation_id` is the commit marker. A slot is usable only when all five prior
+fields exist and the final character reference equals that slot's `subject`.
+The slot-specific variable name and subject equality provide the reservation
+identity without embedded flag-name construction. An interrupted partial write
+is therefore not a pair: it reserves no character, appears in no summary,
+cannot execute, causes preflight failure if it remains in a non-empty slot, and
+is then cleaned.
 
 Every field removal must first check `exists = var:<static_name>`. The exact
 vanilla removal evidence does not establish that removing an absent variable is
@@ -278,7 +300,7 @@ Before committing a slot, both proposed characters are compared with both partic
 
 The global coordinator permits only one active plan across the prototype. P0 does not select a numeric run serial: although increment and capture components exist, no exact CK3 `1.19.0.6` comparison was found between a saved numeric workflow identity and a global serial. That possible stale-context discriminator remains **NOT VERIFIED** and cannot enter runnable script without separate evidence or approval.
 
-The selected representation remains subject to runtime proof for save/reload persistence, visible final-summary access, interrupted writes, cleanup timing, and consecutive runs. It does not use save-game numeric character IDs and does not treat parallel lists as tuples.
+The selected representation remains subject to runtime proof for save/reload persistence, visible final-summary access, interrupted writes, cleanup timing, permanent-lock persistence, and rejection of every second activation attempt in the same save. It does not use save-game numeric character IDs and does not treat parallel lists as tuples. Repeated activated workflows are intentionally impossible in this prototype and remain a future architecture question.
 
 ## 9. Candidate generation and performance
 
@@ -295,7 +317,7 @@ The dynamic tier, staged ranking, and large-Dynasty responsiveness are **REQUIRE
 
 ## 10. Isolated prototype path and metadata contract
 
-P0 reserves the following future test-only root:
+P0 allocates the following isolated test-only root:
 
 ```text
 tests/phase3_dynasty_matchmaking/
@@ -314,17 +336,33 @@ tests/phase3_dynasty_matchmaking/
       simp_chinese/
 ```
 
-This is an allocation, not authorization to create the files. P1 is not started or authorized.
+This is an isolated test allocation, not production authorization. P1-P5 static
+work is complete; P6 is `AWAITING RAY RUNTIME APPROVAL`.
 
-The outer `.mod` will use the established portable `<LOCAL_MOD_PATH>` launcher placeholder. The inner `descriptor.mod` will contain no `path` and no `remote_file_id`. Both identify **Breed Improved Phase 3 Prototype**, use `version="0.1.0"` and `supported_version="1.19.*"`, and remain test-only/non-release. No prototype file may enter production or Workshop staging.
+The outer `.mod` uses the established portable `<LOCAL_MOD_PATH>` launcher
+placeholder. The inner `descriptor.mod` contains no `path` and no
+`remote_file_id`. Both identify **Breed Improved Phase 3 Prototype**, use
+`version="0.1.0"` and `supported_version="1.19.*"`, and remain
+test-only/non-release. No prototype file may enter production or Workshop
+staging.
 
-The English and Simplified Chinese files will use matching key sets, the exact headers `l_english:` and `l_simp_chinese:`, quoted values with the established one-space indentation, `.yml` extensions in their respective directories, and UTF-8 with BOM. These requirements follow the existing Phase 1 test localisation and runtime-accepted production bilingual files; they do not approve any final player-facing text.
+The English and Simplified Chinese files use matching key sets, the exact
+headers `l_english:` and `l_simp_chinese:`, quoted values with the established
+one-space indentation, `.yml` extensions in their respective directories, and
+UTF-8 with BOM. These requirements follow the existing Phase 1 test
+localisation and runtime-accepted production bilingual files; they do not
+approve final Phase 3 player-facing text.
 
-The test event namespace is allocated as `breedimp_matchmaking_validation`, with the non-overlapping range `1000-1199`. This range is prototype-only. It was checked against current repository identifiers and does not allocate any production namespace.
+The test event namespace is allocated as `breedimp_p3_proto_matchmaking`, with the non-overlapping range `1000-1199`. This range is prototype-only and does not allocate any production namespace.
+
+The existing Phase 1/2 production baseline, including v0.2.0, is already
+published on Steam Workshop item `3769010534`. GitHub remains the source and
+release-record channel, while that Workshop item is the player-distribution
+channel. The Phase 3 prototype must not enter either release artifact.
 
 ### 10.1 Provisional production file scope
 
-If a later prototype is approved and passes, production would likely require additive, project-prefixed files in these existing CK3 content families:
+If the existing isolated prototype passes P6 and production implementation is separately approved, production would likely require additive, project-prefixed files in these existing CK3 content families:
 
 | Responsibility | Provisional path |
 | --- | --- |
@@ -360,16 +398,21 @@ P0 evidence registration and design closure is complete. The checkpoint records:
 - one global workflow coordinator;
 - actor-owned 16-slot pair plan with six fields per slot and `reservation_id` written last;
 - centralized explicit cleanup plus additive death, Dynasty-head, and load/start lifecycle hooks;
-- namespace `breedimp_matchmaking_validation`, event IDs `1000-1199`;
+- permanent one-workflow-per-save lock, with no numeric run identity, restart,
+  resume, or delayed/background continuation;
+- namespace `breedimp_p3_proto_matchmaking`, event IDs `1000-1199`;
 - isolated test path, descriptor, localisation-header, encoding, and BOM contract; and
 - CK3 runtime `NOT RUN`.
 
-P1 is `P1 NOT STARTED / NOT AUTHORIZED`. Work stops for checkpoint review.
+P0 is `CORRECTED AND CLOSED`; P1-P5 are `STATIC COMPLETE`; P6 is
+`AWAITING RAY RUNTIME APPROVAL`. Production remains `NOT APPROVED`, and CK3 runtime remains
+`NOT RUN`.
 
 No production implementation should begin until:
 
-- P1 and each later prototype stage receives the required approval;
-- the remaining context-dependent pair-plan and cleanup forms pass static implementation review;
+- P6 runtime validation is approved and completed by Ray;
+- the context-dependent pair-plan, permanent-lock, and cleanup forms pass their
+  runtime matrix;
 - the four relationship modes, external-court targets, and landed targets complete their runtime matrix;
 - direct-effect side effects are compared with native-interaction behavior;
 - the genetic trait model is separately approved;

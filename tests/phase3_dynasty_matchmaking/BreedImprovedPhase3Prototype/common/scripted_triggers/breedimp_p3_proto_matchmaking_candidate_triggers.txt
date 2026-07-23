@@ -1,0 +1,171 @@
+# Breed Improved Phase 3 isolated prototype candidate and pair guards.
+# Dynast override bypasses only native arrangement authority and AI acceptance.
+# Test-only, non-release, CK3 1.19.0.6. Runtime status: NOT RUN.
+
+breedimp_p3_proto_slot_does_not_reserve_character_trigger = {
+	OR = {
+		NOT = {
+			breedimp_p3_proto_slot_is_committed_trigger = { SLOT = $SLOT$ }
+		}
+		AND = {
+			breedimp_p3_proto_slot_is_committed_trigger = { SLOT = $SLOT$ }
+			NOT = { var:breedimp_p3_proto_slot_$SLOT$_subject = $CHARACTER$ }
+			NOT = { var:breedimp_p3_proto_slot_$SLOT$_partner = $CHARACTER$ }
+		}
+	}
+}
+
+breedimp_p3_proto_character_is_unreserved_trigger = {
+	$ACTOR$ = {
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 1 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 2 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 3 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 4 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 5 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 6 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 7 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 8 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 9 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 10 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 11 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 12 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 13 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 14 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 15 CHARACTER = $CHARACTER$ }
+		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 16 CHARACTER = $CHARACTER$ }
+	}
+}
+
+breedimp_p3_proto_subject_candidate_trigger = {
+	is_alive = yes
+	is_ai = yes
+	is_married = no
+	is_betrothed = no
+	is_imprisoned = no
+	is_hostage = no
+	is_concubine = no
+	is_pregnant = no
+	exists = dynasty
+	dynasty = $ACTOR$.var:breedimp_p3_proto_managed_dynasty
+	NOT = { this = $ACTOR$ }
+	breedimp_p3_proto_character_is_unreserved_trigger = {
+		ACTOR = $ACTOR$
+		CHARACTER = this
+	}
+}
+
+breedimp_p3_proto_pair_age_policy_trigger = {
+	NOT = {
+		AND = {
+			is_adult = no
+			$PARTNER$ = {
+				OR = {
+					AND = {
+						is_female = yes
+						age >= 30
+					}
+					AND = {
+						is_male = yes
+						age >= 40
+					}
+				}
+			}
+		}
+	}
+	NOT = {
+		AND = {
+			$PARTNER$ = { is_adult = no }
+			OR = {
+				AND = {
+					is_female = yes
+					age >= 30
+				}
+				AND = {
+					is_male = yes
+					age >= 40
+				}
+			}
+		}
+	}
+}
+
+breedimp_p3_proto_pair_has_no_direct_ancestry_trigger = {
+	save_temporary_scope_as = breedimp_p3_proto_pair_subject_temp
+	NOT = {
+		any_ancestor = {
+			this = $PARTNER$
+		}
+	}
+	$PARTNER$ = {
+		NOT = {
+			any_ancestor = {
+				this = scope:breedimp_p3_proto_pair_subject_temp
+			}
+		}
+	}
+}
+
+breedimp_p3_proto_pair_core_is_eligible_trigger = {
+	save_temporary_scope_as = breedimp_p3_proto_pair_subject_for_legality
+	is_alive = yes
+	is_ai = yes
+	is_married = no
+	is_betrothed = no
+	is_imprisoned = no
+	is_hostage = no
+	is_concubine = no
+	is_pregnant = no
+	exists = dynasty
+	dynasty = $ACTOR$.var:breedimp_p3_proto_managed_dynasty
+	NOT = { this = $PARTNER$ }
+
+	$PARTNER$ = {
+		is_alive = yes
+		is_ai = yes
+		is_married = no
+		is_betrothed = no
+		is_imprisoned = no
+		is_hostage = no
+		is_concubine = no
+		is_pregnant = no
+		exists = dynasty
+		dynasty = $ACTOR$.var:breedimp_p3_proto_managed_dynasty
+	}
+
+	can_marry_character_trigger = { CHARACTER = $PARTNER$ }
+	$PARTNER$ = {
+		can_marry_character_trigger = {
+			CHARACTER = scope:breedimp_p3_proto_pair_subject_for_legality
+		}
+	}
+	breedimp_p3_proto_pair_has_no_direct_ancestry_trigger = { PARTNER = $PARTNER$ }
+	breedimp_p3_proto_pair_age_policy_trigger = { PARTNER = $PARTNER$ }
+}
+
+breedimp_p3_proto_pair_is_eligible_trigger = {
+	breedimp_p3_proto_pair_core_is_eligible_trigger = {
+		ACTOR = $ACTOR$
+		PARTNER = $PARTNER$
+	}
+	breedimp_p3_proto_character_is_unreserved_trigger = {
+		ACTOR = $ACTOR$
+		CHARACTER = this
+	}
+	$PARTNER$ = {
+		breedimp_p3_proto_character_is_unreserved_trigger = {
+			ACTOR = $ACTOR$
+			CHARACTER = this
+		}
+	}
+}
+
+breedimp_p3_proto_current_pair_is_eligible_trigger = {
+	exists = scope:breedimp_p3_proto_current_subject
+	exists = scope:breedimp_p3_proto_current_partner
+	scope:breedimp_p3_proto_current_subject = {
+		breedimp_p3_proto_pair_is_eligible_trigger = {
+			ACTOR = root
+			PARTNER = scope:breedimp_p3_proto_current_partner
+		}
+	}
+}

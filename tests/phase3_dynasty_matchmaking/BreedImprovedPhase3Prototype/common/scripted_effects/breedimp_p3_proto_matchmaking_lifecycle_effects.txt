@@ -1,0 +1,192 @@
+# Breed Improved Phase 3 isolated prototype lifecycle and cleanup effects.
+# The permanent one-workflow-per-save lock is intentionally never removed.
+# Test-only, non-release, CK3 1.19.0.6. Runtime status: NOT RUN.
+
+breedimp_p3_proto_clear_slot_effect = {
+	if = {
+		limit = { exists = var:breedimp_p3_proto_slot_$SLOT$_subject }
+		remove_variable = breedimp_p3_proto_slot_$SLOT$_subject
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_slot_$SLOT$_partner }
+		remove_variable = breedimp_p3_proto_slot_$SLOT$_partner
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_slot_$SLOT$_direction }
+		remove_variable = breedimp_p3_proto_slot_$SLOT$_direction
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_slot_$SLOT$_relationship_type }
+		remove_variable = breedimp_p3_proto_slot_$SLOT$_relationship_type
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_slot_$SLOT$_placeholder }
+		remove_variable = breedimp_p3_proto_slot_$SLOT$_placeholder
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_slot_$SLOT$_reservation_id }
+		remove_variable = breedimp_p3_proto_slot_$SLOT$_reservation_id
+	}
+}
+
+breedimp_p3_proto_clear_event_lists_effect = {
+	every_in_list = {
+		list = breedimp_p3_proto_subjects
+		remove_from_list = breedimp_p3_proto_subjects
+	}
+	every_in_list = {
+		list = breedimp_p3_proto_reviewed_subjects
+		remove_from_list = breedimp_p3_proto_reviewed_subjects
+	}
+	every_in_list = {
+		list = breedimp_p3_proto_deferred_subjects
+		remove_from_list = breedimp_p3_proto_deferred_subjects
+	}
+	every_in_list = {
+		list = breedimp_p3_proto_partner_candidates
+		remove_from_list = breedimp_p3_proto_partner_candidates
+	}
+	every_in_list = {
+		list = breedimp_p3_proto_rejected_partners
+		remove_from_list = breedimp_p3_proto_rejected_partners
+	}
+}
+
+breedimp_p3_proto_clear_actor_state_effect = {
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 1 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 2 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 3 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 4 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 5 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 6 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 7 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 8 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 9 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 10 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 11 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 12 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 13 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 14 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 15 }
+	breedimp_p3_proto_clear_slot_effect = { SLOT = 16 }
+
+	breedimp_p3_proto_clear_event_lists_effect = yes
+
+	if = {
+		limit = { exists = var:breedimp_p3_proto_managed_dynasty }
+		remove_variable = breedimp_p3_proto_managed_dynasty
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_accepted_pair_count }
+		remove_variable = breedimp_p3_proto_accepted_pair_count
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_dynasty_member_count }
+		remove_variable = breedimp_p3_proto_dynasty_member_count
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_subject_count }
+		remove_variable = breedimp_p3_proto_subject_count
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_current_partner_count }
+		remove_variable = breedimp_p3_proto_current_partner_count
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_current_legality_check_count }
+		remove_variable = breedimp_p3_proto_current_legality_check_count
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_current_sort_candidate_count }
+		remove_variable = breedimp_p3_proto_current_sort_candidate_count
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_failure_slot }
+		remove_variable = breedimp_p3_proto_failure_slot
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_failure_reason }
+		remove_variable = breedimp_p3_proto_failure_reason
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_preflight_passed }
+		remove_variable = breedimp_p3_proto_preflight_passed
+	}
+}
+
+breedimp_p3_proto_cleanup_workflow_effect = {
+	breedimp_p3_proto_clear_actor_state_effect = yes
+
+	if = {
+		limit = { exists = global_var:breedimp_p3_proto_phase }
+		remove_global_variable = breedimp_p3_proto_phase
+	}
+	if = {
+		limit = { exists = global_var:breedimp_p3_proto_active_actor }
+		remove_global_variable = breedimp_p3_proto_active_actor
+	}
+}
+
+breedimp_p3_proto_cleanup_active_workflow_effect = {
+	if = {
+		limit = { exists = global_var:breedimp_p3_proto_active_actor }
+		global_var:breedimp_p3_proto_active_actor = {
+			breedimp_p3_proto_cleanup_workflow_effect = yes
+		}
+	}
+	else = {
+		if = {
+			limit = { exists = global_var:breedimp_p3_proto_phase }
+			remove_global_variable = breedimp_p3_proto_phase
+		}
+	}
+}
+
+breedimp_p3_proto_activate_workflow_effect = {
+	# Remove orphaned actor-owned state before consuming the save-wide run.
+	breedimp_p3_proto_clear_actor_state_effect = yes
+
+	# The permanent lock is written first and is never cleared.
+	set_global_variable = {
+		name = breedimp_p3_proto_used_in_save
+		value = flag:breedimp_p3_proto_used
+	}
+	set_global_variable = {
+		name = breedimp_p3_proto_active_actor
+		value = root
+	}
+	set_global_variable = {
+		name = breedimp_p3_proto_phase
+		value = flag:breedimp_p3_proto_phase_review
+	}
+	set_variable = {
+		name = breedimp_p3_proto_managed_dynasty
+		value = root.dynasty
+	}
+	set_variable = {
+		name = breedimp_p3_proto_accepted_pair_count
+		value = 0
+	}
+	set_variable = {
+		name = breedimp_p3_proto_dynasty_member_count
+		value = 0
+	}
+	set_variable = {
+		name = breedimp_p3_proto_subject_count
+		value = 0
+	}
+	set_variable = {
+		name = breedimp_p3_proto_current_partner_count
+		value = 0
+	}
+	set_variable = {
+		name = breedimp_p3_proto_current_legality_check_count
+		value = 0
+	}
+	set_variable = {
+		name = breedimp_p3_proto_current_sort_candidate_count
+		value = 0
+	}
+
+	breedimp_p3_proto_build_subject_list_effect = yes
+}

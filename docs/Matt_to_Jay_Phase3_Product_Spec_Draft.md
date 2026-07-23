@@ -5,19 +5,30 @@ Prepared by Matt (CK3ModDeveloper) for Jay (CK3ModLeader).
 - CK3 evidence target: `1.19.0.6 (Scribe)`
 - Production compatibility target: `1.19.*`
 - Document status: `DRAFT — PROTOTYPE DIRECTION APPROVED; PRODUCT REVIEW CONTINUES`
+- Phase 3 isolated prototype:
+  `STATIC IMPLEMENTATION COMPLETE — RUNTIME TEST REQUIRED`
 - Implementation status: `PRODUCTION NOT APPROVED`
 - Approved prototype direction: `WORKFLOW-SCOPED DYNAST OVERRIDE / DIRECT EXECUTION`
-- Prototype status: `NOT CREATED`
+- P0 status: `P0 CORRECTED AND CLOSED`
+- P1-P5 status: `STATIC COMPLETE`
+- P6 status: `AWAITING RAY RUNTIME APPROVAL`
+- Prototype event allocation: `breedimp_p3_proto_matchmaking.1000-1199`
 - CK3 runtime status: `NOT RUN`
 
 This document defines the proposed player-facing contract for Phase 3. It does
-not authorize gameplay implementation. Technical feasibility, vanilla evidence,
+not authorize production gameplay. P1-P5 static work is complete, but all
+runtime behavior remains unverified. Technical feasibility, vanilla evidence,
 and approach-specific risks are recorded separately in:
 
 - `docs/research/Matt_Phase3_Dynasty_Matchmaking_Feasibility.md`; and
 - `docs/Matt_to_Jay_Phase3_Technical_Approach_Comparison.md`.
 
 No CK3 script form should be inferred from the product terms used here.
+
+The existing Phase 1/2 production baseline, including v0.2.0, is already
+published on Steam Workshop item `3769010534`. GitHub remains the source and
+release-record channel; the Workshop item is the player-distribution channel.
+The isolated Phase 3 prototype is not part of either published release.
 
 ## 1. Requirement status
 
@@ -358,6 +369,14 @@ For the approved prototype, entry must verify that the initiator is the living,
 player-controlled current Dynast before creating any workflow authorization or
 candidate state.
 
+The isolated prototype permits only one confirmed Phase 3 workflow in each
+save. Opening the Decision only dispatches its pre-activation confirmation
+event and does not consume that opportunity. Cancelling that event also
+consumes nothing. Its explicit activation option writes the permanent lock
+before coordinator state or candidate discovery. The lock is not authorization,
+is never cleared, and blocks every later Phase 3 prototype workflow in that
+save.
+
 The workflow builds its active subjects and potential partners from the
 current Dynasty and applies the approved hard eligibility, authority, and
 protection rules before showing a proposed pair.
@@ -546,6 +565,12 @@ Workflow authorization must:
 5. cease to exist as soon as that run completes, aborts, becomes invalid, or is
    abandoned.
 
+The separate permanent lock grants no authority. It records only that the
+save's single prototype workflow has been consumed. Active authorization and
+temporary plan state are cleaned where an explicit event option or verified
+lifecycle hook provides a reachable cleanup path; the permanent lock is never
+cleaned.
+
 The prototype must remove or invalidate all workflow authorization,
 reservations, rejected-pair records, deferred state, accepted-pair state, and
 other temporary run data in every applicable case:
@@ -563,13 +588,19 @@ other temporary run data in every applicable case:
 - either participant leaving the current Dynasty before execution;
 - save/reload during an active workflow, whether the approved behavior is safe
   restoration or safe abortion;
-- an interrupted or unexpectedly terminated event chain; and
-- starting a new workflow when stale state from an earlier run is detected.
+- a queued or instant event failing its trigger; and
+- every explicit terminal option in the event chain.
 
 Cleanup must not create, remove, or alter a marriage or betrothal. It must not
-run as a periodic or background matchmaking process. If an interrupted chain
-cannot clean immediately, the next explicit workflow entry must reject and
-clear the stale authorization before creating a new run.
+run as a periodic or background matchmaking process.
+
+There is no verified generic callback for an unexpectedly closed visible event.
+The prototype therefore does not claim immediate cleanup or a detected close.
+It schedules no delayed/background continuation and exposes no resume or
+reauthorization path. Such a chain is treated as orphaned and permanently
+locked: residual temporary state cannot advance, and the permanent lock blocks
+every later workflow in that save. A lifecycle cleanup hook may remove residue,
+but it must not remove the lock or resume the chain.
 
 Reliable lifecycle isolation, every cleanup path, and save/reload handling are
 `REQUIRES PROTOTYPE`. Any residual authorization usable outside its originating
@@ -703,23 +734,25 @@ During one run:
   player's recorded choice;
 - an invalid combination cannot reach final execution; and
 - cancellation must clear workflow-only state and authorization without
-  changing gameplay.
+  changing gameplay, while retaining the permanent one-workflow-per-save lock.
 
 ### Prototype gate
 
 Phase 2's sequential review and final-confirmation concept is suitable as a
 product model, but Phase 3 must store a pair, direction, outcome type, and
 placeholder status rather than one character. The required pair-state model,
-save/reload continuity, cleanup on every exit path, and final summary are
-`REQUIRES PROTOTYPE`.
+save/reload continuity, explicit cleanup plus orphaned-close behavior, and final
+summary are `REQUIRES PROTOTYPE`.
 
 The product must not promise an unlimited number of accepted pairs until the
 state and UI limits are measured.
 
 The state model must also make workflow authorization inseparable from its
-originating run. A pair record surviving after its authorization has been
-cleaned, or authorization surviving after its pair records have been cleaned,
-is a prototype failure.
+originating run. No residual pair record may be executable after active
+authorization is cleaned or orphaned. The permanent lock is intentionally
+separate: it grants nothing and survives every terminal path. Abnormal-close
+residue is acceptable only if it is unreachable, cannot resume, and cannot be
+used by another run.
 
 ## 15. Approved isolated prototype direction
 
@@ -748,7 +781,9 @@ The isolated Phase 3 prototype must demonstrate:
 - full-batch prevalidation;
 - direct execution only after explicit final confirmation;
 - full-batch abort before any relationship if one pair is invalid; and
-- complete authorization and workflow-state cleanup on every lifecycle path.
+- explicit authorization and workflow-state cleanup on every reachable terminal
+  or lifecycle-hook path, with abnormal closure becoming orphaned and
+  permanently locked rather than claiming an unavailable close callback.
 
 This approves an isolated, workflow-authorized direct-execution prototype for
 technical evaluation. It does not approve that approach for production. The
@@ -799,9 +834,14 @@ The following are fixed for the prototype:
 - Grand Wedding: not supported in the prototype;
 - invalidation policy: prevalidate the complete batch and abort before any
   relationship if one pair is invalid; and
-- lifecycle policy: clean authorization and all workflow state on every
-  completion, cancellation, abort, invalidation, interruption, and stale-run
-  recovery path.
+- run-identity policy: numeric run identity remains unverified, so the prototype
+  permits one confirmed workflow per save and keeps its permanent lock forever;
+- lifecycle policy: clean active authorization and temporary state on every
+  explicit completion, cancellation, abort, invalidation, and verified
+  lifecycle-hook path; and
+- abnormal-close policy: no close callback, delayed/background continuation,
+  resume, or reauthorization is claimed; the run becomes orphaned and the save
+  remains locked.
 
 These decisions do not approve production gameplay.
 
@@ -856,9 +896,13 @@ demonstrates all approved criteria below in CK3:
 
 - only a living, player-controlled current Dynast can start the prototype
   workflow;
+- the permanent lock is set only by the entry event's explicit activation option, survives
+  every outcome and save/reload, and blocks every second workflow in the save;
 - workflow authorization is limited to its originating run and is removed or
-  invalidated on every required completion, cancellation, abort, interruption,
-  save/reload, and stale-run path;
+  made unreachable on every required completion, cancellation, abort,
+  interruption, and save/reload path;
+- an abnormally closed visible event never resumes, reauthorizes, schedules
+  delayed/background execution, or reaches a relationship operation;
 - the override bypasses only ordinary matchmaker authority and AI acceptance,
   never vanilla legality, faith, consanguinity, marriage status, safety,
   protection, or product-level hard exclusions;

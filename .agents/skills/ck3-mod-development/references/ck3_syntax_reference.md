@@ -754,6 +754,20 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Minimal verified example: `var:stored_character = scope:expected_character`
 - Restrictions and notes: existence should be checked before equality. This establishes the identity comparison needed to search subject and partner roles; it does not make a six-field slot atomic.
 
+### Scope-owned Dynasty variables and equality
+
+- Status: `VERIFIED COMPONENTS; PROPOSED ACTOR-OWNED LIFETIME REQUIRES PROTOTYPE`
+- Category: typed scope-variable storage, dereference, and identity comparison
+- CK3 version: `1.19.0.6`
+- File family: event effects, artifact effects, and later trigger blocks on the same variable owner
+- Enclosing context: an effect on the variable-owning scope followed by a trigger or effect that can access the same owner
+- Input scope: variable owner plus a valid Dynasty scope
+- Output scope or state change: stores a typed Dynasty reference and later compares or enters that Dynasty; no Dynasty gameplay mutation
+- Arguments: `set_variable = { name = <name> value = <character_scope>.dynasty }`, `exists = var:<name>`, and `var:<name> = <dynasty_scope>`
+- Evidence: Dynasty storage at `events/interaction_events/adoption_events.txt:83-98`; artifact-owned Dynasty storage at `common/scripted_effects/01_ep1_court_artifact_creation_effects.txt:1469-1476`; equality and dereference at `events/court_maintenance_events.txt:597-618,663-680` and `common/character_interactions/00_artifact_interactions.txt:4046-4077`
+- Minimal verified example: `set_variable = { name = recorded_dynasty value = scope:actor.dynasty }`, later guarded by `exists = var:recorded_dynasty` before `var:recorded_dynasty = scope:actor.dynasty`
+- Restrictions and notes: the cited storage owners are memories and artifacts, while the Phase 3 composition stores the Dynasty on the workflow actor. Typed Dynasty storage and equality are verified variable primitives, but the proposed actor-owned, multi-event, save/reload lifetime remains a P6 runtime gate. Always verify that the actor is highborn and that both the saved variable and the comparison Dynasty exist.
+
 ### Flag-valued variables and equality
 
 - Status: `VERIFIED`
@@ -767,6 +781,34 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Evidence: `events/board_game_events.txt:61-82,170-180`
 - Minimal verified example: `set_variable = { name = result value = flag:success }`
 - Restrictions and notes: this verifies enum-like flag values. It does not make a multi-field record atomic. Breed Improved's Phase 3 reservation marker must be written last and checked with every other required field.
+
+### Parameter-expanded variable names and flag enum values
+
+- Status: `VERIFIED`
+- Category: scripted-effect argument substitution
+- CK3 version: `1.19.0.6`
+- File family: parameterized scripted effects and their explicit callers
+- Enclosing context: a scripted-effect definition that consumes a caller-supplied token
+- Input scope: the scripted effect's current scope plus fixed caller arguments
+- Output scope or state change: resolves a variable name or flag enum token before applying the enclosed verified variable operation
+- Arguments: embedded name form such as `name = education_$SKILL$_variable`; whole flag-token form such as `value = flag:$POS$`
+- Evidence: embedded variable-name parameter and five explicit calls at `events/culture_events/culture_tradition_events.txt:844-873`; parameter-expanded flag value at `events/court_events/01_ep3_court_events.txt:3263-3280`; additional flag parameter and call evidence at `events/board_game_events.txt:29-44,1948-1951`
+- Minimal verified example: define `name = pair_$SLOT$_subject` and call the scripted effect with a fixed approved `SLOT = 1`; pass a complete approved flag token through `value = flag:$ENUM$`
+- Restrictions and notes: this is scripted-argument expansion from explicit call-site tokens, not runtime string construction, array indexing, or player-supplied data. Phase 3 may call helpers only with the fixed whitelisted slots `1` through `16` and complete approved enum tokens. The evidence verifies an embedded variable-name parameter and a whole flag-token parameter separately; do not invent an unevidenced embedded form such as `flag:prefix_$SLOT$` when the complete prefixed token can be passed as `$ENUM$`.
+
+### Numeric scope variables and `change_variable`
+
+- Status: `VERIFIED`
+- Category: numeric variable initialization and mutation
+- CK3 version: `1.19.0.6`
+- File family: event and scripted-effect blocks on a variable-owning scope
+- Enclosing context: effect block on the same owner that stores and later changes the numeric variable
+- Input scope: variable owner and numeric value
+- Output scope or state change: initializes or increments/decrements a numeric variable
+- Arguments: `set_variable = { name = <name> value = <number> }` followed by `change_variable = { name = <name> add = <number_or_formula> }`; a parameterized scripted effect may use `value = $VALUE$` when its explicit caller supplies a numeric token
+- Evidence: initialization to zero and later `add = 1` or `add = -1` at `events/court_events/introduce_court_fashion_events.txt:84-109,157-175`; parameter-expanded fixed name at `events/culture_events/culture_tradition_events.txt:844-858`; numeric `value = $VALUE$` at `common/scripted_effects/00_achievement_effects.txt:33-44` with explicit numeric caller at `common/on_action/game_start.txt:5333-5339`
+- Minimal verified example: initialize `accepted_pair_count` to `0`, then `change_variable = { name = accepted_pair_count add = 1 }`; for a diagnostic assignment, call a fixed helper with `VALUE = 1` and store `value = $VALUE$`
+- Restrictions and notes: initialize the numeric variable before changing it. This verifies bounded counters, not an atomic transaction with the six pair fields. Counter/record agreement after interruption and save/reload remains a P6 runtime test.
 
 ### Global character variables and identity
 
@@ -796,6 +838,20 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Minimal verified example: `global_var:active_phase = flag:review`
 - Restrictions and notes: existence should be checked before equality. This verifies a phase component, not the combined workflow lifecycle.
 
+### Permanent global one-workflow-per-save lock
+
+- Status: `VERIFIED COMPONENTS; SAVE/RELOAD PERSISTENCE REQUIRES P6`
+- Category: global scalar/flag marker, existence guard, and project lifecycle policy
+- CK3 version: `1.19.0.6`
+- File family: Decisions, events, scripted effects, on_actions, and achievement triggers
+- Enclosing context: a pre-activation trigger checks nonexistence; the explicit entry-confirmation option calls an activation effect that sets the global marker first; no approved cleanup path removes it
+- Input scope: global variable name and a fixed marker value
+- Output scope or state change: consumes the isolated prototype's only activation opportunity in the current save
+- Arguments: `NOT = { exists = global_var:<lock_name> }` followed by `set_global_variable = { name = <lock_name> value = yes }`; the independently verified enum form may instead store `value = flag:<fixed_value>`
+- Evidence: same-event nonexistence guard and set-to-`yes` once-only patterns at `events/yearly_events/yearly_events_3.txt:3337-3350,3432-3448`; long-lived achievement-global set and later existence check at `common/scripted_effects/00_achievement_effects.txt:33-44`, `common/on_action/game_start.txt:5039-5042`, and `common/achievements/fp1_achievements.txt:1-4`; global `flag:` storage and equality at `common/scripted_effects/05_dlc_fp3_scripted_effects.txt:23-28` and `common/scripted_triggers/06_fp3_scripted_triggers.txt:206-211`
+- Minimal verified example: reject activation while `exists = global_var:prototype_lock`; from the explicit confirmation option, set the lock before creating coordinator state or scanning candidates; never call `remove_global_variable` for that lock
+- Restrictions and notes: “never clear the lock” is the approved Breed Improved isolated-prototype policy, not a separate CK3 command. The lock is only an activation barrier and never grants workflow authority. Opening the Decision or cancelling its entry-confirmation event must not set it. Static script proves the guard/set design, but save serialization, persistence after reload, and every UI lifecycle path require P6. This lock deliberately prevents every second workflow in the same save after completion, cancellation, failure, actor death, Dynast loss, or an orphaned visible event.
+
 ### Dynasty scope capture with `save_scope_as`
 
 - Status: `VERIFIED`
@@ -808,7 +864,7 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Arguments: `dynasty = { save_scope_as = <name> }`
 - Evidence: `events/court_maintenance_events.txt:609`; `events/religion_events/faith_conversion_events.txt:339-340`
 - Minimal verified example: `dynasty = { save_scope_as = workflow_dynasty }`
-- Restrictions and notes: exact scope capture is verified. Continuity across a long visible-event chain, abnormal closure, and save/reload remains a runtime prototype question.
+- Restrictions and notes: exact scope capture is verified. Continuity across a long visible-event chain and save/reload remains a runtime prototype question. If a visible event closes unexpectedly, no generic close callback or immediate cleanup is claimed; the approved isolated-prototype result is an orphaned, permanently locked workflow with no resume, reauthorization, delayed execution, or background execution.
 
 ### Event namespace declaration and namespaced numeric ID
 
@@ -822,7 +878,7 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Arguments: `namespace = <namespace>` followed by `<namespace>.<numeric_id> = { ... }`
 - Evidence: `events/_events.info:5-10`; existing project events in `MyCK3Mod/events/breedimp_dynasty_cleanup_events.txt`
 - Minimal verified example: `namespace = my_events`, followed by `my_events.1001 = { type = character_event ... }`
-- Restrictions and notes: the approved Phase 3 test namespace is `breedimp_matchmaking_validation`, range `1000`-`1199`. P0 allocates the range but creates no event.
+- Restrictions and notes: the approved Phase 3 isolated-prototype namespace is `breedimp_p3_proto_matchmaking`, range `1000`-`1199`. P0 is corrected and closed; P1-P5 are static-complete, but runtime remains `NOT RUN`.
 
 ### Generic event fields and player options
 
@@ -833,9 +889,9 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Enclosing context: top level of a namespaced event definition
 - Input scope: event root, whose default is character unless overridden
 - Output scope or state change: declares event type/scope, text, trigger/effect phases, visibility, and player options
-- Arguments: verified fields include `type`, `scope`, `title`, `desc`, `trigger`, `immediate`, `after`, `hidden`, and `option = { name = <key> ... }`
-- Evidence: `events/_events.info:10-38,156-164`
-- Minimal verified example: `type = character_event`, `trigger = { ... }`, and `option = { name = my_option ... }`
+- Arguments: verified fields include `type`, `scope`, `title`, `desc`, `trigger`, `immediate`, `after`, `hidden`, `left_portrait`, `right_portrait`, and `option = { name = <key> ... }`; exact vanilla character events also use `theme = dynasty`
+- Evidence: core fields and options at `events/_events.info:10-38,156-164`; portrait blocks at `events/_events.info:54-96`; exact `theme = dynasty` at `events/decisions_events/major_decisions_events.txt:433`
+- Minimal verified example: `type = character_event`, `theme = dynasty`, `left_portrait = { character = root }`, `trigger = { ... }`, and `option = { name = my_option ... }`
 - Restrictions and notes: this is static schema evidence only. It establishes neither window lifecycle callbacks nor save/reload continuity.
 
 ### Event `on_trigger_fail`
@@ -936,6 +992,34 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Minimal verified example: `is_betrothed = no` followed by `is_married = no`
 - Restrictions and notes: the approved Phase 3 policy requires both checks on both participants in addition to `can_marry_character_trigger`.
 
+### Phase 3 conservative special-state exclusions
+
+- Status: `VERIFIED TRIGGER SYNTAX; PROTOTYPE-ONLY POLICY`
+- Category: character triggers
+- CK3 version: `1.19.0.6`
+- File family: character interactions, scripted triggers, and event trigger blocks
+- Enclosing context: each proposed participant's character scope during candidate filtering and final preflight
+- Input scope: character
+- Output scope or state change: boolean current-state result; no state change
+- Arguments: `is_imprisoned = no`, `is_hostage = no`, `is_concubine = no`, and `is_pregnant = no`
+- Evidence: `is_imprisoned = no` for marriage-interaction participants at `common/character_interactions/00_marriage_interactions.txt:514-540`; `is_hostage = no` at `common/scripted_triggers/00_marriage_triggers.txt:536-544`; `is_concubine = no` at `common/scripted_triggers/00_marriage_triggers.txt:244-252,274-282`; `is_pregnant = no` at `events/dlc/ep3/ep3_wedding_events.txt:2055-2061`
+- Minimal verified example: apply all four negative checks directly in the proposed participant's character scope
+- Restrictions and notes: the four trigger forms are verified individually. Their combined use is a conservative isolated-prototype supported-class boundary, not a claim that vanilla marriage universally requires all four and not a final production policy. Do not infer unregistered activity, government, adventurer, or other special-state triggers from this entry.
+
+### Character sex and numeric age checks
+
+- Status: `VERIFIED TRIGGER SYNTAX; PROJECT AGE POLICY`
+- Category: character triggers
+- CK3 version: `1.19.0.6`
+- File family: marriage scripted triggers, marriage interactions, events, and scripted triggers
+- Enclosing context: proposed participant's character scope
+- Input scope: character
+- Output scope or state change: boolean sex or age-threshold result; no state change
+- Arguments: `is_female = yes`, `is_male = yes`, and numeric comparisons such as `age >= 30`
+- Evidence: sex checks in marriage validation at `common/scripted_triggers/00_marriage_triggers.txt:484-493`; numeric age comparison in marriage-interaction evaluation at `common/character_interactions/00_marriage_interactions.txt:3456-3463`
+- Minimal verified example: `AND = { is_female = yes age >= 30 }`
+- Restrictions and notes: the trigger syntax is verified. The Phase 3 rules forbidding a woman aged 30 or older or a man aged 40 or older from pairing with any minor are approved Breed Improved prototype policy, not vanilla thresholds. Both role directions must be checked; fertility and ranking cannot override the hard exclusion.
+
 ### Character `fertility` value
 
 - Status: `VERIFIED`
@@ -964,6 +1048,34 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Minimal verified example: `ordered_in_list = { list = candidates order_by = age_difference }`
 - Restrictions and notes: component syntax is verified, but the complete Phase 3 lexicographic pipeline and deterministic tie behavior require the isolated prototype.
 
+### Dynamic best-minus-`0.05` fertility threshold composition
+
+- Status: `VERIFIED COMPONENTS; COMPLETE COMPOSITION REQUIRES P6`
+- Category: character numeric value, saved numeric event-scope values, formula arithmetic, numeric comparison, and ordered-list selection
+- CK3 version: `1.19.0.6`
+- File family: event effects/triggers, numeric formula blocks, and ordered event-target lists
+- Enclosing context: an active event chain with the required saved numeric values in scope
+- Input scope: fertility-evaluated characters, a captured best value, and candidate numeric values
+- Output scope or state change: derives and checks a dynamic lower threshold; no relationship or character state change
+- Arguments: verified components include `value = fertility`, `save_scope_value_as`, formula `subtract`, saved numeric comparison such as `scope:left < scope:right`, and `ordered_in_list` with numeric `order_by`
+- Evidence: fertility capture at `common/decisions/90_minor_decisions.txt:1669-1677`; numeric formula derivation and saved-value reuse at `events/decisions_events/pledge_loyalty_to_liege_events.txt:190-211`; saved numeric-to-numeric comparison at `events/decisions_events/pledge_loyalty_to_liege_events.txt:454-466`; subtraction formula at `common/script_values/00_age_values.txt:82-88`; ordered numeric list evaluation at `events/diarchy_events/vizierate_events.txt:200-229,1105-1113`
+- Minimal verified example: none for the complete fertility pipeline; the isolated prototype composes the registered primitives to capture the best fertility, derive a floor five percentage points lower, and compare candidate values with that floor
+- Restrictions and notes: no same-version vanilla block was found that performs the entire fertility maximum → subtract `0.05` → inclusive candidate comparison pipeline. Scope-value lifetime, inclusive boundary behavior, ties, values outside `0`-`1`, and deterministic ordering remain P6 runtime gates. Do not describe the full composition as vanilla-proven.
+
+### Remove current scope from an event-target list
+
+- Status: `VERIFIED`
+- Category: event-target list mutation
+- CK3 version: `1.19.0.6`
+- File family: event and scripted-effect blocks using event-target lists
+- Enclosing context: a typed current scope that is already a member of the named list
+- Input scope: current typed list member and list name
+- Output scope or state change: removes the current scope from that event-target list
+- Arguments: `remove_from_list = <list_name>`
+- Evidence: candidates are added to `students`, iterated, and removed from the same list at `events/court_events/01_ep3_court_events.txt:475-502`
+- Minimal verified example: inside the current candidate scope, `remove_from_list = available_partners`
+- Restrictions and notes: the exact evidence removes the current scope, not an arbitrary separately supplied target. Event-target list persistence across the complete Phase 3 event chain and save/reload remains a P6 runtime test.
+
 ### Direct marriage and betrothal effects
 
 - Status: `VERIFIED`
@@ -976,7 +1088,7 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Arguments: `marry = <character_scope>`, `marry_matrilineal = <character_scope>`, `create_betrothal = <character_scope>`, or `create_betrothal_matrilineal = <character_scope>`
 - Evidence: ordinary/matrilineal marriage at `common/scripted_effects/00_game_rule_effects.txt:22-28`; ordinary/matrilineal betrothal at `common/scripted_effects/04_dlc_ep2_wedding_effects.txt:97-111`; adult/minor execution branch at `events/activities/tournaments/tournament_events.txt:1159-1177`
 - Minimal verified example: `scope:subject = { marry = scope:partner }`
-- Restrictions and notes: each individual operation exists. Static evidence does not prove parity with the native arrange-marriage interaction for alliances, Prestige, court movement, succession, memories, on_actions, or other side effects. P0 creates no executable call.
+- Restrictions and notes: each individual operation exists. Static evidence does not prove parity with the native arrange-marriage interaction for alliances, Prestige, court movement, succession, memories, on_actions, or other side effects. The isolated P4 test path now calls exactly these four operations only after full preflight; CK3 runtime remains `NOT RUN`, and no production use is approved.
 
 ### Global numeric serial components
 
@@ -990,21 +1102,35 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Arguments: verified components are `change_global_variable = { name = <name> add = 1 }` and `save_scope_value_as = { name = <name> value = global_var:<name> }`
 - Evidence: `events/religion_events/great_holy_war_events.txt:618-621`; `common/decisions/dlc_decisions/mpo/mpo_decisions.txt:4410-4413`
 - Minimal verified example: none approved for Phase 3
-- Restrictions and notes: no same-context CK3 `1.19.0.6` example was found for comparing the saved numeric scope value with the active global serial. `UNVERIFIED CK3 SYNTAX`: do not implement a Phase 3 numeric run identity until that comparison is separately evidenced or tested under explicit approval.
+- Restrictions and notes: no same-context CK3 `1.19.0.6` example was found for comparing the saved numeric scope value with the active global serial. `UNVERIFIED CK3 SYNTAX`: do not implement a Phase 3 numeric run identity. The isolated prototype closes this dependency with the narrower permanent one-workflow-per-save lock; it does not convert numeric run identity into verified syntax.
 
 ### Phase 3 fixed-slot commit protocol
 
 - Status: `VERIFIED COMPONENTS; COMPOSED LIFECYCLE REQUIRES PROTOTYPE`
 - Category: project storage design composed from verified character variables
 - CK3 version: `1.19.0.6`
-- File family: future isolated-prototype Decision/event/effect contexts only
+- File family: isolated-prototype Decision/event/effect contexts only
 - Enclosing context: the recorded workflow actor owns sixteen explicitly named slots
 - Input scope: actor, subject, partner, and three approved enum-like flag values
 - Output scope or state change: one committed pair record per slot
 - Arguments: six static variables per slot: `subject`, `partner`, `direction`, `relationship_type`, `placeholder`, and slot-specific `reservation_id`
-- Evidence: character storage at `events/yearly_events/bp1_yearly_james.txt:1067-1071,1153-1167`; character identity at `events/board_game_events.txt:1173-1187`; flag values at `events/board_game_events.txt:61-82,170-180`; guarded removal at `events/relations_events/adultery_events.txt:2696-2700`
+- Evidence: character storage at `events/yearly_events/bp1_yearly_james.txt:1067-1071,1153-1167`; character identity at `events/board_game_events.txt:1173-1187`; flag values at `events/board_game_events.txt:61-82,170-180`; parameter-expanded fixed names at `events/culture_events/culture_tradition_events.txt:844-873`; numeric counter evidence at `events/court_events/introduce_court_fashion_events.txt:84-109,157-175`; guarded removal at `events/relations_events/adultery_events.txt:2696-2700`
 - Minimal verified example: none; this is a composed project protocol, not a vanilla command
-- Restrictions and notes: write `reservation_id` last. A slot is committed only if its expected marker and all five payload fields exist and all enum values are approved. Guard every field removal with `exists`. Multi-variable atomicity, interrupted writes, cross-event persistence, and save/reload behavior require the isolated prototype.
+- Restrictions and notes: write `reservation_id` last as a second character reference to that slot's `subject`. A slot is committed only if the two character references compare equal, all five payload fields exist, and all enum values are approved. Parameterized helpers may address only explicitly whitelisted slot names and complete enum tokens; they do not create a runtime array or an embedded parameterized flag name. Guard every field removal with `exists`. Multi-variable atomicity, interrupted writes, cross-event persistence, count/record agreement, and save/reload behavior require P6.
+
+### Event localisation access to ROOT-owned character, numeric, and flag variables
+
+- Status: `VERIFIED`
+- Category: event localisation variable access
+- CK3 version: `1.19.0.6`
+- File family: character events plus referenced English localisation `.yml`
+- Enclosing context: a character event whose `ROOT` is the character that owns the stored variable
+- Input scope: character event ROOT and an existing character-, numeric-, or flag-valued variable on that character
+- Output scope or state change: renders the stored character, number, or localised flag name; no gameplay state change
+- Arguments: verified chains include `[ROOT.Char.MakeScope.Var('<name>').Char.GetShortUIName]`, `[ROOT.Char.MakeScope.Var('<name>').GetValue]`, and `[ROOT.Char.MakeScope.Var('<name>').GetFlagName]`
+- Evidence: exact `ROOT.Char.MakeScope.Var(...).GetValue` at `localization/english/dlc/ach/dlc_ach_coronation_events_klank_l_english.yml:137,143`; exact `ROOT.Char.MakeScope.Var(...).GetFlagName` at `localization/english/dlc/ce1/ce1_legend_spread_events_l_english.yml:609-610`; exact `ROOT.Char.MakeScope.Var(...).Char` character access at `localization/english/dlc/bp3/bp3_experimental_brew_l_english.yml:14,20,25,32`; exact `MakeScope.Var(...).Char.GetShortUIName` at `localization/english/decisions_l_english.yml:135-136`; direct saved-scope `GetShortUIName` is independently registered above
+- Minimal verified example: `[ROOT.Char.MakeScope.Var('stored_character').Char.GetShortUIName]`
+- Restrictions and notes: the complete `ROOT.Char.MakeScope.Var(...).Char.GetShortUIName` expression is a composition of the exact ROOT/variable/character chain and the exact verified character function; runtime rendering remains a P6 check. `ROOT` is not automatically synonymous with a Decision actor or interaction actor. The event scope contract must make the variable-owning workflow actor ROOT, and script must guard variable existence before selecting localisation that dereferences it. Do not guess additional `.Var`, `.Char`, or rendering functions.
 
 ### Standalone test Mod descriptor pair
 
@@ -1016,9 +1142,9 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Input scope: not applicable
 - Output scope or state change: launcher metadata only
 - Arguments: verified fields are `version`, `name`, and `supported_version`; only the outer local launcher template contains `path="<LOCAL_MOD_PATH>"`
-- Evidence: `tests/phase1_create_dynasty/BreedImprovedPhase1Test.mod`; `tests/phase1_create_dynasty/BreedImprovedPhase1Test/descriptor.mod`; Phase 1 test-harness runtime history
+- Evidence: `tests/phase1_create_dynasty/BreedImprovedPhase1Test.mod`; `tests/phase1_create_dynasty/BreedImprovedPhase1Test/descriptor.mod`; current isolated descriptors at `tests/phase3_dynasty_matchmaking/BreedImprovedPhase3Prototype.mod` and `tests/phase3_dynasty_matchmaking/BreedImprovedPhase3Prototype/descriptor.mod`
 - Minimal verified example: outer template with `path="<LOCAL_MOD_PATH>"`, inner descriptor without `path`
-- Restrictions and notes: the future Phase 3 test descriptors are recorded as version `0.1.0`, compatibility `1.19.*`, no Workshop ID, and no absolute committed path. P0 does not create them.
+- Restrictions and notes: the Phase 3 isolated-prototype descriptors use version `0.1.0`, compatibility `1.19.*`, no Workshop ID, and no absolute committed path. They are test-only and excluded from production and Workshop packaging.
 
 ### Standalone test Mod localisation contract
 
@@ -1032,7 +1158,7 @@ The entries below are verified only for the recorded CK3 version and context. Th
 - Arguments: first-line headers `l_english:` and `l_simp_chinese:`; identical key sets; UTF-8 BOM
 - Evidence: `tests/phase1_create_dynasty/BreedImprovedPhase1Test/localization/english/breedimp_test_create_dynasty_l_english.yml`; `MyCK3Mod/localization/simp_chinese/breedimp_dynasty_exile_l_simp_chinese.yml`
 - Minimal verified example: one BOM-prefixed file beginning with `l_english:`
-- Restrictions and notes: UTF-8 BOM is an observed vanilla property and an established project convention, not an asserted universal engine requirement. P0 creates no localisation file.
+- Restrictions and notes: UTF-8 BOM is an observed vanilla property and an established project convention, not an asserted universal engine requirement. The isolated prototype's English and Simplified Chinese files follow this project convention; runtime rendering remains `NOT RUN`.
 
 ## Uncertainty Protocol
 

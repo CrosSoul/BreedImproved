@@ -1,0 +1,418 @@
+# Breed Improved Phase 3 isolated prototype staged candidate generation and review.
+# This file creates no marriage or betrothal relationship.
+# Test-only, non-release, CK3 1.19.0.6. Runtime status: NOT RUN.
+
+breedimp_p3_proto_clear_partner_lists_effect = {
+	every_in_list = {
+		list = breedimp_p3_proto_partner_candidates
+		remove_from_list = breedimp_p3_proto_partner_candidates
+	}
+	every_in_list = {
+		list = breedimp_p3_proto_rejected_partners
+		remove_from_list = breedimp_p3_proto_rejected_partners
+	}
+	set_variable = {
+		name = breedimp_p3_proto_current_partner_count
+		value = 0
+	}
+	set_variable = {
+		name = breedimp_p3_proto_current_legality_check_count
+		value = 0
+	}
+	set_variable = {
+		name = breedimp_p3_proto_current_sort_candidate_count
+		value = 0
+	}
+}
+
+breedimp_p3_proto_build_subject_list_effect = {
+	var:breedimp_p3_proto_managed_dynasty = {
+		every_dynasty_member = {
+			root = {
+				change_variable = {
+					name = breedimp_p3_proto_dynasty_member_count
+					add = 1
+				}
+			}
+		}
+	}
+
+	var:breedimp_p3_proto_managed_dynasty = {
+		every_dynasty_member = {
+			limit = {
+				breedimp_p3_proto_subject_candidate_trigger = {
+					ACTOR = root
+				}
+			}
+			add_to_list = breedimp_p3_proto_subjects
+			root = {
+				change_variable = {
+					name = breedimp_p3_proto_subject_count
+					add = 1
+				}
+			}
+		}
+	}
+
+	breedimp_p3_proto_select_next_subject_effect = yes
+}
+
+breedimp_p3_proto_build_partner_list_effect = {
+	breedimp_p3_proto_clear_partner_lists_effect = yes
+	scope:breedimp_p3_proto_current_subject = {
+		save_scope_as = comparator
+	}
+
+	var:breedimp_p3_proto_managed_dynasty = {
+		every_dynasty_member = {
+			if = {
+				limit = {
+					breedimp_p3_proto_subject_candidate_trigger = { ACTOR = root }
+				}
+				save_temporary_scope_as = breedimp_p3_proto_partner_candidate_temp
+				root = {
+					change_variable = {
+						name = breedimp_p3_proto_current_legality_check_count
+						add = 1
+					}
+				}
+				if = {
+					limit = {
+						scope:breedimp_p3_proto_current_subject = {
+							breedimp_p3_proto_pair_is_eligible_trigger = {
+								ACTOR = root
+								PARTNER = scope:breedimp_p3_proto_partner_candidate_temp
+							}
+						}
+					}
+					add_to_list = breedimp_p3_proto_partner_candidates
+					root = {
+						change_variable = {
+							name = breedimp_p3_proto_current_partner_count
+							add = 1
+						}
+						change_variable = {
+							name = breedimp_p3_proto_current_sort_candidate_count
+							add = 1
+						}
+					}
+				}
+			}
+		}
+	}
+
+	breedimp_p3_proto_select_partner_for_current_subject_effect = yes
+}
+
+breedimp_p3_proto_select_next_subject_effect = {
+	if = {
+		limit = {
+			any_in_list = {
+				list = breedimp_p3_proto_subjects
+				NOT = { is_in_list = breedimp_p3_proto_reviewed_subjects }
+				breedimp_p3_proto_subject_candidate_trigger = { ACTOR = root }
+			}
+		}
+		random_in_list = {
+			list = breedimp_p3_proto_subjects
+			limit = {
+				NOT = { is_in_list = breedimp_p3_proto_reviewed_subjects }
+				breedimp_p3_proto_subject_candidate_trigger = { ACTOR = root }
+			}
+			save_scope_as = breedimp_p3_proto_current_subject
+			add_to_list = breedimp_p3_proto_reviewed_subjects
+		}
+		breedimp_p3_proto_build_partner_list_effect = yes
+	}
+	else_if = {
+		limit = {
+			any_in_list = {
+				list = breedimp_p3_proto_deferred_subjects
+				breedimp_p3_proto_subject_candidate_trigger = { ACTOR = root }
+			}
+		}
+		random_in_list = {
+			list = breedimp_p3_proto_deferred_subjects
+			limit = {
+				breedimp_p3_proto_subject_candidate_trigger = { ACTOR = root }
+			}
+			save_scope_as = breedimp_p3_proto_current_subject
+			remove_from_list = breedimp_p3_proto_deferred_subjects
+		}
+		breedimp_p3_proto_build_partner_list_effect = yes
+	}
+	else = {
+		if = {
+			limit = { breedimp_p3_proto_plan_has_committed_pair_trigger = yes }
+			breedimp_p3_proto_prepare_final_confirmation_effect = yes
+		}
+		else_if = {
+			limit = {
+				var:breedimp_p3_proto_subject_count > 0
+			}
+			breedimp_p3_proto_cleanup_workflow_effect = yes
+			trigger_event = breedimp_p3_proto_matchmaking.1141
+		}
+		else = {
+			breedimp_p3_proto_cleanup_workflow_effect = yes
+			trigger_event = breedimp_p3_proto_matchmaking.1140
+		}
+	}
+}
+
+breedimp_p3_proto_select_partner_for_current_subject_effect = {
+	scope:breedimp_p3_proto_current_subject = {
+		save_scope_as = comparator
+	}
+
+	if = {
+		limit = {
+			any_in_list = {
+				list = breedimp_p3_proto_partner_candidates
+				NOT = { is_in_list = breedimp_p3_proto_rejected_partners }
+				save_temporary_scope_as = breedimp_p3_proto_partner_candidate_temp
+				scope:breedimp_p3_proto_current_subject = {
+					breedimp_p3_proto_pair_is_eligible_trigger = {
+						ACTOR = root
+						PARTNER = scope:breedimp_p3_proto_partner_candidate_temp
+					}
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				scope:breedimp_p3_proto_current_subject = { is_adult = yes }
+			}
+			ordered_in_list = {
+				list = breedimp_p3_proto_partner_candidates
+				limit = {
+					NOT = { is_in_list = breedimp_p3_proto_rejected_partners }
+					save_temporary_scope_as = breedimp_p3_proto_partner_candidate_temp
+					scope:breedimp_p3_proto_current_subject = {
+						breedimp_p3_proto_pair_is_eligible_trigger = {
+							ACTOR = root
+							PARTNER = scope:breedimp_p3_proto_partner_candidate_temp
+						}
+					}
+				}
+				order_by = breedimp_p3_proto_fertility_order_value
+				max = 1
+				check_range_bounds = no
+				save_scope_as = breedimp_p3_proto_best_fertility_partner
+			}
+
+			ordered_in_list = {
+				list = breedimp_p3_proto_partner_candidates
+				limit = {
+					NOT = { is_in_list = breedimp_p3_proto_rejected_partners }
+					save_temporary_scope_as = breedimp_p3_proto_partner_candidate_temp
+					scope:breedimp_p3_proto_current_subject = {
+						breedimp_p3_proto_pair_is_eligible_trigger = {
+							ACTOR = root
+							PARTNER = scope:breedimp_p3_proto_partner_candidate_temp
+						}
+					}
+					fertility >= {
+						value = scope:breedimp_p3_proto_best_fertility_partner.fertility
+						subtract = 0.05
+					}
+					fertility <= scope:breedimp_p3_proto_best_fertility_partner.fertility
+				}
+				order_by = breedimp_p3_proto_age_gap_order_value
+				max = 1
+				check_range_bounds = no
+				save_scope_as = breedimp_p3_proto_current_partner
+			}
+		}
+		else = {
+			ordered_in_list = {
+				list = breedimp_p3_proto_partner_candidates
+				limit = {
+					NOT = { is_in_list = breedimp_p3_proto_rejected_partners }
+					save_temporary_scope_as = breedimp_p3_proto_partner_candidate_temp
+					scope:breedimp_p3_proto_current_subject = {
+						breedimp_p3_proto_pair_is_eligible_trigger = {
+							ACTOR = root
+							PARTNER = scope:breedimp_p3_proto_partner_candidate_temp
+						}
+					}
+				}
+				order_by = breedimp_p3_proto_age_gap_order_value
+				max = 1
+				check_range_bounds = no
+				save_scope_as = breedimp_p3_proto_current_partner
+			}
+		}
+
+		trigger_event = breedimp_p3_proto_matchmaking.1020
+	}
+	else = {
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+}
+
+breedimp_p3_proto_commit_slot_effect = {
+	# Payload first.
+	set_variable = {
+		name = breedimp_p3_proto_slot_$SLOT$_subject
+		value = scope:breedimp_p3_proto_current_subject
+	}
+	set_variable = {
+		name = breedimp_p3_proto_slot_$SLOT$_partner
+		value = scope:breedimp_p3_proto_current_partner
+	}
+	set_variable = {
+		name = breedimp_p3_proto_slot_$SLOT$_direction
+		value = flag:$DIRECTION$
+	}
+	if = {
+		limit = {
+			scope:breedimp_p3_proto_current_subject = { is_adult = yes }
+			scope:breedimp_p3_proto_current_partner = { is_adult = yes }
+		}
+		set_variable = {
+			name = breedimp_p3_proto_slot_$SLOT$_relationship_type
+			value = flag:breedimp_p3_proto_relationship_marriage
+		}
+	}
+	else = {
+		set_variable = {
+			name = breedimp_p3_proto_slot_$SLOT$_relationship_type
+			value = flag:breedimp_p3_proto_relationship_betrothal
+		}
+	}
+	set_variable = {
+		name = breedimp_p3_proto_slot_$SLOT$_placeholder
+		value = flag:breedimp_p3_proto_placeholder_none
+	}
+
+	# The slot-specific marker is always written last.
+	set_variable = {
+		name = breedimp_p3_proto_slot_$SLOT$_reservation_id
+		value = scope:breedimp_p3_proto_current_subject
+	}
+	change_variable = {
+		name = breedimp_p3_proto_accepted_pair_count
+		add = 1
+	}
+}
+
+breedimp_p3_proto_accept_current_pair_effect = {
+	if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 1 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 1 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 2 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 2 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 3 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 3 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 4 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 4 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 5 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 5 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 6 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 6 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 7 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 7 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 8 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 8 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 9 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 9 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 10 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 10 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 11 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 11 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 12 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 12 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 13 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 13 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 14 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 14 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 15 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 15 DIRECTION = $DIRECTION$ }
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+	else_if = {
+		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 16 } }
+		breedimp_p3_proto_commit_slot_effect = { SLOT = 16 DIRECTION = $DIRECTION$ }
+		trigger_event = breedimp_p3_proto_matchmaking.1143
+	}
+	else = {
+		trigger_event = breedimp_p3_proto_matchmaking.1143
+	}
+}
+
+breedimp_p3_proto_reject_current_partner_effect = {
+	scope:breedimp_p3_proto_current_partner = {
+		add_to_list = breedimp_p3_proto_rejected_partners
+	}
+	breedimp_p3_proto_select_partner_for_current_subject_effect = yes
+}
+
+breedimp_p3_proto_skip_current_subject_effect = {
+	breedimp_p3_proto_select_next_subject_effect = yes
+}
+
+breedimp_p3_proto_defer_current_subject_effect = {
+	scope:breedimp_p3_proto_current_subject = {
+		add_to_list = breedimp_p3_proto_deferred_subjects
+	}
+	breedimp_p3_proto_select_next_subject_effect = yes
+}
+
+breedimp_p3_proto_prepare_final_confirmation_effect = {
+	if = {
+		limit = { breedimp_p3_proto_plan_has_committed_pair_trigger = yes }
+		set_global_variable = {
+			name = breedimp_p3_proto_phase
+			value = flag:breedimp_p3_proto_phase_final
+		}
+		trigger_event = breedimp_p3_proto_matchmaking.1100
+	}
+	else = {
+		breedimp_p3_proto_cleanup_workflow_effect = yes
+		trigger_event = breedimp_p3_proto_matchmaking.1141
+	}
+}

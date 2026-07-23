@@ -1,0 +1,301 @@
+# Breed Improved Phase 3 isolated prototype event flow.
+# Namespace allocation: breedimp_p3_proto_matchmaking.1000-1199.
+# Test-only, non-release, CK3 1.19.0.6. Runtime status: NOT RUN.
+
+namespace = breedimp_p3_proto_matchmaking
+
+# Pre-activation confirmation. Cancelling this event consumes no save-wide lock.
+breedimp_p3_proto_matchmaking.1000 = {
+	type = character_event
+	title = breedimp_p3_proto_matchmaking.1000.t
+	desc = breedimp_p3_proto_matchmaking.1000.desc
+	theme = dynasty
+
+	trigger = {
+		breedimp_p3_proto_actor_can_activate_trigger = yes
+	}
+	on_trigger_fail = {
+		breedimp_p3_proto_cleanup_active_workflow_effect = yes
+	}
+
+	left_portrait = {
+		character = root
+	}
+
+	option = {
+		name = breedimp_p3_proto_matchmaking.1000.a
+		custom_tooltip = breedimp_p3_proto_matchmaking.1000.a.tt
+		trigger = {
+			breedimp_p3_proto_actor_can_activate_trigger = yes
+		}
+		breedimp_p3_proto_activate_workflow_effect = yes
+	}
+
+	option = {
+		name = breedimp_p3_proto_matchmaking.1000.b
+		custom_tooltip = breedimp_p3_proto_matchmaking.1000.b.tt
+	}
+}
+
+# Sequential pair review. No option on this page changes a relationship.
+breedimp_p3_proto_matchmaking.1020 = {
+	type = character_event
+	title = breedimp_p3_proto_matchmaking.1020.t
+	theme = dynasty
+
+	trigger = {
+		breedimp_p3_proto_workflow_is_review_phase_trigger = yes
+		breedimp_p3_proto_current_pair_is_eligible_trigger = yes
+	}
+	on_trigger_fail = {
+		breedimp_p3_proto_cleanup_active_workflow_effect = yes
+	}
+
+	desc = {
+		desc = breedimp_p3_proto_matchmaking.1020.desc
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					scope:breedimp_p3_proto_current_subject = { is_adult = yes }
+					scope:breedimp_p3_proto_current_partner = { is_adult = yes }
+				}
+				desc = breedimp_p3_proto_matchmaking.1020.type.marriage
+			}
+			desc = breedimp_p3_proto_matchmaking.1020.type.betrothal
+		}
+		desc = breedimp_p3_proto_matchmaking.1020.diagnostics
+	}
+
+	left_portrait = {
+		character = scope:breedimp_p3_proto_current_subject
+	}
+	right_portrait = {
+		character = scope:breedimp_p3_proto_current_partner
+	}
+
+	option = {
+		name = breedimp_p3_proto_matchmaking.1020.a
+		custom_tooltip = breedimp_p3_proto_matchmaking.1020.a.tt
+		trigger = {
+			breedimp_p3_proto_workflow_is_review_phase_trigger = yes
+			breedimp_p3_proto_current_pair_is_eligible_trigger = yes
+			breedimp_p3_proto_plan_has_empty_slot_trigger = yes
+		}
+		breedimp_p3_proto_accept_current_pair_effect = {
+			DIRECTION = breedimp_p3_proto_direction_ordinary
+		}
+	}
+
+	option = {
+		name = breedimp_p3_proto_matchmaking.1020.b
+		custom_tooltip = breedimp_p3_proto_matchmaking.1020.b.tt
+		trigger = {
+			breedimp_p3_proto_workflow_is_review_phase_trigger = yes
+			breedimp_p3_proto_current_pair_is_eligible_trigger = yes
+			breedimp_p3_proto_plan_has_empty_slot_trigger = yes
+		}
+		breedimp_p3_proto_accept_current_pair_effect = {
+			DIRECTION = breedimp_p3_proto_direction_matrilineal
+		}
+	}
+
+	option = {
+		name = breedimp_p3_proto_matchmaking.1020.c
+		custom_tooltip = breedimp_p3_proto_matchmaking.1020.c.tt
+		trigger = {
+			breedimp_p3_proto_workflow_is_review_phase_trigger = yes
+			breedimp_p3_proto_current_pair_is_eligible_trigger = yes
+		}
+		breedimp_p3_proto_reject_current_partner_effect = yes
+	}
+
+	option = {
+		name = breedimp_p3_proto_matchmaking.1020.d
+		custom_tooltip = breedimp_p3_proto_matchmaking.1020.d.tt
+		trigger = {
+			breedimp_p3_proto_workflow_is_review_phase_trigger = yes
+		}
+		breedimp_p3_proto_skip_current_subject_effect = yes
+	}
+
+	option = {
+		name = breedimp_p3_proto_matchmaking.1020.e
+		custom_tooltip = breedimp_p3_proto_matchmaking.1020.e.tt
+		trigger = {
+			breedimp_p3_proto_workflow_is_review_phase_trigger = yes
+		}
+		breedimp_p3_proto_defer_current_subject_effect = yes
+	}
+
+	option = {
+		name = breedimp_p3_proto_matchmaking.1020.f
+		custom_tooltip = breedimp_p3_proto_matchmaking.1020.f.tt
+		trigger = {
+			breedimp_p3_proto_workflow_is_review_phase_trigger = yes
+		}
+		breedimp_p3_proto_prepare_final_confirmation_effect = yes
+	}
+
+	option = {
+		name = breedimp_p3_proto_matchmaking.1020.g
+		custom_tooltip = breedimp_p3_proto_matchmaking.1020.g.tt
+		breedimp_p3_proto_cleanup_workflow_effect = yes
+	}
+}
+
+# Final summary and the only route to relationship-changing effects.
+breedimp_p3_proto_matchmaking.1100 = {
+	type = character_event
+	title = breedimp_p3_proto_matchmaking.1100.t
+	theme = dynasty
+
+	trigger = {
+		breedimp_p3_proto_workflow_is_final_phase_trigger = yes
+		breedimp_p3_proto_plan_has_committed_pair_trigger = yes
+	}
+	on_trigger_fail = {
+		breedimp_p3_proto_cleanup_active_workflow_effect = yes
+	}
+
+	desc = {
+		desc = breedimp_p3_proto_matchmaking.1100.desc
+		desc = breedimp_p3_proto_matchmaking.1100.diagnostics
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 1 } } desc = breedimp_p3_proto_matchmaking.1100.slot_01 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 2 } } desc = breedimp_p3_proto_matchmaking.1100.slot_02 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 3 } } desc = breedimp_p3_proto_matchmaking.1100.slot_03 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 4 } } desc = breedimp_p3_proto_matchmaking.1100.slot_04 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 5 } } desc = breedimp_p3_proto_matchmaking.1100.slot_05 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 6 } } desc = breedimp_p3_proto_matchmaking.1100.slot_06 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 7 } } desc = breedimp_p3_proto_matchmaking.1100.slot_07 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 8 } } desc = breedimp_p3_proto_matchmaking.1100.slot_08 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 9 } } desc = breedimp_p3_proto_matchmaking.1100.slot_09 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 10 } } desc = breedimp_p3_proto_matchmaking.1100.slot_10 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 11 } } desc = breedimp_p3_proto_matchmaking.1100.slot_11 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 12 } } desc = breedimp_p3_proto_matchmaking.1100.slot_12 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 13 } } desc = breedimp_p3_proto_matchmaking.1100.slot_13 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 14 } } desc = breedimp_p3_proto_matchmaking.1100.slot_14 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 15 } } desc = breedimp_p3_proto_matchmaking.1100.slot_15 }
+		triggered_desc = { trigger = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 16 } } desc = breedimp_p3_proto_matchmaking.1100.slot_16 }
+	}
+
+	left_portrait = {
+		character = root
+	}
+
+	option = {
+		name = breedimp_p3_proto_matchmaking.1100.a
+		custom_tooltip = breedimp_p3_proto_matchmaking.1100.a.tt
+		trigger = {
+			breedimp_p3_proto_workflow_is_final_phase_trigger = yes
+			breedimp_p3_proto_plan_has_committed_pair_trigger = yes
+		}
+		breedimp_p3_proto_confirm_plan_effect = yes
+	}
+
+	option = {
+		name = breedimp_p3_proto_matchmaking.1100.b
+		custom_tooltip = breedimp_p3_proto_matchmaking.1100.b.tt
+		breedimp_p3_proto_cleanup_workflow_effect = yes
+	}
+}
+
+# Informational result after cleanup; the permanent save lock remains.
+breedimp_p3_proto_matchmaking.1140 = {
+	type = character_event
+	title = breedimp_p3_proto_matchmaking.1140.t
+	desc = breedimp_p3_proto_matchmaking.1140.desc
+	theme = dynasty
+	option = { name = breedimp_p3_proto_matchmaking.1140.a }
+}
+
+breedimp_p3_proto_matchmaking.1141 = {
+	type = character_event
+	title = breedimp_p3_proto_matchmaking.1141.t
+	desc = breedimp_p3_proto_matchmaking.1141.desc
+	theme = dynasty
+	option = { name = breedimp_p3_proto_matchmaking.1141.a }
+}
+
+breedimp_p3_proto_matchmaking.1142 = {
+	type = character_event
+	title = breedimp_p3_proto_matchmaking.1142.t
+	theme = dynasty
+
+	trigger = {
+		breedimp_p3_proto_workflow_is_final_phase_trigger = yes
+		exists = var:breedimp_p3_proto_failure_slot
+		exists = var:breedimp_p3_proto_failure_reason
+	}
+	on_trigger_fail = {
+		breedimp_p3_proto_cleanup_active_workflow_effect = yes
+	}
+
+	desc = {
+		desc = breedimp_p3_proto_matchmaking.1142.desc
+		first_valid = {
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 1 } desc = breedimp_p3_proto_matchmaking.1142.slot_01 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 2 } desc = breedimp_p3_proto_matchmaking.1142.slot_02 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 3 } desc = breedimp_p3_proto_matchmaking.1142.slot_03 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 4 } desc = breedimp_p3_proto_matchmaking.1142.slot_04 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 5 } desc = breedimp_p3_proto_matchmaking.1142.slot_05 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 6 } desc = breedimp_p3_proto_matchmaking.1142.slot_06 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 7 } desc = breedimp_p3_proto_matchmaking.1142.slot_07 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 8 } desc = breedimp_p3_proto_matchmaking.1142.slot_08 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 9 } desc = breedimp_p3_proto_matchmaking.1142.slot_09 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 10 } desc = breedimp_p3_proto_matchmaking.1142.slot_10 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 11 } desc = breedimp_p3_proto_matchmaking.1142.slot_11 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 12 } desc = breedimp_p3_proto_matchmaking.1142.slot_12 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 13 } desc = breedimp_p3_proto_matchmaking.1142.slot_13 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 14 } desc = breedimp_p3_proto_matchmaking.1142.slot_14 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 15 } desc = breedimp_p3_proto_matchmaking.1142.slot_15 }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_slot = 16 } desc = breedimp_p3_proto_matchmaking.1142.slot_16 }
+			desc = breedimp_p3_proto_matchmaking.1142.slot_00
+		}
+		first_valid = {
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_reason = flag:breedimp_p3_proto_failure_invalid_slot } desc = breedimp_p3_proto_matchmaking.1142.reason.invalid_slot }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_reason = flag:breedimp_p3_proto_failure_duplicate_character } desc = breedimp_p3_proto_matchmaking.1142.reason.duplicate_character }
+			triggered_desc = { trigger = { var:breedimp_p3_proto_failure_reason = flag:breedimp_p3_proto_failure_empty_plan } desc = breedimp_p3_proto_matchmaking.1142.reason.empty_plan }
+			desc = breedimp_p3_proto_matchmaking.1142.reason.authority
+		}
+	}
+
+	option = {
+		name = breedimp_p3_proto_matchmaking.1142.a
+		breedimp_p3_proto_cleanup_workflow_effect = yes
+	}
+}
+
+# Slot 16 is committed, but no relationship has been created yet.
+breedimp_p3_proto_matchmaking.1143 = {
+	type = character_event
+	title = breedimp_p3_proto_matchmaking.1143.t
+	desc = breedimp_p3_proto_matchmaking.1143.desc
+	theme = dynasty
+
+	trigger = {
+		breedimp_p3_proto_workflow_is_review_phase_trigger = yes
+		NOT = { breedimp_p3_proto_plan_has_empty_slot_trigger = yes }
+	}
+	on_trigger_fail = {
+		breedimp_p3_proto_cleanup_active_workflow_effect = yes
+	}
+
+	option = {
+		name = breedimp_p3_proto_matchmaking.1143.a
+		custom_tooltip = breedimp_p3_proto_matchmaking.1143.a.tt
+		breedimp_p3_proto_prepare_final_confirmation_effect = yes
+	}
+	option = {
+		name = breedimp_p3_proto_matchmaking.1143.b
+		custom_tooltip = breedimp_p3_proto_matchmaking.1143.b.tt
+		breedimp_p3_proto_cleanup_workflow_effect = yes
+	}
+}
+
+breedimp_p3_proto_matchmaking.1144 = {
+	type = character_event
+	title = breedimp_p3_proto_matchmaking.1144.t
+	desc = breedimp_p3_proto_matchmaking.1144.desc
+	theme = dynasty
+	option = { name = breedimp_p3_proto_matchmaking.1144.a }
+}

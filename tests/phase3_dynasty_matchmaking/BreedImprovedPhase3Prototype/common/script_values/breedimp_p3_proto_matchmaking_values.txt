@@ -1,0 +1,9 @@
+# Test-only Phase 3 ranking values. CK3 1.19.0.6. Runtime status: NOT RUN.
+
+breedimp_p3_proto_fertility_order_value = {
+	value = fertility
+}
+
+breedimp_p3_proto_age_gap_order_value = {
+	value = age_difference
+}

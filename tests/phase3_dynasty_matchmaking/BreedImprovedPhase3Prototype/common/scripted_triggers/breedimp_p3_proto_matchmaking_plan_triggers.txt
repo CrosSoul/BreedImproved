@@ -1,0 +1,279 @@
+# Breed Improved Phase 3 isolated prototype fixed-slot and preflight guards.
+# The 120 unordered slot comparisons cover at most 480 role comparisons.
+# Test-only, non-release, CK3 1.19.0.6. Runtime status: NOT RUN.
+
+breedimp_p3_proto_slot_is_empty_trigger = {
+	NOT = { exists = var:breedimp_p3_proto_slot_$SLOT$_subject }
+	NOT = { exists = var:breedimp_p3_proto_slot_$SLOT$_partner }
+	NOT = { exists = var:breedimp_p3_proto_slot_$SLOT$_direction }
+	NOT = { exists = var:breedimp_p3_proto_slot_$SLOT$_relationship_type }
+	NOT = { exists = var:breedimp_p3_proto_slot_$SLOT$_placeholder }
+	NOT = { exists = var:breedimp_p3_proto_slot_$SLOT$_reservation_id }
+}
+
+breedimp_p3_proto_slot_is_committed_trigger = {
+	exists = var:breedimp_p3_proto_slot_$SLOT$_subject
+	exists = var:breedimp_p3_proto_slot_$SLOT$_partner
+	exists = var:breedimp_p3_proto_slot_$SLOT$_direction
+	exists = var:breedimp_p3_proto_slot_$SLOT$_relationship_type
+	exists = var:breedimp_p3_proto_slot_$SLOT$_placeholder
+	exists = var:breedimp_p3_proto_slot_$SLOT$_reservation_id
+	var:breedimp_p3_proto_slot_$SLOT$_reservation_id = var:breedimp_p3_proto_slot_$SLOT$_subject
+	OR = {
+		var:breedimp_p3_proto_slot_$SLOT$_direction = flag:breedimp_p3_proto_direction_ordinary
+		var:breedimp_p3_proto_slot_$SLOT$_direction = flag:breedimp_p3_proto_direction_matrilineal
+	}
+	OR = {
+		var:breedimp_p3_proto_slot_$SLOT$_relationship_type = flag:breedimp_p3_proto_relationship_marriage
+		var:breedimp_p3_proto_slot_$SLOT$_relationship_type = flag:breedimp_p3_proto_relationship_betrothal
+	}
+	var:breedimp_p3_proto_slot_$SLOT$_placeholder = flag:breedimp_p3_proto_placeholder_none
+	NOT = {
+		var:breedimp_p3_proto_slot_$SLOT$_subject = var:breedimp_p3_proto_slot_$SLOT$_partner
+	}
+}
+
+breedimp_p3_proto_slot_relationship_type_matches_ages_trigger = {
+	OR = {
+		AND = {
+			var:breedimp_p3_proto_slot_$SLOT$_relationship_type = flag:breedimp_p3_proto_relationship_marriage
+			var:breedimp_p3_proto_slot_$SLOT$_subject = { is_adult = yes }
+			var:breedimp_p3_proto_slot_$SLOT$_partner = { is_adult = yes }
+		}
+		AND = {
+			var:breedimp_p3_proto_slot_$SLOT$_relationship_type = flag:breedimp_p3_proto_relationship_betrothal
+			OR = {
+				var:breedimp_p3_proto_slot_$SLOT$_subject = { is_adult = no }
+				var:breedimp_p3_proto_slot_$SLOT$_partner = { is_adult = no }
+			}
+		}
+	}
+}
+
+breedimp_p3_proto_slot_runtime_is_valid_trigger = {
+	breedimp_p3_proto_slot_is_committed_trigger = { SLOT = $SLOT$ }
+	breedimp_p3_proto_slot_relationship_type_matches_ages_trigger = { SLOT = $SLOT$ }
+	var:breedimp_p3_proto_slot_$SLOT$_subject = {
+		breedimp_p3_proto_pair_core_is_eligible_trigger = {
+			ACTOR = root
+			PARTNER = root.var:breedimp_p3_proto_slot_$SLOT$_partner
+		}
+	}
+}
+
+breedimp_p3_proto_slot_is_valid_or_empty_trigger = {
+	OR = {
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = $SLOT$ }
+		breedimp_p3_proto_slot_runtime_is_valid_trigger = { SLOT = $SLOT$ }
+	}
+}
+
+breedimp_p3_proto_slot_pair_has_no_collision_trigger = {
+	OR = {
+		NOT = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = $LEFT$ } }
+		NOT = { breedimp_p3_proto_slot_is_committed_trigger = { SLOT = $RIGHT$ } }
+		AND = {
+			NOT = {
+				var:breedimp_p3_proto_slot_$LEFT$_subject = var:breedimp_p3_proto_slot_$RIGHT$_subject
+			}
+			NOT = {
+				var:breedimp_p3_proto_slot_$LEFT$_subject = var:breedimp_p3_proto_slot_$RIGHT$_partner
+			}
+			NOT = {
+				var:breedimp_p3_proto_slot_$LEFT$_partner = var:breedimp_p3_proto_slot_$RIGHT$_subject
+			}
+			NOT = {
+				var:breedimp_p3_proto_slot_$LEFT$_partner = var:breedimp_p3_proto_slot_$RIGHT$_partner
+			}
+		}
+	}
+}
+
+breedimp_p3_proto_plan_has_committed_pair_trigger = {
+	OR = {
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 1 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 2 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 3 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 4 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 5 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 6 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 7 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 8 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 9 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 10 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 11 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 12 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 13 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 14 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 15 }
+		breedimp_p3_proto_slot_is_committed_trigger = { SLOT = 16 }
+	}
+}
+
+breedimp_p3_proto_plan_has_empty_slot_trigger = {
+	OR = {
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 1 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 2 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 3 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 4 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 5 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 6 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 7 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 8 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 9 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 10 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 11 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 12 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 13 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 14 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 15 }
+		breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 16 }
+	}
+}
+
+breedimp_p3_proto_plan_has_no_collisions_trigger = {
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 2 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 3 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 4 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 5 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 6 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 7 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 8 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 9 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 10 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 11 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 12 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 13 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 14 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 15 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 1 RIGHT = 16 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 2 RIGHT = 3 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 2 RIGHT = 4 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 2 RIGHT = 5 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 2 RIGHT = 6 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 2 RIGHT = 7 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 2 RIGHT = 8 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 2 RIGHT = 9 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 2 RIGHT = 10 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 2 RIGHT = 11 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 2 RIGHT = 12 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 2 RIGHT = 13 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 2 RIGHT = 14 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 2 RIGHT = 15 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 2 RIGHT = 16 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 3 RIGHT = 4 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 3 RIGHT = 5 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 3 RIGHT = 6 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 3 RIGHT = 7 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 3 RIGHT = 8 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 3 RIGHT = 9 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 3 RIGHT = 10 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 3 RIGHT = 11 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 3 RIGHT = 12 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 3 RIGHT = 13 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 3 RIGHT = 14 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 3 RIGHT = 15 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 3 RIGHT = 16 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 4 RIGHT = 5 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 4 RIGHT = 6 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 4 RIGHT = 7 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 4 RIGHT = 8 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 4 RIGHT = 9 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 4 RIGHT = 10 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 4 RIGHT = 11 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 4 RIGHT = 12 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 4 RIGHT = 13 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 4 RIGHT = 14 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 4 RIGHT = 15 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 4 RIGHT = 16 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 5 RIGHT = 6 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 5 RIGHT = 7 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 5 RIGHT = 8 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 5 RIGHT = 9 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 5 RIGHT = 10 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 5 RIGHT = 11 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 5 RIGHT = 12 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 5 RIGHT = 13 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 5 RIGHT = 14 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 5 RIGHT = 15 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 5 RIGHT = 16 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 6 RIGHT = 7 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 6 RIGHT = 8 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 6 RIGHT = 9 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 6 RIGHT = 10 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 6 RIGHT = 11 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 6 RIGHT = 12 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 6 RIGHT = 13 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 6 RIGHT = 14 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 6 RIGHT = 15 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 6 RIGHT = 16 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 7 RIGHT = 8 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 7 RIGHT = 9 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 7 RIGHT = 10 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 7 RIGHT = 11 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 7 RIGHT = 12 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 7 RIGHT = 13 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 7 RIGHT = 14 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 7 RIGHT = 15 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 7 RIGHT = 16 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 8 RIGHT = 9 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 8 RIGHT = 10 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 8 RIGHT = 11 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 8 RIGHT = 12 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 8 RIGHT = 13 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 8 RIGHT = 14 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 8 RIGHT = 15 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 8 RIGHT = 16 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 9 RIGHT = 10 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 9 RIGHT = 11 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 9 RIGHT = 12 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 9 RIGHT = 13 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 9 RIGHT = 14 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 9 RIGHT = 15 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 9 RIGHT = 16 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 10 RIGHT = 11 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 10 RIGHT = 12 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 10 RIGHT = 13 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 10 RIGHT = 14 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 10 RIGHT = 15 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 10 RIGHT = 16 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 11 RIGHT = 12 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 11 RIGHT = 13 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 11 RIGHT = 14 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 11 RIGHT = 15 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 11 RIGHT = 16 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 12 RIGHT = 13 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 12 RIGHT = 14 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 12 RIGHT = 15 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 12 RIGHT = 16 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 13 RIGHT = 14 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 13 RIGHT = 15 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 13 RIGHT = 16 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 14 RIGHT = 15 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 14 RIGHT = 16 }
+	breedimp_p3_proto_slot_pair_has_no_collision_trigger = { LEFT = 15 RIGHT = 16 }
+}
+
+breedimp_p3_proto_full_plan_preflight_trigger = {
+	breedimp_p3_proto_workflow_is_final_phase_trigger = yes
+	breedimp_p3_proto_plan_has_committed_pair_trigger = yes
+
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 1 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 2 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 3 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 4 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 5 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 6 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 7 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 8 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 9 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 10 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 11 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 12 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 13 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 14 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 15 }
+	breedimp_p3_proto_slot_is_valid_or_empty_trigger = { SLOT = 16 }
+
+	breedimp_p3_proto_plan_has_no_collisions_trigger = yes
+}

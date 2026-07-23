@@ -17,7 +17,7 @@
 
 ## Project Status and Goals
 
-Treat this repository as the Breed Improved CK3 mod project. Version `0.1.0` contains one runtime-verified production Character Interaction. Version `0.2.0` adds the implemented Phase 2 multi-mode bulk-cleanup workflow. Phase 2 passed final runtime acceptance, Ray recommends release, and Jay/Boss approved the final artifact. The update is ready for Ray's manual Workshop upload but is not yet published.
+Treat this repository as the Breed Improved CK3 mod project. Version `0.1.0` contains one runtime-verified production Character Interaction. Version `0.2.0` adds the implemented Phase 2 multi-mode bulk-cleanup workflow. Phase 2 passed final runtime acceptance and Jay/Boss approval, and version `0.2.0` is published on Steam Workshop item `3769010534`.
 
 Use angle-bracket values as unresolved placeholders. Do not copy them literally into runnable mod files.
 
@@ -39,7 +39,7 @@ Use angle-bracket values as unresolved placeholders. Do not copy them literally 
 | Steam Workshop URL | `https://steamcommunity.com/sharedfiles/filedetails/?id=3769010534` |
 | GitHub role | Public source, history, issues, roadmap, documentation, tags, and Release notes |
 | Release versioning scheme | `<VERSIONING_SCHEME>` |
-| Current release-preparation target | `0.2.0`; runtime-accepted and ready for Ray upload; not yet published |
+| Current published version | `0.2.0` on Steam Workshop item `3769010534` |
 
 Adopt these development goals:
 
@@ -106,7 +106,7 @@ The interface must require explicit player initiation and a confirmation step be
 
 ### Phase 2: Bulk Dynasty Cleanup
 
-Status: implemented and runtime-accepted for `0.2.0`. The full manual matrix, final bilingual UI, error-log review, Ray recommendation, and Jay/Boss approval are recorded as `PASS`. Ready for Ray's manual Workshop update; not yet published.
+Status: implemented, runtime-accepted, approved, and published on Steam Workshop item `3769010534` as version `0.2.0`. The full manual matrix, final bilingual UI, error-log review, Ray recommendation, and Jay/Boss approval are recorded as `PASS`.
 
 Approved first-implementation boundaries:
 
@@ -139,8 +139,15 @@ Deferred until separate approval and evidence:
 - Consider age compatibility, traits, and genetic risks when assisting the player.
 - Avoid excessively close blood relationships.
 - The isolated-prototype authority model is **Dynast override limited to the current, explicitly initiated workflow**. This is an approved Mod-owned test authority, not a vanilla Dynast permission.
-- Phase 3 P0 evidence registration and design closure are complete and await checkpoint review. P1 is not started or authorized, production implementation is not approved, and CK3 runtime remains `NOT RUN`.
+- Phase 3 isolated prototype is
+  `STATIC IMPLEMENTATION COMPLETE — RUNTIME TEST REQUIRED`.
+- Phase 3 P0 is `CORRECTED AND CLOSED`.
+- Phase 3 P1-P5 are `STATIC COMPLETE`; the work exists only in the standalone isolated prototype.
+- Phase 3 P6 is `AWAITING RAY RUNTIME APPROVAL`.
+- Phase 3 production implementation is `NOT APPROVED`, and CK3 runtime remains `NOT RUN`.
 - The P0 storage design uses one global workflow coordinator and sixteen actor-owned fixed pair slots. This is a prototype constraint, not a production pair limit.
+- The prototype uses a separate permanent one-workflow-per-save global activation lock because numeric run identity remains `NOT VERIFIED`. The lock is never a grant of authority.
+- An unexpectedly closed visible event is treated as orphaned and permanently locked. No generic close callback, immediate cleanup, resume, reauthorization, delayed execution, or background execution is claimed.
 - Keep final scoring rules, relationship-distance thresholds, presentation, special-state policy, multiplayer consent, and production player controls open until the isolated prototype and later product decisions are approved.
 
 ### Phase 4: Advanced Breeding Assistant
@@ -176,6 +183,8 @@ Before introducing a new CK3 directory, file type, field, trigger, effect, modif
 - Stop and report `UNVERIFIED CK3 SYNTAX` when evidence is insufficient.
 - Request approval before establishing a new project-wide convention from a placeholder.
 
+The prior Phase 3 changes under `.agents/skills/ck3-mod-development/` are ratified only as Phase 3 evidence and status registration. They do not alter the skill's general correctness rules, approve Phase 3 production implementation, or authorize another feature.
+
 ## Foundation Layout and Launcher Setup
 
 Use this confirmed repository layout:
@@ -203,7 +212,7 @@ Use this confirmed repository layout:
 
 Treat `MyCK3Mod/` as the CK3 mod content root. Keep development-only material, including `.agents/`, outside that folder.
 
-Steam Workshop is the sole supported end-user installation channel. Users subscribe through Steam Workshop and enable the Mod in a CK3 Launcher playset. GitHub source archives are not supported installable Mod packages, and cloning the repository does not automatically install the Mod.
+Steam Workshop is the supported ordinary end-user installation channel. Users subscribe to Workshop item `3769010534` and enable the Mod in a CK3 Launcher playset. GitHub remains the public source, history, issue, roadmap, documentation, tag, and release-record host; its source archives and release documentation are not supported installable Mod packages, and cloning the repository does not automatically install the Mod.
 
 Use `MyCK3Mod.mod` only as a developer/advanced-user local launcher template. Keep `path="<LOCAL_MOD_PATH>"` unchanged in the committed template. For repository-path development testing:
 
@@ -269,8 +278,8 @@ Initial namespace registry:
 
 | Purpose | Namespace | Event range | Status |
 | --- | --- | --- | --- |
-| Phase 2 Dynasty cleanup review | `breedimp_dynasty_cleanup` | `1000`–`1099` | Allocated; `1001` and `1002` used; final v0.2.0 runtime acceptance `PASS`; ready for Ray upload |
-| Phase 3 isolated matchmaking validation | `breedimp_matchmaking_validation` | `1000`–`1199` | Prototype-only allocation recorded at P0; no events created; checkpoint review required; P1 not authorized |
+| Phase 2 Dynasty cleanup review | `breedimp_dynasty_cleanup` | `1000`-`1099` | Allocated; `1001` and `1002` used; final v0.2.0 runtime acceptance `PASS`; published on Workshop item `3769010534` |
+| Phase 3 isolated matchmaking validation | `breedimp_p3_proto_matchmaking` | `1000`-`1199` | Prototype-only; P0 corrected and closed; P1-P5 static complete; P6 awaiting Ray runtime approval; production not approved |
 | Unassigned future system | `breedimp_<system>` | `<RANGE>` | Prefix confirmed; system and range unassigned |
 
 ## Event ID Naming Rules

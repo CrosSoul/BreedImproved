@@ -1,0 +1,37 @@
+# Breed Improved Phase 3 isolated prototype entry.
+# Test-only, non-release, CK3 1.19.0.6. Runtime status: NOT RUN.
+
+breedimp_p3_proto_manage_matchmaking_decision = {
+	title = breedimp_p3_proto_manage_matchmaking_decision
+	picture = {
+		reference = "gfx/interface/illustrations/decisions/decision_dynasty_house.dds"
+	}
+	selection_tooltip = breedimp_p3_proto_manage_matchmaking_decision_tooltip
+	desc = breedimp_p3_proto_manage_matchmaking_decision_desc
+	confirm_text = breedimp_p3_proto_manage_matchmaking_decision_confirm
+	sort_order = 90
+
+	is_shown = {
+		breedimp_p3_proto_actor_can_open_entry_trigger = yes
+	}
+
+	is_valid_showing_failures_only = {
+		custom_tooltip = {
+			text = breedimp_p3_proto_manage_matchmaking_decision_invalid_tt
+			breedimp_p3_proto_actor_can_activate_trigger = yes
+		}
+	}
+
+	effect = {
+		save_scope_as = breedimp_p3_proto_actor
+		trigger_event = breedimp_p3_proto_matchmaking.1000
+	}
+
+	ai_check_interval = 0
+	ai_potential = {
+		always = no
+	}
+	ai_will_do = {
+		base = 0
+	}
+}
