@@ -32,11 +32,21 @@ The final candidate-page layout, quoted option labels, tooltips, complete cleanu
 
 Deferred Phase 2 extensions include accepted-founder-parent and whole-branch protection, combined modes, arbitrary trait selection, scoring, saved mode preferences, and broader descendant-topology handling. No character names or save-specific character IDs will be hardcoded.
 
+## Phase 3 - Dynasty Matchmaking Management
+
+Status: `STATIC FEASIBILITY COMPLETE - ISOLATED PROTOTYPE DIRECTION APPROVED; PRODUCTION NOT APPROVED`.
+
+Phase 3 is a proposed player-initiated workflow for reviewing same-Dynasty marriage and betrothal recommendations. Static CK3 `1.19.0.6` research confirms individual building blocks for native marriage-window preselection, direct marriage and betrothal effects, current fertility, age comparison, vanilla marriage legality, and coarse kinship categories.
+
+The approved isolated-prototype direction is the **Dynast-override model, with authority limited to the current workflow**, combined with direct execution after final confirmation (Approach B). A living player-controlled Dynast must explicitly start and confirm the workflow. Breed Improved then supplies a temporary internal authority for that run only. This is an intentional Mod power: verified vanilla evidence does not grant a Dynast general marriage authority over every Dynasty member.
+
+The prototype must preserve all non-authority legality and safety rules, store only an unexecuted temporary plan during review, and perform complete all-or-nothing preflight validation before creating any relationship. If any planned pair is invalid, the whole plan stops without creating a marriage or betrothal. The prototype must also prove temporary-authority cleanup, pair-state integrity, ordinary and matrilineal adult marriages and minor betrothals, direct-effect side effects, dynamic fertility tiers, large-Dynasty performance, save/reload behavior, and Phase 1/2 regression safety.
+
+Production implementation remains unapproved. Native marriage-window batch continuation, final trait scoring, lower fertility tiers, exact kinship calculation, special-state policy, multiplayer consent, Grand Weddings, and other product refinements remain deferred rather than cancelled. No automatic or background matchmaking is planned.
+
+The next gate is approval of `docs/Matt_to_Jay_Phase3_Prototype_Implementation_Plan.md`. Only after that approval may an isolated test-only prototype be created. CK3 runtime status remains `NOT RUN`.
+
 ## Later phases
-
-### Dynasty marriage assistance
-
-Player-assisted marriage planning remains a future concept. Candidate scoring, relationship-distance limits, genetic-risk presentation, and player controls require separate design approval and CK3 evidence.
 
 ### Advanced breeding assistance
 
