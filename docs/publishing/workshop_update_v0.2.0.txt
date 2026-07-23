@@ -1,0 +1,7 @@
+Breed Improved v0.2.0
+
+Added player-controlled multi-mode Dynasty cleanup with Bloodline and Negative Congenital Trait modes. Review candidates one by one, spare them, finish early, or add the current and all remaining candidates before final confirmation. The original individual Exile from Dynasty interaction remains available. English and Simplified Chinese interface text has also been improved.
+
+Breed Improved v0.2.0
+
+新增由玩家主动控制的多模式宗族清理，包含“血缘清理”和“负面先天特质清理”。玩家可以逐人审查、放过候选人、提前结束，或将当前及所有剩余候选人加入名单，再进行最终确认。原有的单角色“逐出宗族”互动继续保留，并改进了英文与简体中文界面文本。

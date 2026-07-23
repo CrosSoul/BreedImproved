@@ -1,5 +1,5 @@
 param(
-	[string]$Version = "0.1.0"
+	[string]$Version = "0.2.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -9,6 +9,7 @@ $productionRoot = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot "MyCK
 $distRoot = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot "dist"))
 $workshopRoot = [System.IO.Path]::GetFullPath((Join-Path $distRoot "workshop"))
 $stageRoot = [System.IO.Path]::GetFullPath((Join-Path $workshopRoot "BreedImproved"))
+$manifestPath = [System.IO.Path]::GetFullPath((Join-Path $workshopRoot "BreedImproved.manifest.json"))
 $workshopIdConfigPath = Join-Path $repositoryRoot "docs/publishing/workshop_item_id.txt"
 $expectedWorkshopId = "3769010534"
 $thumbnailSourcePath = Join-Path $repositoryRoot "assets/workshop/thumbnail.png"
@@ -74,6 +75,51 @@ if ($configuredWorkshopId -ne $expectedWorkshopId) {
 }
 
 $thumbnailSourceMetadata = Get-PngMetadata -Path $thumbnailSourcePath
+if ($thumbnailSourceMetadata.Width -ne 512 -or $thumbnailSourceMetadata.Height -ne 512) {
+	throw "Workshop thumbnail must be exactly 512x512 pixels: $thumbnailSourcePath"
+}
+
+$requiredProductionFiles = @(
+	"descriptor.mod",
+	"common/character_interactions/breedimp_dynasty_cleanup_protection_interactions.txt",
+	"common/character_interactions/breedimp_exile_from_dynasty_interaction.txt",
+	"common/decisions/breedimp_dynasty_cleanup_decisions.txt",
+	"common/modifiers/breedimp_dynasty_exile_modifiers.txt",
+	"common/opinion_modifiers/breedimp_dynasty_exile_opinions.txt",
+	"common/scripted_effects/breedimp_dynasty_cleanup_effects.txt",
+	"common/scripted_effects/breedimp_dynasty_exile_effects.txt",
+	"common/scripted_triggers/breedimp_dynasty_cleanup_triggers.txt",
+	"common/scripted_triggers/breedimp_dynasty_exile_triggers.txt",
+	"common/script_values/breedimp_dynasty_exile_values.txt",
+	"events/breedimp_dynasty_cleanup_events.txt",
+	"localization/english/breedimp_dynasty_cleanup_l_english.yml",
+	"localization/english/breedimp_dynasty_exile_l_english.yml",
+	"localization/simp_chinese/breedimp_dynasty_cleanup_l_simp_chinese.yml",
+	"localization/simp_chinese/breedimp_dynasty_exile_l_simp_chinese.yml"
+)
+
+# Freeze the v0.2.0 production payload. An unexpected file in the CK3 content
+# root is a release error even when it would copy byte-for-byte to staging.
+$productionFiles = @(
+	Get-ChildItem -LiteralPath $productionRoot -Recurse -File -Force |
+		Where-Object { $_.Name -ne ".gitkeep" }
+)
+$productionRelativePaths = @(
+	$productionFiles |
+		ForEach-Object { $_.FullName.Substring($productionRoot.Length + 1).Replace("\", "/") }
+)
+$unexpectedProductionFiles = @(
+	$productionRelativePaths | Where-Object { $_ -notin $requiredProductionFiles }
+)
+$missingProductionFiles = @(
+	$requiredProductionFiles | Where-Object { $_ -notin $productionRelativePaths }
+)
+if ($unexpectedProductionFiles.Count -ne 0) {
+	throw "Unexpected file in frozen v0.2.0 production payload: $($unexpectedProductionFiles[0])"
+}
+if ($missingProductionFiles.Count -ne 0) {
+	throw "Required v0.2.0 production file is missing: $($missingProductionFiles[0])"
+}
 
 $sourceDescriptorPath = Join-Path $productionRoot "descriptor.mod"
 $sourceDescriptor = Get-Content -LiteralPath $sourceDescriptorPath -Raw -Encoding UTF8
@@ -83,18 +129,17 @@ if ($sourceDescriptor -match '(?m)^\s*remote_file_id\s*=') {
 
 New-Item -ItemType Directory -Path $workshopRoot -Force | Out-Null
 
+# A manifest is proof of a fully successful build. Remove any stale copy before
+# rebuilding and write a new one only after every staging validation passes.
+if (Test-Path -LiteralPath $manifestPath) {
+	Remove-Item -LiteralPath $manifestPath -Force
+}
+
 # Workshop staging is never incremental.
 if (Test-Path -LiteralPath $stageRoot) {
 	Remove-Item -LiteralPath $stageRoot -Recurse -Force
 }
 New-Item -ItemType Directory -Path $stageRoot | Out-Null
-
-# Copy every production file directly from MyCK3Mod/. Repository-only .gitkeep
-# files preserve empty source directories but are not runtime content.
-$productionFiles = @(
-	Get-ChildItem -LiteralPath $productionRoot -Recurse -File -Force |
-		Where-Object { $_.Name -ne ".gitkeep" }
-)
 
 foreach ($sourceFile in $productionFiles) {
 	$relativePath = $sourceFile.FullName.Substring($productionRoot.Length + 1)
@@ -117,31 +162,13 @@ if (
 	throw "Staged Workshop thumbnail does not match the repository publishing asset."
 }
 
-$requiredProductionFiles = @(
-	"descriptor.mod",
-	"common/character_interactions/breedimp_dynasty_cleanup_protection_interactions.txt",
-	"common/character_interactions/breedimp_exile_from_dynasty_interaction.txt",
-	"common/decisions/breedimp_dynasty_cleanup_decisions.txt",
-	"common/modifiers/breedimp_dynasty_exile_modifiers.txt",
-	"common/opinion_modifiers/breedimp_dynasty_exile_opinions.txt",
-	"common/scripted_effects/breedimp_dynasty_cleanup_effects.txt",
-	"common/scripted_effects/breedimp_dynasty_exile_effects.txt",
-	"common/scripted_triggers/breedimp_dynasty_cleanup_triggers.txt",
-	"common/scripted_triggers/breedimp_dynasty_exile_triggers.txt",
-	"common/script_values/breedimp_dynasty_exile_values.txt",
-	"events/breedimp_dynasty_cleanup_events.txt",
-	"localization/english/breedimp_dynasty_cleanup_l_english.yml",
-	"localization/english/breedimp_dynasty_exile_l_english.yml",
-	"localization/simp_chinese/breedimp_dynasty_cleanup_l_simp_chinese.yml",
-	"localization/simp_chinese/breedimp_dynasty_exile_l_simp_chinese.yml"
-)
 foreach ($relativePath in $requiredProductionFiles) {
 	if (-not (Test-Path -LiteralPath (Join-Path $stageRoot $relativePath) -PathType Leaf)) {
 		throw "Required Workshop production file is missing: $relativePath"
 	}
 }
 
-foreach ($requiredDirectory in @("common", "localization")) {
+foreach ($requiredDirectory in @("common", "events", "localization")) {
 	if (-not (Test-Path -LiteralPath (Join-Path $stageRoot $requiredDirectory) -PathType Container)) {
 		throw "Required Workshop root directory is missing: $requiredDirectory"
 	}
@@ -306,6 +333,53 @@ foreach ($relativePath in $allRelativePaths) {
 	}
 }
 
+$roleByPath = @{
+	"descriptor.mod" = "descriptor"
+	"thumbnail.png" = "workshop thumbnail"
+	"common/character_interactions/breedimp_dynasty_cleanup_protection_interactions.txt" = "Phase 2 protection interactions"
+	"common/character_interactions/breedimp_exile_from_dynasty_interaction.txt" = "Phase 1 individual interaction"
+	"common/decisions/breedimp_dynasty_cleanup_decisions.txt" = "Phase 2 decision"
+	"common/modifiers/breedimp_dynasty_exile_modifiers.txt" = "shared exile modifier"
+	"common/opinion_modifiers/breedimp_dynasty_exile_opinions.txt" = "shared exile opinion modifier"
+	"common/script_values/breedimp_dynasty_exile_values.txt" = "Phase 1 interaction cost value"
+	"common/scripted_effects/breedimp_dynasty_cleanup_effects.txt" = "Phase 2 effects"
+	"common/scripted_effects/breedimp_dynasty_exile_effects.txt" = "shared exile effect"
+	"common/scripted_triggers/breedimp_dynasty_cleanup_triggers.txt" = "Phase 2 triggers"
+	"common/scripted_triggers/breedimp_dynasty_exile_triggers.txt" = "shared exile triggers"
+	"events/breedimp_dynasty_cleanup_events.txt" = "Phase 2 events"
+	"localization/english/breedimp_dynasty_cleanup_l_english.yml" = "Phase 2 English localisation"
+	"localization/english/breedimp_dynasty_exile_l_english.yml" = "Phase 1 English localisation"
+	"localization/simp_chinese/breedimp_dynasty_cleanup_l_simp_chinese.yml" = "Phase 2 Simplified Chinese localisation"
+	"localization/simp_chinese/breedimp_dynasty_exile_l_simp_chinese.yml" = "Phase 1 Simplified Chinese localisation"
+}
+$manifestFiles = @(
+	foreach ($relativePath in @($stageMap.Keys | Sort-Object)) {
+		$normalizedPath = $relativePath.Replace("\", "/")
+		$stagedFile = $stageMap[$relativePath]
+		[ordered]@{
+			path = $normalizedPath
+			size_bytes = [int64]$stagedFile.Length
+			sha256 = (Get-FileHash -LiteralPath $stagedFile.FullName -Algorithm SHA256).Hash
+			category = if ($normalizedPath -eq "thumbnail.png") { "publishing asset" } else { "gameplay production file" }
+			role = $roleByPath[$normalizedPath]
+		}
+	}
+)
+$manifest = [ordered]@{
+	schema_version = 1
+	release_version = $Version
+	supported_version = "1.19.*"
+	workshop_item_id = $configuredWorkshopId
+	staging_root = "dist/workshop/BreedImproved"
+	production_file_count = $productionFiles.Count
+	publishing_asset_count = 1
+	staged_file_count = $stagedFiles.Count
+	files = $manifestFiles
+}
+$manifestJson = ($manifest | ConvertTo-Json -Depth 5).Replace("`r`n", "`n") + "`n"
+[System.IO.File]::WriteAllText($manifestPath, $manifestJson, $utf8NoBom)
+$manifestHash = (Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash
+
 [PSCustomObject]@{
 	Version = $Version
 	ProductionRoot = $productionRoot
@@ -315,9 +389,12 @@ foreach ($relativePath in $allRelativePaths) {
 	ProductionFiles = $productionFiles.Count
 	PublishingAssets = 1
 	StagedFiles = $stagedFiles.Count
+	Manifest = $manifestPath
+	ManifestSHA256 = $manifestHash
 	HashComparison = "PASS (production files and publishing asset)"
 	DescriptorTransform = "PASS (exact remote_file_id injection only)"
 	ThumbnailValidation = "PASS (PNG, $($thumbnailStageMetadata.Width)x$($thumbnailStageMetadata.Height), $($thumbnailStageMetadata.Bytes) bytes)"
+	ThumbnailSHA256 = $thumbnailStageMetadata.SHA256
 	LocalisationBOM = "PASS"
-	ContentRootLayout = "descriptor.mod + thumbnail.png + common/ + localization/"
+	ContentRootLayout = "descriptor.mod + thumbnail.png + common/ + events/ + localization/"
 }

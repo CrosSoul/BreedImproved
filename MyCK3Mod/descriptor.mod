@@ -1,7 +1,7 @@
-version="0.1.0"
+version="0.2.0"
 tags={
 	"Utilities"
 	"Gameplay"
 }
-name="Breed Improved Phase 2 test"
+name="Breed Improved"
 supported_version="1.19.*"

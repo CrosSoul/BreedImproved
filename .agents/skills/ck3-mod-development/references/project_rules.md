@@ -17,7 +17,7 @@
 
 ## Project Status and Goals
 
-Treat this repository as the Breed Improved CK3 mod project. Version `0.1.0` contains one runtime-verified production Character Interaction. A Phase 2 multi-mode bulk-cleanup implementation has passed static review and is ready for controlled manual testing, but it is not runtime-verified or release-approved.
+Treat this repository as the Breed Improved CK3 mod project. Version `0.1.0` contains one runtime-verified production Character Interaction. Version `0.2.0` adds the implemented Phase 2 multi-mode bulk-cleanup workflow. Phase 2 passed final runtime acceptance, Ray recommends release, and Jay/Boss approved the final artifact. The update is ready for Ray's manual Workshop upload but is not yet published.
 
 Use angle-bracket values as unresolved placeholders. Do not copy them literally into runnable mod files.
 
@@ -39,6 +39,7 @@ Use angle-bracket values as unresolved placeholders. Do not copy them literally 
 | Steam Workshop URL | `https://steamcommunity.com/sharedfiles/filedetails/?id=3769010534` |
 | GitHub role | Public source, history, issues, roadmap, documentation, tags, and Release notes |
 | Release versioning scheme | `<VERSIONING_SCHEME>` |
+| Current release-preparation target | `0.2.0`; runtime-accepted and ready for Ray upload; not yet published |
 
 Adopt these development goals:
 
@@ -105,7 +106,7 @@ The interface must require explicit player initiation and a confirmation step be
 
 ### Phase 2: Bulk Dynasty Cleanup
 
-Status: development implementation created; static review `PASS`; runtime status `NOT RUN`; not part of released v0.1.0.
+Status: implemented and runtime-accepted for `0.2.0`. The full manual matrix, final bilingual UI, error-log review, Ray recommendation, and Jay/Boss approval are recorded as `PASS`. Ready for Ray's manual Workshop update; not yet published.
 
 Approved first-implementation boundaries:
 
@@ -130,7 +131,7 @@ Deferred until separate approval and evidence:
 - combined modes, custom trait selection, scoring, or saved mode preferences;
 - an arbitrary descendant iterator or a claimed static solution for converging non-ancestor branches;
 - automatic, recurring, or background execution; and
-- release of Phase 2 before Ray's manual test matrix and Jay/Boss approval are complete.
+- any future Phase 2 extension without separate approval, evidence, and runtime testing.
 
 ### Phase 3: Dynasty Marriage Assistance
 
@@ -265,7 +266,7 @@ Initial namespace registry:
 
 | Purpose | Namespace | Event range | Status |
 | --- | --- | --- | --- |
-| Phase 2 Dynasty cleanup review | `breedimp_dynasty_cleanup` | `1000`–`1099` | Allocated; `1001` and `1002` used; runtime `NOT RUN` |
+| Phase 2 Dynasty cleanup review | `breedimp_dynasty_cleanup` | `1000`–`1099` | Allocated; `1001` and `1002` used; final v0.2.0 runtime acceptance `PASS`; ready for Ray upload |
 | Unassigned future system | `breedimp_<system>` | `<RANGE>` | Prefix confirmed; system and range unassigned |
 
 ## Event ID Naming Rules

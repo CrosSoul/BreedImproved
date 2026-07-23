@@ -4,11 +4,12 @@ Prepared by Matt (CK3ModDeveloper) for Jay (CK3ModLeader).
 
 - CK3 evidence target: `1.19.0.6`
 - Production compatibility target: `1.19.*`
-- Implementation status: `IMPLEMENTED — STATIC REVIEW PASSED; MANUAL RUNTIME NOT RUN`
-- Runtime status: `NOT RUN`
+- Target release: `0.2.0`
+- Implementation status: `IMPLEMENTED AND RUNTIME-VERIFIED FOR v0.2.0`
+- Runtime status: `FINAL RC ACCEPTANCE PASS — READY FOR RAY UPLOAD`
 - Existing release baseline: v0.1.0 individual **Exile from Dynasty**
 
-This document records the conservative implementation decisions used to turn the approved Phase 2 product baseline into a testable CK3 implementation. It does not claim runtime success and does not alter the accepted v0.1.0 individual interaction contract.
+This document records the conservative implementation decisions used to turn the approved Phase 2 product baseline into a CK3 implementation. The full final acceptance matrix is user-confirmed `PASS`, including the bilingual display revision, every review and confirmation path, candidate/protection/branch matrices, large-Dynasty and save/reload coverage, and the final CK3 error-log review. Ray recommends release, and Jay/Boss approved the final v0.2.0 artifact. The accepted v0.1.0 individual interaction contract remains unchanged.
 
 ## 1. Frozen first-implementation scope
 
@@ -20,8 +21,8 @@ The first Phase 2 implementation contains:
   - Negative Congenital Trait Cleanup;
 - one shared mandatory-protection layer;
 - a player-managed individual protection marker shared by both modes;
-- sequential candidate review with explicit select, skip, finish, and cancel choices;
-- candidate reason, age, landed status, relationship, positive-trait warning, descendant-impact warning, and succession warning disclosure;
+- sequential candidate review with explicit select, spare, finish-early, and add-current-and-remaining choices;
+- candidate reason, age, landed status, relationship, positive-trait warning, and child-or-descendant information;
 - a separate final confirmation step;
 - immediate final revalidation;
 - ancestor/descendant overlap collapse before mutation; and
@@ -136,8 +137,8 @@ For each candidate the player can:
 
 - select the candidate for final review;
 - leave the candidate unselected and continue;
-- finish candidate review early; or
-- cancel the complete workflow.
+- finish candidate review early while preserving the current list; or
+- add the current and all remaining eligible branch roots while preserving every earlier decision to spare a character, then proceed to final confirmation.
 
 Selecting or skipping changes only event-chain lists. It does not add temporary character flags, call `create_dynasty`, or apply any v0.1.0 exile consequence.
 
@@ -151,11 +152,9 @@ The candidate event identifies:
 - the current mode;
 - the exact bloodline reason or every exact fixed negative trait detected;
 - whether the candidate also has a fixed positive congenital trait;
-- that all descendants will move even when they do not share the candidate reason;
-- that parents and siblings remain outside the moved branch; and
-- that CK3 may recalculate succession and the player heir.
+- and whether the candidate has recorded children or descendants affected by the branch move.
 
-The first implementation discloses the full descendant branch as the impact scope. It does not claim an exact descendant count because no count-display form has been approved for this implementation.
+The event retains candidate-specific descendant information but does not repeat a generic technical warning on every candidate page. The implementation does not claim an exact descendant count because no count-display form has been approved.
 
 ### 4.4 Final confirmation and overlap collapse
 
@@ -220,43 +219,35 @@ Before handoff, static review must confirm:
 
 ### Manual CK3 gate for Ray
 
-Runtime approval is required for:
+The manual CK3 gate is complete. The user confirmed that Ray's final testing passed:
 
-- both Decision mode options and their descriptions;
-- candidate discovery and no-candidate behavior;
-- select, skip, early finish, cancel, and final confirm paths;
-- each bloodline rule branch;
-- the fixed negative-trait preset and positive-trait warning;
-- individual protection and its removal;
-- minors, adults, unlanded characters, landed rulers, and current player heirs;
-- ancestor/descendant overlap collapse;
-- converging descendant branches from non-ancestor selected roots;
-- target and all-descendant propagation through the unchanged shared effect;
-- invalidation between review and confirm where practical;
-- English and Simplified Chinese presentation;
-- save/reload persistence of the individual protection marker; and
-- CK3 error-log review.
+- both Decision modes, candidate discovery, zero-candidate handling, and every review/confirmation path;
+- all bloodline, congenital-trait, shared-exclusion, protection, target-class, and candidate-presentation cases;
+- ancestor-first handling, duplicate-root folding, converging and independent branch cases, and the complete **Exile them all** flow;
+- English and Simplified Chinese layout, all six quoted option labels, all six tooltips, and removal of obsolete technical warnings;
+- large-Dynasty behavior, save/reload, consecutive independent runs, and Phase 1 regression coverage; and
+- the final CK3 error log with no blocking Breed Improved errors.
 
-Until those tests pass, Phase 2 remains a development implementation and must not be described as runtime-verified or released.
+Ray recommends release, and Jay/Boss approved the final v0.2.0 artifact. Phase 2 may be described as implemented and runtime-accepted, but not as published until Ray completes the existing Workshop-item update.
 
 ## 8. Static review result
 
-Status: `PASS` on 2026-07-22.
+Status: initial implementation `PASS` on 2026-07-22; v0.2.0 release-preparation static and staging recheck `PASS` on 2026-07-23. CK3 runtime was not run during release preparation.
 
 Confirmed without launching CK3:
 
 - braces and quotes are balanced in every new runnable script;
 - event namespace, IDs, callers, and the allocated `1000`–`1099` range are consistent;
 - the fixed trait union is exactly 20 negative keys, 11 positive warning keys, and the two approved public bastard-state keys;
-- English and Simplified Chinese each contain 59 unique, matching keys with no missing or orphaned Phase 2 reference;
+- English and Simplified Chinese each contain 66 unique, matching Phase 2 keys with no missing reference;
 - both localisation files retain UTF-8 BOM;
 - no age, landed, ruler, heir, government, title, marriage, or court eligibility restriction was added;
 - no cost, automatic entry point, recurring action, claim/title/court mutation, descendant iterator, or copied `create_dynasty` block was added;
 - Phase 2 calls the unchanged v0.1.0 mutation effect exactly once from its guarded execution path;
-- all tracked v0.1.0 gameplay, localisation, and descriptor files are unchanged from `HEAD`;
+- all v0.1.0 gameplay files remain unchanged from the release-preparation baseline; descriptor version metadata is intentionally updated for v0.2.0;
 - Workshop staging contains all 16 production files plus the separately classified thumbnail, with source/staging hashes matching;
 - the staged descriptor contains exactly one `remote_file_id="3769010534"` and no local path;
 - no `breedimp_test_` identifier or local absolute path appears in production or staging; and
 - `git diff --check` passes.
 
-This is a static result only. Runtime behavior, UI layout, list continuity, large-Dynasty performance, repeated Dynasty replacement, save/reload, and the named branch-topology cases remain `NOT RUN` pending Ray's manual matrix.
+Static review does not replace runtime testing. The separate user-confirmed runtime record now reports the complete final v0.2.0 matrix, final bilingual UI, CK3 error-log review, Ray recommendation, and Jay/Boss approval as passing.

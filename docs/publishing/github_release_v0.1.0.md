@@ -45,4 +45,4 @@ The Mod performs no automatic background scans or recurring cleanup.
 
 ## Source repository
 
-Source, issues, roadmap, and documentation: `<INSERT_GITHUB_REPOSITORY_URL>`
+Source, issues, roadmap, and documentation: https://github.com/CrosSoul/BreedImproved
