@@ -96,9 +96,9 @@
  breedimp_p3_proto_matchmaking.1143.b: "Cancel the full plan."
  breedimp_p3_proto_matchmaking.1143.b.tt: "Discard all 16 temporary records without creating a relationship."
 
- breedimp_p3_proto_matchmaking.1144.t: "Prototype Batch Dispatched"
- breedimp_p3_proto_matchmaking.1144.desc: "The fully preflighted relationship operations were dispatched, and all temporary workflow state was cleaned. Runtime side effects still require inspection before any production approval."
- breedimp_p3_proto_matchmaking.1144.a: "Record the observations."
+ breedimp_p3_proto_matchmaking.1144.t: "Prototype Batch Complete"
+ breedimp_p3_proto_matchmaking.1144.desc: "The approved batch execution path completed.\nAccepted pairs: [ROOT.Char.MakeScope.Var('breedimp_p3_proto_accepted_pair_count').GetValue|0]\nRelationship operations reached: [ROOT.Char.MakeScope.Var('breedimp_p3_proto_executed_pair_count').GetValue|0]\nMarriages: [ROOT.Char.MakeScope.Var('breedimp_p3_proto_executed_marriage_count').GetValue|0]\nBetrothals: [ROOT.Char.MakeScope.Var('breedimp_p3_proto_executed_betrothal_count').GetValue|0]\n\nProcessed pairs:"
+ breedimp_p3_proto_matchmaking.1144.a: "Acknowledge the completed batch."
 
  breedimp_p3_proto_direction_ordinary: "ordinary"
  breedimp_p3_proto_direction_matrilineal: "matrilineal"

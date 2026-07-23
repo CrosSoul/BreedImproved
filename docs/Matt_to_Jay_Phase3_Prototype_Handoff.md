@@ -6,16 +6,17 @@
   `STATIC IMPLEMENTATION COMPLETE — RUNTIME TEST REQUIRED`
 - P0: `CORRECTED AND CLOSED`
 - P1-P5: `STATIC COMPLETE`
-- P6: `AWAITING RAY RUNTIME APPROVAL`
+- P6: `PRE-FIX BLOCKER OBSERVED; POST-FIX RETEST NOT RUN`
 - Production implementation: `NOT APPROVED`
-- CK3 runtime: `NOT RUN`
-- Final handoff state: `AWAITING RAY IN-GAME TESTING`
+- CK3 runtime:
+  `PRE-FIX BLOCKER OBSERVED; POST-FIX RESERVATION RETEST NOT RUN`
+- Final handoff state: `AWAITING RAY RESERVATION-REGRESSION RETEST`
 - Target: CK3 `1.19.0.6 (Scribe)`
 
 This handoff covers only the isolated test Mod under
 `tests/phase3_dynasty_matchmaking/`. It does not approve Phase 3 production
-code, change the released Mod, or claim that CK3 has loaded or executed the
-prototype.
+code or change the released Mod. Ray's first P6 pass established the pre-fix
+observations recorded below; no post-fix CK3 result is claimed.
 
 ## 1. Run isolation
 
@@ -87,8 +88,10 @@ age policy, and reservation state.
 
 ### Terminal paths
 
-- Normal completion: execute only after whole-plan preflight, then centrally
-  clear temporary state.
+- Normal completion: execute only after whole-plan preflight, display the
+  test-only completion result while its counts and slot details remain
+  available, then centrally clear temporary state when that result is
+  acknowledged.
 - Review cancellation: clear temporary state; create no relationship.
 - Final cancellation: clear temporary state; create no relationship.
 - No eligible subject: clear temporary state and show the no-subject result.
@@ -140,6 +143,58 @@ The capacity is 16 pairs / 32 reserved characters. Slot 17 does not exist.
 After slot 16 is committed, the prototype opens a capacity result that allows
 the player to proceed to final confirmation or cancel. No existing slot is
 overwritten, wrapped, reused, or truncated.
+
+### P6 reservation blocker and static correction
+
+Ray/Boss reported that the pre-correction build passed entry/cancel Smoke 1,
+first activation/permanent-lock Smoke 2, and **View another partner for this
+person** on retest. Pair-slot writing worked. These observations belong only
+to that earlier build and do not mark the corrected build as runtime-verified.
+
+The first P6 pass established a blocking pre-fix result: accepting a pair
+wrote a committed slot, but one or both participants could still be proposed
+and accepted again. The final cross-slot preflight detected the resulting
+duplicate plan and aborted, but immediate subject/partner reservation had
+failed. Reliable multi-pair execution was therefore blocked.
+
+The exact cause was a scope-identity error in the shared unreserved-character
+trigger. Callers evaluated it from the proposed character and passed
+`CHARACTER = this`, but the trigger entered the actor scope before forwarding
+that textual parameter to the slot checks. Scripted-trigger parameters are
+textual substitutions, not automatically captured scopes; after entering the
+actor block, `this` denoted the actor instead of the proposed subject or
+partner. The slot integrity and final preflight logic remained sound because
+those paths directly inspected actor-owned slot variables.
+
+The CK3 `1.19.0.6` basis is the save-before-scope-transition pattern in
+`common/scripted_triggers/00_marriage_triggers.txt:183-212`, plus
+character-variable equality against a saved scope in
+`events/board_game_events.txt:1173-1187`,
+`events/relations_events/relation_upgrade_events.txt:190-210`, and
+`events/siege_events.txt:1323-1351`. The corresponding project restrictions
+are registered in
+`.agents/skills/ck3-mod-development/references/ck3_syntax_reference.md:603-629`.
+
+The static correction now:
+
+1. saves the proposed character with `save_temporary_scope_as` before entering
+   the actor-owned slot scope;
+2. passes that explicit saved character to all 16 committed-slot reservation
+   checks;
+3. uses the same unreserved-character contract for subject selection and both
+   roles in partner eligibility;
+4. re-evaluates the current pair inside the shared acceptance effect before
+   the first slot field is written; and
+5. routes a rejected or stale pair to recovery without writing `subject`,
+   `partner`, metadata, `reservation_id`, or incrementing
+   `accepted_pair_count`.
+
+Both visible direction options call this one acceptance effect, while
+marriage versus betrothal remains derived from the participants' ages.
+Consequently the static guard is shared by ordinary marriage, matrilineal
+marriage, ordinary betrothal, and matrilineal betrothal. The complete final
+preflight and all 120 unordered cross-slot comparisons remain unchanged as
+defense in depth.
 
 ## 5. Candidate generation and ordering
 
@@ -202,6 +257,32 @@ despite the completed preflight, an earlier operation could already have
 executed. That residual partial-execution risk is a mandatory runtime gate, not
 a statically solved guarantee.
 
+### Test-only completion feedback
+
+After the execution path is reached, event
+`breedimp_p3_proto_matchmaking.1144` now provides a visible test result before
+temporary state is cleared. It reports:
+
+- accepted-pair count;
+- relationship-operation count reached by the execution dispatcher;
+- marriage-operation count;
+- betrothal-operation count; and
+- each committed slot's two characters, relationship type, and ordinary or
+  matrilineal direction.
+
+These are prototype diagnostics, not proof that CK3 completed every requested
+relationship. The counters advance only in the corresponding committed-slot
+execution branch, and no success result is dispatched before the validated
+execution path. Cleanup now occurs when the player acknowledges this
+completion page. The event rendering, counter agreement, relationship
+postconditions, cleanup timing, and abnormal-close behavior remain runtime
+retest requirements.
+
+The conditional description pattern is evidenced by
+`events/court_position_management_events.txt:5-41`; numeric counter
+initialization and increments are evidenced by
+`events/court_events/introduce_court_fashion_events.txt:84-109,157-175`.
+
 ## 7. Runtime gates and known risks
 
 P6 must verify:
@@ -212,6 +293,12 @@ P6 must verify:
 - actor death and every relevant Dynast-transfer route;
 - abnormal visible-event closure and orphaned-state isolation;
 - fixed-slot persistence, incomplete writes, marker checks, and diagnostics;
+- immediate exclusion of an accepted subject and partner from both later
+  roles;
+- effect-time duplicate rejection with no partial slot or count change;
+- ordinary/matrilineal marriage and betrothal parity through the shared
+  reservation guard;
+- completion-event counts, slot details, and acknowledgement-time cleanup;
 - maximum-minus-`0.05` fertility boundaries and age-gap ordering;
 - ordinary and matrilineal adult marriage;
 - ordinary and matrilineal minor betrothal;
@@ -223,7 +310,7 @@ P6 must verify:
 - Phase 1 and Phase 2 regression safety; and
 - CK3 `error.log`.
 
-All 140 manual cases remain `NOT RUN`.
+All 156 manual cases remain `NOT RUN`.
 
 ## 8. Ray handoff
 
@@ -231,9 +318,9 @@ Use
 `docs/testing/phase3_prototype_runtime_instructions.md` for installation,
 fresh-save discipline, priority smoke gates, observation capture, and log
 review. Use
-`docs/testing/phase3_dynasty_matchmaking_manual.md` as the complete 140-case
+`docs/testing/phase3_dynasty_matchmaking_manual.md` as the complete 156-case
 matrix.
 
-Do not begin runtime testing until Ray explicitly approves P6. A runtime pass
-would validate only this isolated prototype; it would not approve production
-implementation.
+Ray should now perform the reservation-regression retest before continuing
+the broader P6 matrix. A post-fix runtime pass would validate only this
+isolated prototype; it would not approve production implementation.

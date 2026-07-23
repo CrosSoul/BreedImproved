@@ -298,89 +298,113 @@ breedimp_p3_proto_commit_slot_effect = {
 	}
 }
 
-breedimp_p3_proto_accept_current_pair_effect = {
+breedimp_p3_proto_recover_invalid_current_pair_effect = {
 	if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 1 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 1 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 2 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 2 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 3 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 3 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 4 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 4 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 5 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 5 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 6 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 6 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 7 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 7 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 8 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 8 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 9 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 9 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 10 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 10 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 11 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 11 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 12 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 12 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 13 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 13 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 14 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 14 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 15 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 15 DIRECTION = $DIRECTION$ }
-		breedimp_p3_proto_select_next_subject_effect = yes
-	}
-	else_if = {
-		limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 16 } }
-		breedimp_p3_proto_commit_slot_effect = { SLOT = 16 DIRECTION = $DIRECTION$ }
-		trigger_event = breedimp_p3_proto_matchmaking.1143
+		limit = {
+			exists = scope:breedimp_p3_proto_current_subject
+			scope:breedimp_p3_proto_current_subject = {
+				breedimp_p3_proto_subject_candidate_trigger = { ACTOR = root }
+			}
+		}
+		breedimp_p3_proto_build_partner_list_effect = yes
 	}
 	else = {
-		trigger_event = breedimp_p3_proto_matchmaking.1143
+		breedimp_p3_proto_select_next_subject_effect = yes
+	}
+}
+
+breedimp_p3_proto_accept_current_pair_effect = {
+	# Recheck both participants before the first slot field is written.
+	if = {
+		limit = {
+			breedimp_p3_proto_current_pair_can_be_committed_trigger = yes
+		}
+		if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 1 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 1 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 2 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 2 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 3 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 3 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 4 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 4 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 5 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 5 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 6 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 6 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 7 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 7 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 8 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 8 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 9 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 9 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 10 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 10 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 11 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 11 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 12 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 12 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 13 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 13 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 14 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 14 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 15 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 15 DIRECTION = $DIRECTION$ }
+			breedimp_p3_proto_select_next_subject_effect = yes
+		}
+		else_if = {
+			limit = { breedimp_p3_proto_slot_is_empty_trigger = { SLOT = 16 } }
+			breedimp_p3_proto_commit_slot_effect = { SLOT = 16 DIRECTION = $DIRECTION$ }
+			trigger_event = breedimp_p3_proto_matchmaking.1143
+		}
+		else = {
+			trigger_event = breedimp_p3_proto_matchmaking.1143
+		}
+	}
+	else = {
+		breedimp_p3_proto_recover_invalid_current_pair_effect = yes
 	}
 }
 

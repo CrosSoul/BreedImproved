@@ -2,37 +2,38 @@
 # Dynast override bypasses only native arrangement authority and AI acceptance.
 # Test-only, non-release, CK3 1.19.0.6. Runtime status: NOT RUN.
 
-breedimp_p3_proto_slot_does_not_reserve_character_trigger = {
+breedimp_p3_proto_slot_reserves_character_trigger = {
+	breedimp_p3_proto_slot_is_committed_trigger = { SLOT = $SLOT$ }
 	OR = {
-		NOT = {
-			breedimp_p3_proto_slot_is_committed_trigger = { SLOT = $SLOT$ }
-		}
-		AND = {
-			breedimp_p3_proto_slot_is_committed_trigger = { SLOT = $SLOT$ }
-			NOT = { var:breedimp_p3_proto_slot_$SLOT$_subject = $CHARACTER$ }
-			NOT = { var:breedimp_p3_proto_slot_$SLOT$_partner = $CHARACTER$ }
-		}
+		var:breedimp_p3_proto_slot_$SLOT$_subject = $CHARACTER$
+		var:breedimp_p3_proto_slot_$SLOT$_partner = $CHARACTER$
 	}
 }
 
 breedimp_p3_proto_character_is_unreserved_trigger = {
+	# Preserve the candidate before entering the actor-owned slot scope.
+	save_temporary_scope_as = breedimp_p3_proto_reservation_candidate
 	$ACTOR$ = {
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 1 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 2 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 3 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 4 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 5 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 6 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 7 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 8 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 9 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 10 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 11 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 12 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 13 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 14 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 15 CHARACTER = $CHARACTER$ }
-		breedimp_p3_proto_slot_does_not_reserve_character_trigger = { SLOT = 16 CHARACTER = $CHARACTER$ }
+		NOT = {
+			OR = {
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 1 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 2 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 3 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 4 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 5 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 6 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 7 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 8 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 9 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 10 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 11 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 12 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 13 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 14 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 15 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+				breedimp_p3_proto_slot_reserves_character_trigger = { SLOT = 16 CHARACTER = scope:breedimp_p3_proto_reservation_candidate }
+			}
+		}
 	}
 }
 
@@ -50,7 +51,6 @@ breedimp_p3_proto_subject_candidate_trigger = {
 	NOT = { this = $ACTOR$ }
 	breedimp_p3_proto_character_is_unreserved_trigger = {
 		ACTOR = $ACTOR$
-		CHARACTER = this
 	}
 }
 
@@ -149,12 +149,10 @@ breedimp_p3_proto_pair_is_eligible_trigger = {
 	}
 	breedimp_p3_proto_character_is_unreserved_trigger = {
 		ACTOR = $ACTOR$
-		CHARACTER = this
 	}
 	$PARTNER$ = {
 		breedimp_p3_proto_character_is_unreserved_trigger = {
 			ACTOR = $ACTOR$
-			CHARACTER = this
 		}
 	}
 }
@@ -168,4 +166,10 @@ breedimp_p3_proto_current_pair_is_eligible_trigger = {
 			PARTNER = scope:breedimp_p3_proto_current_partner
 		}
 	}
+}
+
+breedimp_p3_proto_current_pair_can_be_committed_trigger = {
+	breedimp_p3_proto_workflow_is_review_phase_trigger = yes
+	breedimp_p3_proto_plan_has_empty_slot_trigger = yes
+	breedimp_p3_proto_current_pair_is_eligible_trigger = yes
 }

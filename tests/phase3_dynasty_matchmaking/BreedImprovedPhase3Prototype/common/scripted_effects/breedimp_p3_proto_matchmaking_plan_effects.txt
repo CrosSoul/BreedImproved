@@ -273,6 +273,25 @@ breedimp_p3_proto_execute_slot_effect = {
 				PARTNER = root.var:breedimp_p3_proto_slot_$SLOT$_partner
 			}
 		}
+		change_variable = {
+			name = breedimp_p3_proto_executed_pair_count
+			add = 1
+		}
+		if = {
+			limit = {
+				var:breedimp_p3_proto_slot_$SLOT$_relationship_type = flag:breedimp_p3_proto_relationship_marriage
+			}
+			change_variable = {
+				name = breedimp_p3_proto_executed_marriage_count
+				add = 1
+			}
+		}
+		else = {
+			change_variable = {
+				name = breedimp_p3_proto_executed_betrothal_count
+				add = 1
+			}
+		}
 	}
 }
 
@@ -305,7 +324,6 @@ breedimp_p3_proto_confirm_plan_effect = {
 			var:breedimp_p3_proto_preflight_passed = flag:breedimp_p3_proto_preflight_passed
 		}
 		breedimp_p3_proto_execute_validated_plan_effect = yes
-		breedimp_p3_proto_cleanup_workflow_effect = yes
 		trigger_event = breedimp_p3_proto_matchmaking.1144
 	}
 	else = {

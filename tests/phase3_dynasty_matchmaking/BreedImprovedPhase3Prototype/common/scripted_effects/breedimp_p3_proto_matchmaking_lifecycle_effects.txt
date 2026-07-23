@@ -81,6 +81,18 @@ breedimp_p3_proto_clear_actor_state_effect = {
 		remove_variable = breedimp_p3_proto_accepted_pair_count
 	}
 	if = {
+		limit = { exists = var:breedimp_p3_proto_executed_pair_count }
+		remove_variable = breedimp_p3_proto_executed_pair_count
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_executed_marriage_count }
+		remove_variable = breedimp_p3_proto_executed_marriage_count
+	}
+	if = {
+		limit = { exists = var:breedimp_p3_proto_executed_betrothal_count }
+		remove_variable = breedimp_p3_proto_executed_betrothal_count
+	}
+	if = {
 		limit = { exists = var:breedimp_p3_proto_dynasty_member_count }
 		remove_variable = breedimp_p3_proto_dynasty_member_count
 	}
@@ -165,6 +177,18 @@ breedimp_p3_proto_activate_workflow_effect = {
 	}
 	set_variable = {
 		name = breedimp_p3_proto_accepted_pair_count
+		value = 0
+	}
+	set_variable = {
+		name = breedimp_p3_proto_executed_pair_count
+		value = 0
+	}
+	set_variable = {
+		name = breedimp_p3_proto_executed_marriage_count
+		value = 0
+	}
+	set_variable = {
+		name = breedimp_p3_proto_executed_betrothal_count
 		value = 0
 	}
 	set_variable = {

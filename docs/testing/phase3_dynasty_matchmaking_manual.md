@@ -3,9 +3,11 @@
 - Status: `NOT RUN`
 - CK3 target: `1.19.0.6 (Scribe)`
 - Production compatibility target: `1.19.*`
-- Build under test: `ISOLATED STATIC PROTOTYPE — RUNTIME NOT RUN`
-- Runtime approval: `AWAITING RAY RUNTIME APPROVAL`
-- Runtime result: `NO RUNTIME RESULT CLAIMED`
+- Build under test:
+  `ISOLATED STATIC PROTOTYPE — POST-FIX RUNTIME NOT RUN`
+- Runtime approval: `AWAITING RAY RESERVATION-REGRESSION RETEST`
+- Runtime result:
+  `PRE-FIX BLOCKER OBSERVED; POST-FIX RESERVATION RETEST NOT RUN`
 
 This is the manual test specification for the statically completed isolated
 Phase 3 Dynasty Matchmaking prototype. Static completion does not establish
@@ -16,13 +18,24 @@ The prototype workflow namespace is `breedimp_p3_proto_matchmaking`. It uses **A
 
 The original 111-case matrix is preserved. Sixteen workflow-lock/lifecycle
 cases, nine fixed-slot integrity cases, two role-direction age cases, and two
-error-log cases bring the total to 140. Every result remains `NOT RUN`.
+error-log cases first brought the total to 140. Sixteen P6 immediate-reservation
+and completion-feedback regression cases now bring the total to 156. Every
+result remains `NOT RUN`.
 Cases covering post-prototype product refinements remain `NOT RUN` as future
 coverage; they are not mandatory gates for the first infrastructure prototype
 unless its approved implementation scope includes that feature. Approach A is
 retained only as deferred comparison coverage and is not the selected
 prototype executor. Use a fresh baseline save for every activated workflow
 case; do not attempt a second Phase 3 workflow in the same save.
+
+Ray/Boss reported the following observations from the pre-correction build:
+entry/cancel Smoke 1 passed, first activation/permanent-lock Smoke 2 passed,
+and **View another partner for this person** passed on retest. Pair-slot writing
+worked, and the final duplicate-character preflight caught the invalid plan as
+a late safety net. Immediate reservation, later candidate exclusion, and the
+acceptance-time duplicate guard failed, allowing repeated characters into
+multiple committed records. These historical observations do not mark any
+case below as `PASS`. The corrected build has not been run in CK3.
 
 ## 0. Test discipline and environment record
 
@@ -202,6 +215,34 @@ the combined lifecycle before P1.
 | P3-SLOT-08 | Sixteen committed, pairwise-distinct slots. | Run the complete reservation and preflight integrity pass without executing relationships. | All unordered slot-pair checks, all subject/partner role comparisons, committed-slot count, and error log. | Exactly 120 unordered slot-pair comparisons and at most 480 role-to-role character-reference comparisons cover the 16 slots; no duplicate or mirror pair passes. | `NOT RUN` |
 | P3-SLOT-09 | One valid committed slot plus diagnostic records with swapped direction/type flags, an invalid placeholder enum, and a reservation reference copied from a slot with a different subject. | Open summary, invoke preflight, then cancel. | Enum validation, reservation-to-subject equality, summary visibility, relationship state, and guarded cleanup. | Only a record whose five payload values are valid and whose final reservation reference equals its subject is committed; every malformed record is non-executable and is cleaned without affecting valid slots. | `NOT RUN` |
 
+### 8.2 P6 immediate-reservation and completion-feedback regression
+
+These cases target the runtime blocker observed in the pre-correction build.
+They supplement rather than replace the existing state, slot, preflight, and
+relationship-path cases. Use a fresh baseline save for every confirmed
+activation. If an acceptance-time duplicate attempt is not naturally reachable
+through the test UI or an already approved test setup, record that part as
+`BLOCKED`; do not invent or assume a diagnostic invocation.
+
+| ID | Setup | Action | Required observations | Pass criteria | Result |
+| --- | --- | --- | --- | --- | --- |
+| P3-RES-01 | At least four eligible characters; accept displayed pair A (subject) and B (partner). | Continue review and inspect every later active-subject proposal. | Slot containing A-B, next-proposal timing, and every later subject identity. | A is unavailable as a subject before the next proposal is selected and never reappears in that role. | `NOT RUN` |
+| P3-RES-02 | Committed A-B plus another eligible subject C with several possible partners. | Continue with C and exhaust the partner alternatives available through normal review. | Every later partner identity and the committed A-B slot. | A is unavailable as a partner immediately after A-B commits and never reappears in that role. | `NOT RUN` |
+| P3-RES-03 | At least four eligible characters; accept displayed pair A (subject) and B (partner). | Continue review and inspect every later active-subject proposal. | Slot containing A-B, next-proposal timing, and every later subject identity. | B is unavailable as a subject before the next proposal is selected and never reappears in that role. | `NOT RUN` |
+| P3-RES-04 | Committed A-B plus another eligible subject C with several possible partners. | Continue with C and exhaust the partner alternatives available through normal review. | Every later partner identity and the committed A-B slot. | B is unavailable as a partner immediately after A-B commits and never reappears in that role. | `NOT RUN` |
+| P3-RES-05 | Committed A-B and a naturally reachable or already approved retained proposal A-C. | Attempt to accept A-C. If no such proposal can be reached safely, record the case as `BLOCKED`. | Failure/recovery presentation, accepted count, existing slot, next empty slot, and all relationships. | The same subject cannot be accepted twice; rejection occurs before any slot field or count changes. | `NOT RUN` |
+| P3-RES-06 | Committed A-B and a naturally reachable or already approved retained proposal C-B. | Attempt to accept C-B. If no such proposal can be reached safely, record the case as `BLOCKED`. | Failure/recovery presentation, accepted count, existing slot, next empty slot, and all relationships. | The same partner cannot be accepted twice; rejection occurs before any slot field or count changes. | `NOT RUN` |
+| P3-RES-07 | Committed A-B with a naturally reachable or already approved retained mirror proposal B-A. | Attempt to accept B-A. If no such proposal can be reached safely, record the case as `BLOCKED`. | Failure/recovery presentation, accepted count, committed slots, and all relationships. | The mirror pair cannot be accepted; A-B remains the only committed record involving either character. | `NOT RUN` |
+| P3-RES-08 | Committed A-B and any safely reachable repeated-character proposal from P3-RES-05 through P3-RES-07. | Record all six fields of the next empty slot, attempt duplicate acceptance, then inspect the same slot again. | `subject`, `partner`, `direction`, `relationship_type`, `placeholder`, `reservation_id`, prior committed slots, and errors. | Rejected duplicate acceptance writes none of the six fields and does not alter any earlier slot. | `NOT RUN` |
+| P3-RES-09 | Same controlled duplicate attempt as P3-RES-08. | Record accepted-pair and summary counts before and after the rejected attempt. | Stored count, displayed count, committed-slot count, and next proposal. | No accepted-pair, summary, or committed-slot count increases after rejection. | `NOT RUN` |
+| P3-RES-10 | Four or more legal adults; accept A-B as an ordinary marriage plan. | Continue review, inspect both later roles, and attempt a repeated-character acceptance only if safely reachable. | Stored direction/type, subject and partner pools, duplicate guard, slot writes, and count. | The ordinary adult-marriage path uses the shared immediate-reservation and pre-write duplicate contract for both A and B. | `NOT RUN` |
+| P3-RES-11 | Four or more legal adults; accept A-B as a matrilineal marriage plan. | Repeat P3-RES-10. | Same fields and role checks as P3-RES-10. | The matrilineal adult-marriage path uses the same reservation and duplicate contract as the ordinary path. | `NOT RUN` |
+| P3-RES-12 | A legal pair with at least one minor; accept A-B as an ordinary betrothal plan. | Repeat P3-RES-10 using the betrothal path. | Stored direction/type, subject and partner pools, duplicate guard, slot writes, and count. | The ordinary betrothal path immediately reserves both characters and uses the same pre-write duplicate contract. | `NOT RUN` |
+| P3-RES-13 | A legal pair with at least one minor; accept A-B as a matrilineal betrothal plan. | Repeat P3-RES-12 using matrilineal direction. | Same fields and role checks as P3-RES-12. | The matrilineal betrothal path uses the same reservation and duplicate contract as the other three acceptance paths. | `NOT RUN` |
+| P3-RES-14 | A duplicated committed plan created only through an already approved test setup; otherwise record `BLOCKED`. | Attempt final confirmation. | Full-plan duplicate failure, every relationship before/after, accepted records, and error log. | Final duplicate preflight remains active as defense in depth and aborts before any marriage or betrothal mutation. | `NOT RUN` |
+| P3-RES-15 | Fresh baseline copies supporting one successful valid batch and one preflight-abort comparison. | Final-confirm the valid batch; separately exercise the abort path. | Timing and visibility of the completion result, total/marriage/betrothal counts, relationships, and errors. | A visible completion result appears only after the relationship-execution path is reached successfully; no success result appears before execution or after duplicate rejection or preflight abort. | `NOT RUN` |
+| P3-RES-16 | Valid batch containing a controlled mix of marriage and betrothal records, using distinct characters. | Record the accepted plan, final-confirm, then compare the completion result with every actual relationship. | Accepted/executed total, marriage count, betrothal count, each relationship and direction, and any pair details displayed. | Completion totals match the relationships actually established; marriage plus betrothal counts equal the executed total, with no duplicated character or false success. | `NOT RUN` |
+
 ## 9. Final prevalidation and invalidation safety
 
 | ID | Setup | Action | Required observations | Pass criteria | Result |
@@ -315,12 +356,17 @@ Inspect the CK3 error log after every suite for:
 | Out-of-workflow and stale-authorization execution guards | `NOT RUN` |
 | Special-state exclusions | `NOT RUN` |
 | Pair-state and duplicate protection | `NOT RUN` |
+| Immediate reservation in all four subject/partner roles | `NOT RUN` |
+| Duplicate rejection with zero slot writes and zero count increase | `NOT RUN` |
+| Shared reservation contract across all four acceptance paths | `NOT RUN` |
 | Fixed slots 01/16 and seventeenth-pair capacity boundary | `NOT RUN` |
 | Partial records and reservation-marker integrity | `NOT RUN` |
 | Cancel and no-preconfirmation consequences | `NOT RUN` |
 | Full prevalidation and invalidation safety | `NOT RUN` |
 | Approach A advisory comparison (deferred, not selected) | `NOT RUN` |
 | Approach B isolated prototype | `NOT RUN` |
+| Final duplicate preflight defense in depth | `NOT RUN` |
+| Completion-result visibility and count accuracy | `NOT RUN` |
 | Large-Dynasty performance | `NOT RUN` |
 | English localisation | `NOT RUN` |
 | Simplified Chinese localisation | `NOT RUN` |
@@ -331,5 +377,6 @@ Inspect the CK3 error log after every suite for:
 | Ray recommendation | `NOT RUN` |
 | Jay/Boss approval | `NOT RUN` |
 
-Phase 3 runtime status remains `NOT RUN`. This matrix does not authorize CK3
-execution, production implementation, or production release.
+Post-fix Phase 3 reservation-regression status remains `NOT RUN`. The current
+gate is `AWAITING RAY RESERVATION-REGRESSION RETEST`. This matrix does not
+authorize production implementation or production release.

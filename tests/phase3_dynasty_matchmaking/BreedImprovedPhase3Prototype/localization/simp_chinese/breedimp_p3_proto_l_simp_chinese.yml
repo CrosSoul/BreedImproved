@@ -96,9 +96,9 @@
  breedimp_p3_proto_matchmaking.1143.b: "取消完整计划。"
  breedimp_p3_proto_matchmaking.1143.b.tt: "丢弃全部 16 组临时记录，不建立任何关系。"
 
- breedimp_p3_proto_matchmaking.1144.t: "原型批次已分派"
- breedimp_p3_proto_matchmaking.1144.desc: "通过完整预检的关系操作已被分派，全部临时工作流状态已清理。在批准任何生产实现之前，仍须检查实际运行副作用。"
- breedimp_p3_proto_matchmaking.1144.a: "记录观察结果。"
+ breedimp_p3_proto_matchmaking.1144.t: "原型批次已完成"
+ breedimp_p3_proto_matchmaking.1144.desc: "获准的批次执行流程已经完成。\n接受的配对：[ROOT.Char.MakeScope.Var('breedimp_p3_proto_accepted_pair_count').GetValue|0]\n已进入的关系操作：[ROOT.Char.MakeScope.Var('breedimp_p3_proto_executed_pair_count').GetValue|0]\n婚姻：[ROOT.Char.MakeScope.Var('breedimp_p3_proto_executed_marriage_count').GetValue|0]\n订婚：[ROOT.Char.MakeScope.Var('breedimp_p3_proto_executed_betrothal_count').GetValue|0]\n\n已处理配对："
+ breedimp_p3_proto_matchmaking.1144.a: "确认本批次已完成。"
 
  breedimp_p3_proto_direction_ordinary: "普通"
  breedimp_p3_proto_direction_matrilineal: "母系"
