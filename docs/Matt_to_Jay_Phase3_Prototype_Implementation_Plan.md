@@ -4,21 +4,22 @@ Prepared by Matt (CK3ModDeveloper) for Jay (CK3ModLeader).
 
 - CK3 target: `1.19.0.6 (Scribe)`
 - Phase 3 isolated prototype:
-  `STATIC IMPLEMENTATION COMPLETE — RUNTIME TEST REQUIRED`
+  `STATIC IMPLEMENTATION COMPLETE — PARTIAL RUNTIME ACCEPTANCE COMPLETE`
 - Plan status: `P0 CORRECTED AND CLOSED`
 - Prototype direction: `DYNAST OVERRIDE + AUTHORITY LIMITED TO THE CURRENT WORKFLOW`
 - Execution approach: `APPROACH B - DIRECT EFFECTS AFTER FINAL CONFIRMATION`
 - Production implementation: `NOT APPROVED`
 - P0 evidence/design checkpoint: `P0 CORRECTED AND CLOSED`
 - P1-P5 status: `STATIC COMPLETE`
-- P6 status: `AWAITING RAY RUNTIME APPROVAL`
+- P6 status: `40 MAPPED PASS / 0 FAIL / 116 NOT RUN`
 - Prototype implementation: `ISOLATED; PRODUCTION NOT APPROVED`
-- CK3 runtime: `NOT RUN`
+- CK3 runtime: `PARTIAL RUNTIME ACCEPTANCE COMPLETE`
 
 This plan translates the approved Phase 3 authority and execution decisions into
-a bounded, isolated prototype. P0 is corrected and closed, and P1-P5 static work
-is complete. P6 runtime approval and execution remain with Ray. Nothing in this document
-authorizes production implementation or claims a CK3 runtime result.
+a bounded, isolated prototype. P0 is corrected and closed, P1-P5 static work
+is complete, and Ray has completed the mapped P6 smoke and functional
+sequences recorded in the runtime acceptance report. Nothing in this document
+authorizes production implementation.
 
 The word "authorization" in this plan describes a Breed Improved workflow guard.
 It is not a verified CK3 permission, a change to the vanilla marriage
@@ -757,11 +758,13 @@ Deliverable: a static report that does not claim CK3 runtime success.
 
 ### P6 - Approval gate before CK3
 
-Status: `AWAITING RAY RUNTIME APPROVAL`.
+Status: `PARTIAL RUNTIME ACCEPTANCE COMPLETE`.
 
-The existing Phase 3 manual matrix, with the added workflow-authorization
-cases, remains the runtime source of truth. Every case remains `NOT RUN` until
-Ray records an observed CK3 result.
+The existing Phase 3 manual matrix remains the detailed runtime source of
+truth. Ray's supplied smoke and functional sequences map to 40 `PASS` cases;
+116 stronger or unreported cases remain `NOT RUN`. The formal assessment is
+`PROTOTYPE ACCEPTED — PRODUCTION DESIGN MAY PROCEED`. Production coding remains
+unapproved.
 
 ## 13. Runtime acceptance gates
 
@@ -830,11 +833,14 @@ P0 closes:
 9. isolated test paths, descriptor, localisation-header, encoding, and BOM
    contracts.
 
-P0 is `CORRECTED AND CLOSED`; P1-P5 are `STATIC COMPLETE`; P6 is
-`AWAITING RAY RUNTIME APPROVAL`. The permanent lock deliberately forbids same-actor restart,
-so no unverified numeric comparison enters the prototype. Abnormal visible-event
-closure, lock persistence, save/reload lifecycle, Dynast-change coverage, and
-all direct-effect side effects remain explicit P6 gates.
+P0 is `CORRECTED AND CLOSED`; P1-P5 are `STATIC COMPLETE`; P6 has partial
+runtime acceptance with 40 mapped `PASS` cases and 116 `NOT RUN` cases. The
+permanent lock deliberately forbids same-actor restart, so no unverified
+numeric comparison enters the prototype. Broader lifecycle variants,
+Dynast-change coverage, direct-effect side effects, regression cases, and
+error-log review remain explicit production-integration gates.
 
 No approval is implied for production implementation, Workshop packaging, or
-release publication. CK3 runtime remains `NOT RUN`.
+release publication. The next recommended task is **Phase 3 production
+implementation design and gap-closure specification**, subject to Jay/Boss
+approval.

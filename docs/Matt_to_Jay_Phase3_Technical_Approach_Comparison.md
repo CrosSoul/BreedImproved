@@ -1,19 +1,24 @@
 # Breed Improved Phase 3 - Technical Approach Comparison
 
+Current runtime status (2026-07-23): `PROTOTYPE ACCEPTED — PRODUCTION DESIGN
+MAY PROCEED`; 40 mapped matrix cases pass and 116 remain `NOT RUN`. Historical
+P6 status statements below are preserved as approach-decision context. See
+`docs/Matt_to_Jay_Phase3_Prototype_Runtime_Acceptance.md`.
+
 Status: `P0 CORRECTED AND CLOSED`
 
 Target: Crusader Kings III `1.19.0.6 (Scribe)`
 
 Phase 3 isolated prototype:
-`STATIC IMPLEMENTATION COMPLETE — RUNTIME TEST REQUIRED`
+`STATIC IMPLEMENTATION COMPLETE — PARTIAL RUNTIME ACCEPTANCE COMPLETE`
 
-Runtime status: `NOT RUN`
+Runtime status: `40 MAPPED PASS / 0 FAIL / 116 NOT RUN`
 
 P0 status: `P0 CORRECTED AND CLOSED`.
 P1-P5 status: `STATIC COMPLETE`.
-P6 status: `AWAITING RAY RUNTIME APPROVAL`.
+P6 status: `PROTOTYPE ACCEPTED — PRODUCTION DESIGN MAY PROCEED`.
 
-This document compares technical approaches for Phase 3 Dynasty Matchmaking Management and records the approved direction for the isolated prototype. The prototype direction is a **Dynast-override model limited to the current, explicitly initiated workflow**. This is a guarded Breed Improved direct-execution pathway, not a vanilla CK3 permission, not evidence that a Dynast is every member's matchmaker, and not approval for production gameplay. It supersedes the earlier recommendation to limit the prototype to the actor's vanilla matchmaker authority. Static work through P5 is complete; CK3 runtime remains `NOT RUN`.
+This document compares technical approaches for Phase 3 Dynasty Matchmaking Management and records the approved direction for the isolated prototype. The prototype direction is a **Dynast-override model limited to the current, explicitly initiated workflow**. This is a guarded Breed Improved direct-execution pathway, not a vanilla CK3 permission, not evidence that a Dynast is every member's matchmaker, and not approval for production gameplay. It supersedes the earlier recommendation to limit the prototype to the actor's vanilla matchmaker authority. Static work through P5 is complete, and the mapped runtime sequences are recorded in the acceptance report.
 
 ## 1. Required product behavior
 
@@ -337,7 +342,8 @@ tests/phase3_dynasty_matchmaking/
 ```
 
 This is an isolated test allocation, not production authorization. P1-P5 static
-work is complete; P6 is `AWAITING RAY RUNTIME APPROVAL`.
+work is complete; P6 records partial runtime acceptance and the production
+design gate is awaiting Jay/Boss approval.
 
 The outer `.mod` uses the established portable `<LOCAL_MOD_PATH>` launcher
 placeholder. The inner `descriptor.mod` contains no `path` and no
@@ -402,11 +408,11 @@ P0 evidence registration and design closure is complete. The checkpoint records:
   resume, or delayed/background continuation;
 - namespace `breedimp_p3_proto_matchmaking`, event IDs `1000-1199`;
 - isolated test path, descriptor, localisation-header, encoding, and BOM contract; and
-- CK3 runtime `NOT RUN`.
+- CK3 runtime `40 MAPPED PASS / 0 FAIL / 116 NOT RUN`.
 
-P0 is `CORRECTED AND CLOSED`; P1-P5 are `STATIC COMPLETE`; P6 is
-`AWAITING RAY RUNTIME APPROVAL`. Production remains `NOT APPROVED`, and CK3 runtime remains
-`NOT RUN`.
+P0 is `CORRECTED AND CLOSED`; P1-P5 are `STATIC COMPLETE`; the prototype is
+`ACCEPTED — PRODUCTION DESIGN MAY PROCEED`. Production implementation remains
+`NOT APPROVED`.
 
 No production implementation should begin until:
 

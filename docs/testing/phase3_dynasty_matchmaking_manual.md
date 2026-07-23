@@ -1,26 +1,28 @@
 # Breed Improved Phase 3 — Dynasty Matchmaking Manual Test Matrix
 
-- Status: `NOT RUN`
+- Status: `PARTIAL RUNTIME ACCEPTANCE COMPLETE`
 - CK3 target: `1.19.0.6 (Scribe)`
 - Production compatibility target: `1.19.*`
 - Build under test:
-  `ISOLATED STATIC PROTOTYPE — POST-FIX RUNTIME NOT RUN`
-- Runtime approval: `AWAITING RAY RESERVATION-REGRESSION RETEST`
+  `ISOLATED PROTOTYPE — POST-FIX RUNTIME PASS RECORDED FOR MAPPED CASES`
+- Runtime approval: `RAY RUNTIME PASS RECORDED FOR THE SUPPLIED TEST SEQUENCES`
 - Runtime result:
-  `PRE-FIX BLOCKER OBSERVED; POST-FIX RESERVATION RETEST NOT RUN`
+  `40 PASS / 0 FAIL / 116 NOT RUN / 0 BLOCKED`
 
-This is the manual test specification for the statically completed isolated
-Phase 3 Dynasty Matchmaking prototype. Static completion does not establish
-that any Phase 3 behavior is valid in CK3 or approved for production. Run only
-after Ray explicitly approves P6 runtime testing.
+This is the manual test specification and partial runtime record for the
+isolated Phase 3 Dynasty Matchmaking prototype. Ray executed the supplied
+smoke, relationship-path, reservation, batch-safety, ranking-boundary,
+capacity-boundary, and tested performance sequences. Only the exact cases
+mapped below are `PASS`; all stronger or unreported cases remain `NOT RUN`.
+This record does not approve production implementation.
 
 The prototype workflow namespace is `breedimp_p3_proto_matchmaking`. It uses **Approach B: Dynast override + authority limited to the current workflow**. A living player Dynast must explicitly confirm activation. A pre-activation cancellation does not consume the save; once activation occurs, the prototype's permanent one-workflow-per-save lock is consumed and is never cleared, even after completion, cancellation, failure, death, Dynast loss, save/load, or an orphaned visible event. This prevents a second workflow or stale event from being re-authorized in the same save. The lock does not waive any eligibility, marriage-legality, availability, age, kinship, duplicate-pair, or full-prevalidation rule.
 
 The original 111-case matrix is preserved. Sixteen workflow-lock/lifecycle
 cases, nine fixed-slot integrity cases, two role-direction age cases, and two
 error-log cases first brought the total to 140. Sixteen P6 immediate-reservation
-and completion-feedback regression cases now bring the total to 156. Every
-result remains `NOT RUN`.
+and completion-feedback regression cases bring the total to 156. The current
+row totals are 40 `PASS`, 0 `FAIL`, 116 `NOT RUN`, and 0 `BLOCKED`.
 Cases covering post-prototype product refinements remain `NOT RUN` as future
 coverage; they are not mandatory gates for the first infrastructure prototype
 unless its approved implementation scope includes that feature. Approach A is
@@ -28,14 +30,40 @@ retained only as deferred comparison coverage and is not the selected
 prototype executor. Use a fresh baseline save for every activated workflow
 case; do not attempt a second Phase 3 workflow in the same save.
 
-Ray/Boss reported the following observations from the pre-correction build:
-entry/cancel Smoke 1 passed, first activation/permanent-lock Smoke 2 passed,
-and **View another partner for this person** passed on retest. Pair-slot writing
-worked, and the final duplicate-character preflight caught the invalid plan as
-a late safety net. Immediate reservation, later candidate exclusion, and the
-acceptance-time duplicate guard failed, allowing repeated characters into
-multiple committed records. These historical observations do not mark any
-case below as `PASS`. The corrected build has not been run in CK3.
+The first runtime pass exposed a blocking accepted-character reservation
+defect: accepted participants could reappear in later proposals, although the
+final duplicate preflight still stopped the invalid plan. Matt corrected the
+reservation path, and Ray's final retest did not reproduce the defect.
+
+Ray also observed that one character from a displayed but unaccepted pair later
+appeared with a different partner. This is expected. Displaying, skipping,
+replacing, or declining a pair reserves neither character. Only a successfully
+accepted and committed pair reserves both participants. An accepted participant
+must not appear again as either subject or partner in another accepted plan
+record.
+
+### Runtime evidence mapping
+
+The conversational labels "first sequence", "second sequence", and "third
+sequence" are not matrix headings. The current evidence maps observations to
+existing IDs by matching the tested action and expected result:
+
+| Ray runtime observation | Matching matrix test IDs | Result | Notes |
+| --- | --- | --- | --- |
+| Entry cancellation, first activation, review/final cancellation, and abnormal-exit/load isolation | `P3-LIFE-01`-`04`, `P3-LIFE-09` | `PASS` | Stronger death, Dynast-loss, multiplayer, repeated-cancel, and other lifecycle variants remain `NOT RUN`. |
+| Four direct relationship paths and tested persistence | `P3-B-01`-`04`, `P3-B-10` | `PASS` | This does not establish native-side-effect parity or a clean error log. |
+| Valid multi-pair execution and one tested invalid-pair all-or-nothing abort | `P3-B-09`, `P3-VALID-01`, `P3-VALID-02` | `PASS` | Other invalidation causes remain `NOT RUN`. |
+| Accepted-person, mirror, and overlapping-pair exclusion | `P3-STATE-01`-`03`, `P3-SLOT-05`, `P3-SLOT-06` | `PASS` | Displayed but unaccepted characters remain eligible. |
+| Sixteen-pair boundary and seventeenth-pair non-overwrite behavior | `P3-SLOT-02`, `P3-SLOT-03` | `PASS` | Partial and malformed slot records remain `NOT RUN`. |
+| Post-fix accepted-character reservation and duplicate rejection | `P3-RES-01`-`09` | `PASS` | Covers both accepted participants in both later roles, rejected repeat/mirror writes, and count stability. |
+| Final duplicate preflight and completion-result timing | `P3-RES-14`, `P3-RES-15` | `PASS` | Final preflight remains defense in depth; mixed-type count-detail case `P3-RES-16` remains `NOT RUN`. |
+| Adult fertility boundaries and age priority within the tier | `P3-FERT-02`, `P3-FERT-03`, `P3-FERT-05` | `PASS` | Covers `100/95/94`, `80/75/74`, inclusive absolute `0.05`, and within-tier age priority. |
+| Minor age ordering and hard adult-minor boundaries | `P3-AGE-01`, `P3-AGE-04`-`07` | `PASS` | Both-role-direction and post-review birthday variants remain `NOT RUN`. |
+| Tested large-Dynasty recommendation generation | `P3-SCALE-01` | `PASS` | Only the reported scenario is mapped; stronger scale and long-duration cases remain `NOT RUN`. |
+| Unaccepted character later offered in a different pairing | Observation only | `EXPECTED BEHAVIOR CONFIRMED` | This does not establish every criterion in `P3-STATE-04` or `P3-STATE-05`, so those rows remain `NOT RUN`. |
+
+No explicit CK3 `error.log` observation was supplied. `P3-ERR-01` and
+`P3-ERR-02` therefore remain `NOT RUN`.
 
 ## 0. Test discipline and environment record
 
@@ -48,23 +76,23 @@ Before each suite:
 3. Record the proposed pair order, accepted-pair state, skipped/deferred state, and any reserved-character state visible to the tester.
 4. Before final confirmation, compare saves or inspect every relevant relationship to ensure no marriage, betrothal, alliance, court, title, government, Prestige, claim, succession, or Dynasty state changed.
 5. After execution, save, reload, advance at least one day, and inspect the CK3 error log.
-6. Record each case as `PASS`, `FAIL`, or `BLOCKED` only after it is run. Every result below intentionally remains `NOT RUN`.
+6. Record each case as `PASS`, `FAIL`, or `BLOCKED` only after it is run. Preserve `NOT RUN` for every unmatched or stronger case.
 
 | Environment field | Result |
 | --- | --- |
-| Test date | `NOT RUN` |
-| Tester | `NOT RUN` |
-| CK3 full version | `Target: 1.19.0.6; NOT RUN` |
-| Breed Improved revision | `NOT RUN` |
-| Phase 3 approach | `Approach B isolated prototype — Dynast override limited to current workflow; NOT RUN` |
-| Enabled DLC | `NOT RUN` |
-| Game rules | `NOT RUN` |
-| Language | `NOT RUN` |
-| Playset and load order | `NOT RUN` |
-| Other enabled Mods | `NOT RUN` |
-| New game or existing save | `NOT RUN` |
-| Debug mode | `NOT RUN` |
-| Error-log path reviewed | `NOT RUN` |
+| Test date | `EVIDENCE NOT PROVIDED` |
+| Tester | `Ray` |
+| CK3 full version | `Target: 1.19.0.6; exact runtime build EVIDENCE NOT PROVIDED` |
+| Breed Improved revision | `Post-reservation-fix isolated prototype; exact commit EVIDENCE NOT PROVIDED` |
+| Phase 3 approach | `Approach B isolated prototype — Dynast override limited to current workflow` |
+| Enabled DLC | `EVIDENCE NOT PROVIDED` |
+| Game rules | `EVIDENCE NOT PROVIDED` |
+| Language | `EVIDENCE NOT PROVIDED` |
+| Playset and load order | `EVIDENCE NOT PROVIDED` |
+| Other enabled Mods | `EVIDENCE NOT PROVIDED` |
+| New game or existing save | `EVIDENCE NOT PROVIDED` |
+| Debug mode | `EVIDENCE NOT PROVIDED` |
+| Error-log path reviewed | `EVIDENCE NOT PROVIDED`; log cases remain `NOT RUN` |
 
 ## 1. Candidate scope and marital-history groups
 
@@ -89,10 +117,10 @@ Use controlled characters whose evaluated fertility values are known through a v
 | ID | Setup | Action | Required observations | Pass criteria | Result |
 | --- | --- | --- | --- | --- | --- |
 | P3-FERT-01 | Adult target with legal candidates at negative, zero, ordinary positive, and greater-than-1.0 fertility values. Keep other factors as equal as possible. | Cycle through spouse recommendations. | Raw evaluated values, ordering, clamping or display behavior, and errors. | Ordering remains deterministic across negative, zero, ordinary, and greater-than-1.0 values; no overflow, wraparound, or invalid display occurs. | `NOT RUN` |
-| P3-FERT-02 | Best candidate at 100% and comparison candidates at exactly 95% and 94%, with age/genetics arranged so the tier boundary is observable. | Request the best and next alternatives. | Tier membership and within-tier order. | 95% is in the best candidate's five-point tier; 94% is outside it. Age proximity can reorder 100% and 95% within the tier but cannot promote 94% into it. | `NOT RUN` |
-| P3-FERT-03 | Best candidate at 80% and comparison candidates at exactly 75% and 74%. | Request the best and next alternatives. | Tier membership and within-tier order. | The exact five-percentage-point boundary is inclusive: 75% shares the tier and 74% does not. | `NOT RUN` |
+| P3-FERT-02 | Best candidate at 100% and comparison candidates at exactly 95% and 94%, with age/genetics arranged so the tier boundary is observable. | Request the best and next alternatives. | Tier membership and within-tier order. | 95% is in the best candidate's five-point tier; 94% is outside it. Age proximity can reorder 100% and 95% within the tier but cannot promote 94% into it. | `PASS` |
+| P3-FERT-03 | Best candidate at 80% and comparison candidates at exactly 75% and 74%. | Request the best and next alternatives. | Tier membership and within-tier order. | The exact five-percentage-point boundary is inclusive: 75% shares the tier and 74% does not. | `PASS` |
 | P3-FERT-04 | Best candidate at 6%, comparison candidates at 1% and 0%, with otherwise controlled factors. | Request the best and alternatives. | Low-value arithmetic and tier membership. | 1% shares the tier with 6%; 0% is outside a five-point-inclusive tier if the implementation uses exact percentage-point comparison. No negative or zero special case silently changes the boundary. | `NOT RUN` |
-| P3-FERT-05 | Two candidates inside the same five-point tier: one closer in age but with weaker positive genetics; one farther in age with stronger genetics. | Review ordering. | Fertility tier, age gap, genetic indicators, and order. | Within one adult fertility tier, age proximity outranks beneficial genetics. | `NOT RUN` |
+| P3-FERT-05 | Two candidates inside the same five-point tier: one closer in age but with weaker positive genetics; one farther in age with stronger genetics. | Review ordering. | Fertility tier, age gap, genetic indicators, and order. | Within one adult fertility tier, age proximity outranks beneficial genetics. | `PASS` |
 | P3-FERT-06 | One candidate in a better fertility tier but with a worse age gap and weaker genetics than a lower-tier candidate. | Review ordering. | Tier assignment and order. | Better fertility tier remains the first adult ranking criterion. | `NOT RUN` |
 | P3-FERT-07 | Candidates equal in fertility tier and age gap but different in beneficial genetics and kinship distance. | Review ordering. | Genetic score/reasons, kinship warning, and order. | Beneficial genetics breaks the tie before lower consanguinity; lower consanguinity breaks only a remaining tie. | `NOT RUN` |
 | P3-FERT-08 | Same controlled adult pool tested before and after save/reload without changing character state. | Generate recommendations, save/reload, and regenerate. | Exact ordering and values before/after. | Identical state yields identical tier membership and ordering. | `NOT RUN` |
@@ -103,13 +131,13 @@ If an approved implementation replaces the dynamic comparison with fixed buckets
 
 | ID | Setup | Action | Required observations | Pass criteria | Result |
 | --- | --- | --- | --- | --- | --- |
-| P3-AGE-01 | Minor target with several legal minor candidates of different ages, while genetics and kinship are controlled. | Cycle recommendations. | Ages, absolute age gaps, and order. | Smallest age gap ranks first. | `NOT RUN` |
+| P3-AGE-01 | Minor target with several legal minor candidates of different ages, while genetics and kinship are controlled. | Cycle recommendations. | Ages, absolute age gaps, and order. | Smallest age gap ranks first. | `PASS` |
 | P3-AGE-02 | Minor candidates with equal age gap but different beneficial congenital traits. | Cycle recommendations. | Trait reasons and order. | Beneficial genetics breaks the age-gap tie. | `NOT RUN` |
 | P3-AGE-03 | Minor candidates with equal age gap and equal beneficial genetics but different legal kinship distance. | Cycle recommendations. | Kinship classification and order. | More distant legal kin ranks first. | `NOT RUN` |
-| P3-AGE-04 | Female age 29 paired with a minor; all other eligibility and doctrine checks pass. | Generate and attempt to accept the pair. | Whether the pair is proposed and accepted. | The Phase 3 hard threshold does not exclude age 29 by itself. | `NOT RUN` |
-| P3-AGE-05 | Female age exactly 30 paired with a minor; otherwise identical to P3-AGE-04. | Generate recommendations and search every alternative. | Candidate presence, warning text, and final-list presence. | Pair is never proposed, accepted, or executable. No fertility, trait, kinship, scarcity, or placeholder condition overrides the exclusion. | `NOT RUN` |
-| P3-AGE-06 | Male age 39 paired with a minor; all other eligibility and doctrine checks pass. | Generate and attempt to accept the pair. | Whether the pair is proposed and accepted. | The Phase 3 hard threshold does not exclude age 39 by itself. | `NOT RUN` |
-| P3-AGE-07 | Male age exactly 40 paired with a minor; otherwise identical to P3-AGE-06. | Generate recommendations and search every alternative. | Candidate presence, warning text, and final-list presence. | Pair is never proposed, accepted, or executable. No other factor overrides the exclusion. | `NOT RUN` |
+| P3-AGE-04 | Female age 29 paired with a minor; all other eligibility and doctrine checks pass. | Generate and attempt to accept the pair. | Whether the pair is proposed and accepted. | The Phase 3 hard threshold does not exclude age 29 by itself. | `PASS` |
+| P3-AGE-05 | Female age exactly 30 paired with a minor; otherwise identical to P3-AGE-04. | Generate recommendations and search every alternative. | Candidate presence, warning text, and final-list presence. | Pair is never proposed, accepted, or executable. No fertility, trait, kinship, scarcity, or placeholder condition overrides the exclusion. | `PASS` |
+| P3-AGE-06 | Male age 39 paired with a minor; all other eligibility and doctrine checks pass. | Generate and attempt to accept the pair. | Whether the pair is proposed and accepted. | The Phase 3 hard threshold does not exclude age 39 by itself. | `PASS` |
+| P3-AGE-07 | Male age exactly 40 paired with a minor; otherwise identical to P3-AGE-06. | Generate recommendations and search every alternative. | Candidate presence, warning text, and final-list presence. | Pair is never proposed, accepted, or executable. No other factor overrides the exclusion. | `PASS` |
 | P3-AGE-08 | Age-30 female/minor and age-40 male/minor pairs where both have exceptional congenital traits or `pure_blooded`. | Generate recommendations. | Pair presence and exclusion reason. | Both hard exclusions remain absolute. | `NOT RUN` |
 | P3-AGE-09 | Age-threshold pair becomes invalid because one participant has a birthday after review but before final confirmation. | Accept before the birthday, advance time where the test harness permits, then open final confirmation. | Revalidation result and relationship state. | Invalid pair cannot execute; no other pair has mutated before full validation completes. | `NOT RUN` |
 | P3-AGE-10 | Woman age 30 or older and a minor, tested once as subject and once as proposed partner. | Generate, search alternatives, and attempt acceptance in both role directions. | Candidate presence, role assignment, warning/failure text, stored direction/type, and final-list presence. | The female-30-plus/minor exclusion applies identically in both roles; neither ordinary nor matrilineal direction bypasses it. | `NOT RUN` |
@@ -164,15 +192,15 @@ Every case in this suite must inspect both player-visible behavior and the imple
 
 | ID | Setup | Action | Required observations | Pass criteria | Result |
 | --- | --- | --- | --- | --- | --- |
-| P3-LIFE-01 | Living player-controlled Dynast at the entry confirmation. | Cancel before activation, then reopen the Decision in the same save. | Lock state, authority state, candidates, relationships, and Decision availability. | Pre-activation cancellation consumes neither authority nor the one-workflow-per-save lock; no scan, reservation, or relationship change occurs. | `NOT RUN` |
-| P3-LIFE-02 | Living player-controlled Dynast with at least one otherwise eligible same-Dynasty AI pair. | Confirm activation and enter the first review state. | Permanent lock, authority state, candidate state, and relationship state. | The lock is set only after confirmation; the workflow becomes usable once and no relationship changes before final confirmation. | `NOT RUN` |
-| P3-LIFE-03 | Active workflow during candidate review. | Cancel before final confirmation, then attempt the Decision again in the same save. | Relationships, temporary plan cleanup, permanent lock, and new-entry result. | No relationship changes; reachable temporary state is cleaned, but the permanent lock remains and rejects every later Phase 3 entry. | `NOT RUN` |
-| P3-LIFE-04 | Active workflow with accepted pairs on final confirmation. | Cancel final confirmation, then attempt a new entry. | Every proposed relationship, temporary state, permanent lock, and new-entry result. | No pair executes; temporary state is cleaned where reachable; the consumed lock remains and a second workflow is rejected. | `NOT RUN` |
+| P3-LIFE-01 | Living player-controlled Dynast at the entry confirmation. | Cancel before activation, then reopen the Decision in the same save. | Lock state, authority state, candidates, relationships, and Decision availability. | Pre-activation cancellation consumes neither authority nor the one-workflow-per-save lock; no scan, reservation, or relationship change occurs. | `PASS` |
+| P3-LIFE-02 | Living player-controlled Dynast with at least one otherwise eligible same-Dynasty AI pair. | Confirm activation and enter the first review state. | Permanent lock, authority state, candidate state, and relationship state. | The lock is set only after confirmation; the workflow becomes usable once and no relationship changes before final confirmation. | `PASS` |
+| P3-LIFE-03 | Active workflow during candidate review. | Cancel before final confirmation, then attempt the Decision again in the same save. | Relationships, temporary plan cleanup, permanent lock, and new-entry result. | No relationship changes; reachable temporary state is cleaned, but the permanent lock remains and rejects every later Phase 3 entry. | `PASS` |
+| P3-LIFE-04 | Active workflow with accepted pairs on final confirmation. | Cancel final confirmation, then attempt a new entry. | Every proposed relationship, temporary state, permanent lock, and new-entry result. | No pair executes; temporary state is cleaned where reachable; the consumed lock remains and a second workflow is rejected. | `PASS` |
 | P3-LIFE-05 | Living player Dynast whose Dynasty yields zero eligible targets or zero legal pairs. | Confirm activation, observe the empty result, then attempt a new entry. | Empty-state handling, relationships, temporary state, permanent lock, and entry result. | No relationship changes; the lock remains consumed after activation and rejects a later workflow in the same save. | `NOT RUN` |
 | P3-LIFE-06 | Active workflow owned by a living player Dynast; use an isolated setup capable of making the actor die before confirmation. | Cause actor death, then attempt to continue, save/reload, advance one day, or invoke a stale event. | Actor validity, lock, authority state, relationships, pending events, and error log. | Workflow is inert and executes no pair; reachable state is cleaned without scope errors, and the permanent lock prevents reauthorization in that save. | `NOT RUN` |
 | P3-LIFE-07 | Active workflow; use an isolated setup capable of transferring Dynast status away from the actor before confirmation. | Remove the actor's Dynast status and attempt to continue, save/reload, or invoke a stale event. | Current Dynast, lock, authority state, relationships, UI handling, and error log. | The workflow becomes invalid and executes zero pairs; no later Dynast may reuse the consumed lock in that save. | `NOT RUN` |
 | P3-LIFE-08 | Any terminal activated workflow: completed, review-canceled, final-canceled, no-candidate, or preflight-failed. | Attempt to start the Decision again with the original actor and with another eligible Dynast. | Lock value, entry visibility/validity, relationships, and error log. | The permanent one-workflow-per-save lock rejects all second workflows without clearing, replacing, or reauthorizing old state. | `NOT RUN` |
-| P3-LIFE-09 | Active workflow at review, final confirmation, and immediately before execution. | Close the visible event abnormally where possible; save/reload and advance one day without resuming. | Orphaned event/state, permanent lock, relationships, recurring behavior, and error log. | No relationship operation is reachable from the orphaned/old event; no automatic or delayed matchmaking occurs; the lock remains consumed. | `NOT RUN` |
+| P3-LIFE-09 | Active workflow at review, final confirmation, and immediately before execution. | Close the visible event abnormally where possible; save/reload and advance one day without resuming. | Orphaned event/state, permanent lock, relationships, recurring behavior, and error log. | No relationship operation is reachable from the orphaned/old event; no automatic or delayed matchmaking occurs; the lock remains consumed. | `PASS` |
 | P3-LIFE-10 | No active confirmed workflow, plus an isolated test-only way to invoke the internal final execution entry point or preserved stale pair data. | Attempt internal execution before activation and after an activated terminal/orphaned workflow. | Guard result, lock, all relationships, authority state, and error log. | Internal execution is rejected with zero mutations whenever live activation authority is absent, stale, invalid, or already terminal. | `NOT RUN` |
 | P3-LIFE-11 | One active workflow owned by player Dynast A, plus a second eligible player Dynast B in an isolated multiplayer or equivalent setup. | Attempt B's first entry while A is active, then after A reaches a terminal state. | Entry availability, global lock, both actors' slots, relationships, and error log. | The permanent lock rejects B in both cases; A's state is never replaced or contaminated. | `NOT RUN` |
 | P3-LIFE-12 | Active workflow with one committed pair and one uncommitted review state. | Save, reload, inspect immediately, advance one day, then attempt resume, stale-event use, cancellation, and new entry. | Lock, saved Dynasty, committed fields, partial state, UI reachability, relationships, and error log. | Load cleanup may remove reachable temporary residue, but the permanent lock remains; neither resume nor a new workflow can create a relationship without live authority. | `NOT RUN` |
@@ -185,9 +213,9 @@ Every case in this suite must inspect both player-visible behavior and the imple
 
 | ID | Setup | Action | Required observations | Pass criteria | Result |
 | --- | --- | --- | --- | --- | --- |
-| P3-STATE-01 | At least four eligible targets and several possible spouses. | Accept the first proposed pair and continue. | Accepted list and availability of both participants in later recommendations. | Both participants become reserved and neither is proposed again. | `NOT RUN` |
-| P3-STATE-02 | Candidate pool where A–B and B–A would otherwise both score highly. | Accept A–B and continue. | Later pair list. | Mirrored B–A is never proposed or stored. | `NOT RUN` |
-| P3-STATE-03 | Candidate pool where A–B, B–C, and C–A could form an overlapping cycle. | Accept one pair, then continue through all remaining proposals. | Participant reservation and final list. | No character appears in two accepted pairs and no overlapping cycle is created. | `NOT RUN` |
+| P3-STATE-01 | At least four eligible targets and several possible spouses. | Accept the first proposed pair and continue. | Accepted list and availability of both participants in later recommendations. | Both participants become reserved and neither is proposed again. | `PASS` |
+| P3-STATE-02 | Candidate pool where A–B and B–A would otherwise both score highly. | Accept A–B and continue. | Later pair list. | Mirrored B–A is never proposed or stored. | `PASS` |
+| P3-STATE-03 | Candidate pool where A–B, B–C, and C–A could form an overlapping cycle. | Accept one pair, then continue through all remaining proposals. | Participant reservation and final list. | No character appears in two accepted pairs and no overlapping cycle is created. | `PASS` |
 | P3-STATE-04 | One target with at least three ranked spouse options. | Use **next candidate for this person** repeatedly. | Candidate order, wrap/end behavior, and state of rejected alternatives. | Alternatives appear in deterministic order without duplicates; cycling does not reserve or mutate anyone. | `NOT RUN` |
 | P3-STATE-05 | One proposed pair followed by other candidates. | Skip the pair and continue. | Skipped-pair state and later proposals. | Exact skipped pair is not re-proposed in the same run; both people may remain eligible for different partners if the approved design allows it. | `NOT RUN` |
 | P3-STATE-06 | One active target followed by other candidates. | Defer the person and continue. | Deferred-person state and later proposals. | Deferred person is not shown again in the same run and is not silently accepted. | `NOT RUN` |
@@ -206,11 +234,11 @@ the combined lifecycle before P1.
 | ID | Setup | Action | Required observations | Pass criteria | Result |
 | --- | --- | --- | --- | --- | --- |
 | P3-SLOT-01 | Clean workflow with one eligible accepted pair. | Commit the first pair to slot 01 and open the review/final summary path without executing it. | Slot 01 `subject`, `partner`, `direction`, `relationship_type`, `placeholder`, `reservation_id`, display identity, and relationship state. | All six fields preserve their intended values; the slot-specific marker is present only after the five payload fields; the pair is readable but causes no relationship change. | `NOT RUN` |
-| P3-SLOT-02 | Fifteen valid committed pairs and one additional eligible pair. | Commit the sixteenth pair to slot 16 and reach final preflight without execution. | Every field in slots 01-16, especially slot 16, summary count, reservations, comparison result, and error log. | Slot 16 behaves identically to slot 01; all 16 pairs remain distinct and intact; no field wraps to another slot. | `NOT RUN` |
-| P3-SLOT-03 | Sixteen valid committed pairs and a seventeenth eligible proposal. | Attempt to accept pair 17. | Capacity presentation/result, all 96 existing fields, summary, reservations, and relationships. | The seventeenth pair is rejected or routed through the approved capacity path; slots 01-16 remain byte-for-byte/logically unchanged; nothing is overwritten, truncated, wrapped, or executed. | `NOT RUN` |
+| P3-SLOT-02 | Fifteen valid committed pairs and one additional eligible pair. | Commit the sixteenth pair to slot 16 and reach final preflight without execution. | Every field in slots 01-16, especially slot 16, summary count, reservations, comparison result, and error log. | Slot 16 behaves identically to slot 01; all 16 pairs remain distinct and intact; no field wraps to another slot. | `PASS` |
+| P3-SLOT-03 | Sixteen valid committed pairs and a seventeenth eligible proposal. | Attempt to accept pair 17. | Capacity presentation/result, all 96 existing fields, summary, reservations, and relationships. | The seventeenth pair is rejected or routed through the approved capacity path; slots 01-16 remain byte-for-byte/logically unchanged; nothing is overwritten, truncated, wrapped, or executed. | `PASS` |
 | P3-SLOT-04 | Separately approved diagnostic setup with payload fields in one slot but its `reservation_id` absent; repeat with other required fields missing. | Enter review, summary, preflight, cancellation, and cleanup paths. | Whether the partial slot reserves either character, appears in UI, reaches execution, and whether every existing field is guardedly removed. | An uncommitted/partial slot is ignored for reservation, summary, and execution; preflight never treats it as valid; cleanup removes each existing field without errors. | `NOT RUN` |
-| P3-SLOT-05 | One committed `A-B` pair and proposals reusing A or B in either subject/partner position. | Attempt `A-C`, `C-A`, `B-C`, and `C-B`. | Identity comparisons against both roles, accepted count, stored fields, and errors. | Every reused-character proposal is rejected before commit; one character appears in at most one accepted pair. | `NOT RUN` |
-| P3-SLOT-06 | One committed `A-B` pair with `B-A` otherwise legal and highly ranked. | Attempt to propose, accept, or inject the mirrored pair. | Candidate presentation, role comparisons, committed slots, final preflight, and errors. | `B-A` is neither committed nor executable. Mirror prevention follows from the same two-role character reservation invariant. | `NOT RUN` |
+| P3-SLOT-05 | One committed `A-B` pair and proposals reusing A or B in either subject/partner position. | Attempt `A-C`, `C-A`, `B-C`, and `C-B`. | Identity comparisons against both roles, accepted count, stored fields, and errors. | Every reused-character proposal is rejected before commit; one character appears in at most one accepted pair. | `PASS` |
+| P3-SLOT-06 | One committed `A-B` pair with `B-A` otherwise legal and highly ranked. | Attempt to propose, accept, or inject the mirrored pair. | Candidate presentation, role comparisons, committed slots, final preflight, and errors. | `B-A` is neither committed nor executable. Mirror prevention follows from the same two-role character reservation invariant. | `PASS` |
 | P3-SLOT-07 | Separately approved diagnostic setup with all five payload fields present but a missing `reservation_id` or one that references a character other than that slot's subject. | Enter summary and final preflight, then cancel/clean. | Subject-to-marker comparison, plan validity, relationship state, field cleanup, and error log. | The slot is not committed; no relationship operation is reachable; the whole plan follows the approved failure path; guarded cleanup removes residue without touching another slot. | `NOT RUN` |
 | P3-SLOT-08 | Sixteen committed, pairwise-distinct slots. | Run the complete reservation and preflight integrity pass without executing relationships. | All unordered slot-pair checks, all subject/partner role comparisons, committed-slot count, and error log. | Exactly 120 unordered slot-pair comparisons and at most 480 role-to-role character-reference comparisons cover the 16 slots; no duplicate or mirror pair passes. | `NOT RUN` |
 | P3-SLOT-09 | One valid committed slot plus diagnostic records with swapped direction/type flags, an invalid placeholder enum, and a reservation reference copied from a slot with a different subject. | Open summary, invoke preflight, then cancel. | Enum validation, reservation-to-subject equality, summary visibility, relationship state, and guarded cleanup. | Only a record whose five payload values are valid and whose final reservation reference equals its subject is committed; every malformed record is non-executable and is cleaned without affecting valid slots. | `NOT RUN` |
@@ -226,29 +254,29 @@ through the test UI or an already approved test setup, record that part as
 
 | ID | Setup | Action | Required observations | Pass criteria | Result |
 | --- | --- | --- | --- | --- | --- |
-| P3-RES-01 | At least four eligible characters; accept displayed pair A (subject) and B (partner). | Continue review and inspect every later active-subject proposal. | Slot containing A-B, next-proposal timing, and every later subject identity. | A is unavailable as a subject before the next proposal is selected and never reappears in that role. | `NOT RUN` |
-| P3-RES-02 | Committed A-B plus another eligible subject C with several possible partners. | Continue with C and exhaust the partner alternatives available through normal review. | Every later partner identity and the committed A-B slot. | A is unavailable as a partner immediately after A-B commits and never reappears in that role. | `NOT RUN` |
-| P3-RES-03 | At least four eligible characters; accept displayed pair A (subject) and B (partner). | Continue review and inspect every later active-subject proposal. | Slot containing A-B, next-proposal timing, and every later subject identity. | B is unavailable as a subject before the next proposal is selected and never reappears in that role. | `NOT RUN` |
-| P3-RES-04 | Committed A-B plus another eligible subject C with several possible partners. | Continue with C and exhaust the partner alternatives available through normal review. | Every later partner identity and the committed A-B slot. | B is unavailable as a partner immediately after A-B commits and never reappears in that role. | `NOT RUN` |
-| P3-RES-05 | Committed A-B and a naturally reachable or already approved retained proposal A-C. | Attempt to accept A-C. If no such proposal can be reached safely, record the case as `BLOCKED`. | Failure/recovery presentation, accepted count, existing slot, next empty slot, and all relationships. | The same subject cannot be accepted twice; rejection occurs before any slot field or count changes. | `NOT RUN` |
-| P3-RES-06 | Committed A-B and a naturally reachable or already approved retained proposal C-B. | Attempt to accept C-B. If no such proposal can be reached safely, record the case as `BLOCKED`. | Failure/recovery presentation, accepted count, existing slot, next empty slot, and all relationships. | The same partner cannot be accepted twice; rejection occurs before any slot field or count changes. | `NOT RUN` |
-| P3-RES-07 | Committed A-B with a naturally reachable or already approved retained mirror proposal B-A. | Attempt to accept B-A. If no such proposal can be reached safely, record the case as `BLOCKED`. | Failure/recovery presentation, accepted count, committed slots, and all relationships. | The mirror pair cannot be accepted; A-B remains the only committed record involving either character. | `NOT RUN` |
-| P3-RES-08 | Committed A-B and any safely reachable repeated-character proposal from P3-RES-05 through P3-RES-07. | Record all six fields of the next empty slot, attempt duplicate acceptance, then inspect the same slot again. | `subject`, `partner`, `direction`, `relationship_type`, `placeholder`, `reservation_id`, prior committed slots, and errors. | Rejected duplicate acceptance writes none of the six fields and does not alter any earlier slot. | `NOT RUN` |
-| P3-RES-09 | Same controlled duplicate attempt as P3-RES-08. | Record accepted-pair and summary counts before and after the rejected attempt. | Stored count, displayed count, committed-slot count, and next proposal. | No accepted-pair, summary, or committed-slot count increases after rejection. | `NOT RUN` |
+| P3-RES-01 | At least four eligible characters; accept displayed pair A (subject) and B (partner). | Continue review and inspect every later active-subject proposal. | Slot containing A-B, next-proposal timing, and every later subject identity. | A is unavailable as a subject before the next proposal is selected and never reappears in that role. | `PASS` |
+| P3-RES-02 | Committed A-B plus another eligible subject C with several possible partners. | Continue with C and exhaust the partner alternatives available through normal review. | Every later partner identity and the committed A-B slot. | A is unavailable as a partner immediately after A-B commits and never reappears in that role. | `PASS` |
+| P3-RES-03 | At least four eligible characters; accept displayed pair A (subject) and B (partner). | Continue review and inspect every later active-subject proposal. | Slot containing A-B, next-proposal timing, and every later subject identity. | B is unavailable as a subject before the next proposal is selected and never reappears in that role. | `PASS` |
+| P3-RES-04 | Committed A-B plus another eligible subject C with several possible partners. | Continue with C and exhaust the partner alternatives available through normal review. | Every later partner identity and the committed A-B slot. | B is unavailable as a partner immediately after A-B commits and never reappears in that role. | `PASS` |
+| P3-RES-05 | Committed A-B and a naturally reachable or already approved retained proposal A-C. | Attempt to accept A-C. If no such proposal can be reached safely, record the case as `BLOCKED`. | Failure/recovery presentation, accepted count, existing slot, next empty slot, and all relationships. | The same subject cannot be accepted twice; rejection occurs before any slot field or count changes. | `PASS` |
+| P3-RES-06 | Committed A-B and a naturally reachable or already approved retained proposal C-B. | Attempt to accept C-B. If no such proposal can be reached safely, record the case as `BLOCKED`. | Failure/recovery presentation, accepted count, existing slot, next empty slot, and all relationships. | The same partner cannot be accepted twice; rejection occurs before any slot field or count changes. | `PASS` |
+| P3-RES-07 | Committed A-B with a naturally reachable or already approved retained mirror proposal B-A. | Attempt to accept B-A. If no such proposal can be reached safely, record the case as `BLOCKED`. | Failure/recovery presentation, accepted count, committed slots, and all relationships. | The mirror pair cannot be accepted; A-B remains the only committed record involving either character. | `PASS` |
+| P3-RES-08 | Committed A-B and any safely reachable repeated-character proposal from P3-RES-05 through P3-RES-07. | Record all six fields of the next empty slot, attempt duplicate acceptance, then inspect the same slot again. | `subject`, `partner`, `direction`, `relationship_type`, `placeholder`, `reservation_id`, prior committed slots, and errors. | Rejected duplicate acceptance writes none of the six fields and does not alter any earlier slot. | `PASS` |
+| P3-RES-09 | Same controlled duplicate attempt as P3-RES-08. | Record accepted-pair and summary counts before and after the rejected attempt. | Stored count, displayed count, committed-slot count, and next proposal. | No accepted-pair, summary, or committed-slot count increases after rejection. | `PASS` |
 | P3-RES-10 | Four or more legal adults; accept A-B as an ordinary marriage plan. | Continue review, inspect both later roles, and attempt a repeated-character acceptance only if safely reachable. | Stored direction/type, subject and partner pools, duplicate guard, slot writes, and count. | The ordinary adult-marriage path uses the shared immediate-reservation and pre-write duplicate contract for both A and B. | `NOT RUN` |
 | P3-RES-11 | Four or more legal adults; accept A-B as a matrilineal marriage plan. | Repeat P3-RES-10. | Same fields and role checks as P3-RES-10. | The matrilineal adult-marriage path uses the same reservation and duplicate contract as the ordinary path. | `NOT RUN` |
 | P3-RES-12 | A legal pair with at least one minor; accept A-B as an ordinary betrothal plan. | Repeat P3-RES-10 using the betrothal path. | Stored direction/type, subject and partner pools, duplicate guard, slot writes, and count. | The ordinary betrothal path immediately reserves both characters and uses the same pre-write duplicate contract. | `NOT RUN` |
 | P3-RES-13 | A legal pair with at least one minor; accept A-B as a matrilineal betrothal plan. | Repeat P3-RES-12 using matrilineal direction. | Same fields and role checks as P3-RES-12. | The matrilineal betrothal path uses the same reservation and duplicate contract as the other three acceptance paths. | `NOT RUN` |
-| P3-RES-14 | A duplicated committed plan created only through an already approved test setup; otherwise record `BLOCKED`. | Attempt final confirmation. | Full-plan duplicate failure, every relationship before/after, accepted records, and error log. | Final duplicate preflight remains active as defense in depth and aborts before any marriage or betrothal mutation. | `NOT RUN` |
-| P3-RES-15 | Fresh baseline copies supporting one successful valid batch and one preflight-abort comparison. | Final-confirm the valid batch; separately exercise the abort path. | Timing and visibility of the completion result, total/marriage/betrothal counts, relationships, and errors. | A visible completion result appears only after the relationship-execution path is reached successfully; no success result appears before execution or after duplicate rejection or preflight abort. | `NOT RUN` |
+| P3-RES-14 | A duplicated committed plan created only through an already approved test setup; otherwise record `BLOCKED`. | Attempt final confirmation. | Full-plan duplicate failure, every relationship before/after, accepted records, and error log. | Final duplicate preflight remains active as defense in depth and aborts before any marriage or betrothal mutation. | `PASS` |
+| P3-RES-15 | Fresh baseline copies supporting one successful valid batch and one preflight-abort comparison. | Final-confirm the valid batch; separately exercise the abort path. | Timing and visibility of the completion result, total/marriage/betrothal counts, relationships, and errors. | A visible completion result appears only after the relationship-execution path is reached successfully; no success result appears before execution or after duplicate rejection or preflight abort. | `PASS` |
 | P3-RES-16 | Valid batch containing a controlled mix of marriage and betrothal records, using distinct characters. | Record the accepted plan, final-confirm, then compare the completion result with every actual relationship. | Accepted/executed total, marriage count, betrothal count, each relationship and direction, and any pair details displayed. | Completion totals match the relationships actually established; marriage plus betrothal counts equal the executed total, with no duplicated character or false success. | `NOT RUN` |
 
 ## 9. Final prevalidation and invalidation safety
 
 | ID | Setup | Action | Required observations | Pass criteria | Result |
 | --- | --- | --- | --- | --- | --- |
-| P3-VALID-01 | Several accepted pairs, all still legal. | Confirm the final batch. | Validation log/UI, execution count, and every before/after relationship. | All pairs are validated before the first relationship mutation, then each executes exactly once. | `NOT RUN` |
-| P3-VALID-02 | Invalidate one accepted pair by marriage or betrothal before final confirmation. | Confirm the final batch. | Whether any earlier pair executes, invalid-pair reason, and final state. | Mandatory all-or-nothing validation aborts the entire batch before mutation; zero accepted pairs change. | `NOT RUN` |
+| P3-VALID-01 | Several accepted pairs, all still legal. | Confirm the final batch. | Validation log/UI, execution count, and every before/after relationship. | All pairs are validated before the first relationship mutation, then each executes exactly once. | `PASS` |
+| P3-VALID-02 | Invalidate one accepted pair by marriage or betrothal before final confirmation. | Confirm the final batch. | Whether any earlier pair executes, invalid-pair reason, and final state. | Mandatory all-or-nothing validation aborts the entire batch before mutation; zero accepted pairs change. | `PASS` |
 | P3-VALID-03 | One accepted participant dies before final confirmation. | Confirm. | All accepted pairs and error log. | Entire batch aborts before mutation; zero pairs change and no invalid scope/effect error occurs. | `NOT RUN` |
 | P3-VALID-04 | One participant leaves the actor's Dynasty before final confirmation. | Confirm. | Dynasty membership, final list, and all relationships. | Full prevalidation aborts the entire batch before mutation; zero pairs change. | `NOT RUN` |
 | P3-VALID-05 | One participant becomes imprisoned, a hostage, clergy unable to marry, or otherwise unavailable before final confirmation. | Confirm. | Failure reason and complete batch state. | Approved availability failure aborts the entire batch before mutation; zero pairs change. | `NOT RUN` |
@@ -279,16 +307,16 @@ Run this section only after explicit P6 runtime approval for the existing isolat
 
 | ID | Setup | Action | Required observations | Pass criteria | Result |
 | --- | --- | --- | --- | --- | --- |
-| P3-B-01 | Legal adult opposite-sex pair, ordinary direction, both unmarried and unbetrothed. | Final-confirm and execute only this pair. | Spouse relation, direction, alliances, Prestige, court, titles, claims, government, succession, memories/on-actions, and error log. | Exactly one ordinary marriage is created; no unapproved state changes occur. | `NOT RUN` |
-| P3-B-02 | Legal adult pair approved for matrilineal direction. | Final-confirm and execute. | Matrilineal state, children-Dynasty implications where observable, and all P3-B-01 fields. | Exactly one matrilineal marriage is created and the direction matches the summary. | `NOT RUN` |
-| P3-B-03 | Legal minor pair. | Final-confirm an ordinary betrothal. | Betrothed relation, matchmaker, alliance, maturation behavior, and error log. | Exactly one ordinary betrothal is created; no immediate marriage occurs. | `NOT RUN` |
-| P3-B-04 | Legal pair with at least one minor and approved matrilineal direction. | Final-confirm. | Betrothal direction, matchmaker, House/Dynasty implications after eventual marriage, and error log. | Exactly one matrilineal betrothal is created and no hard age rule is bypassed. | `NOT RUN` |
+| P3-B-01 | Legal adult opposite-sex pair, ordinary direction, both unmarried and unbetrothed. | Final-confirm and execute only this pair. | Spouse relation, direction, alliances, Prestige, court, titles, claims, government, succession, memories/on-actions, and error log. | Exactly one ordinary marriage is created; no unapproved state changes occur. | `PASS` |
+| P3-B-02 | Legal adult pair approved for matrilineal direction. | Final-confirm and execute. | Matrilineal state, children-Dynasty implications where observable, and all P3-B-01 fields. | Exactly one matrilineal marriage is created and the direction matches the summary. | `PASS` |
+| P3-B-03 | Legal minor pair. | Final-confirm an ordinary betrothal. | Betrothed relation, matchmaker, alliance, maturation behavior, and error log. | Exactly one ordinary betrothal is created; no immediate marriage occurs. | `PASS` |
+| P3-B-04 | Legal pair with at least one minor and approved matrilineal direction. | Final-confirm. | Betrothal direction, matchmaker, House/Dynasty implications after eventual marriage, and error log. | Exactly one matrilineal betrothal is created and no hard age rule is bypassed. | `PASS` |
 | P3-B-05 | Same adult pair in two controlled saves: one through vanilla UI, one through direct effect. | Execute each path. | Alliances, Prestige, court movement, memories, opinions, House relations, and other side effects. | Every intended difference is documented and approved; no missing vanilla consequence is misrepresented as equivalent behavior. | `NOT RUN` |
 | P3-B-06 | Same-Dynasty unlanded characters from different courts. | Direct-confirm the pair under the approved authority policy. | Courts, lieges, relocation, matchmaker state, and acceptance bypass. | Behavior matches the explicit product authority decision and produces no invalid court state. | `NOT RUN` |
 | P3-B-07 | Landed ruler pair. | Direct-confirm. | Titles, government, capital/court, lieges/vassals, alliances, succession, heirs, and claims. | Marriage/betrothal is created without direct title, government, or realm corruption. | `NOT RUN` |
 | P3-B-08 | Current player heir paired under ordinary and matrilineal directions in separate saves. | Direct-confirm and advance time. | Player heir, succession order, Dynasty, titles, and government. | CK3 recalculation is stable and no unapproved succession mutation is scripted directly. | `NOT RUN` |
-| P3-B-09 | Multiple independent valid adult and minor pairs. | Final-confirm the whole batch. | Execution count/order, duplicates, alliances, Prestige, courts, and errors. | Every pair is validated before the first mutation and then executes exactly once; if any pair fails validation, mandatory all-or-nothing behavior executes zero pairs. No participant is reused. | `NOT RUN` |
-| P3-B-10 | Successful direct batch. | Save, reload, advance time, and inspect again. | Marriage/betrothal direction, matchmaker, courts, titles, governments, alliances, succession, and delayed errors. | All relationships persist and no delayed duplicate or background execution occurs. | `NOT RUN` |
+| P3-B-09 | Multiple independent valid adult and minor pairs. | Final-confirm the whole batch. | Execution count/order, duplicates, alliances, Prestige, courts, and errors. | Every pair is validated before the first mutation and then executes exactly once; if any pair fails validation, mandatory all-or-nothing behavior executes zero pairs. No participant is reused. | `PASS` |
+| P3-B-10 | Successful direct batch. | Save, reload, advance time, and inspect again. | Marriage/betrothal direction, matchmaker, courts, titles, governments, alliances, succession, and delayed errors. | All relationships persist and no delayed duplicate or background execution occurs. | `PASS` |
 | P3-B-11 | Pair eligible for a Grand Wedding under vanilla UI. | Inspect the direct prototype. | Effects and options offered. | Direct MVP does not create Grand Wedding promise state unless that separate feature is approved and tested. | `NOT RUN` |
 | P3-B-12 | Standard-UI-invalid prisoner, hostage, illegal-kin, cannot-marry, or unavailable pair. | Attempt to stage and final-confirm. | Prevalidation and relationship state. | Direct effects never bypass the approved legality and availability gates. | `NOT RUN` |
 
@@ -296,7 +324,7 @@ Run this section only after explicit P6 runtime approval for the existing isolat
 
 | ID | Setup | Action | Required observations | Pass criteria | Result |
 | --- | --- | --- | --- | --- | --- |
-| P3-SCALE-01 | Large Dynasty with hundreds of living members across ages, courts, marital histories, and ruler states. | Start matchmaking and reach the first proposal. | Candidate-build time, frame responsiveness, event/UI delay, and error log. | Game remains responsive; candidate construction occurs only after player initiation and completes without recurring background work. | `NOT RUN` |
+| P3-SCALE-01 | Large Dynasty with hundreds of living members across ages, courts, marital histories, and ruler states. | Start matchmaking and reach the first proposal. | Candidate-build time, frame responsiveness, event/UI delay, and error log. | Game remains responsive; candidate construction occurs only after player initiation and completes without recurring background work. | `PASS` |
 | P3-SCALE-02 | Same large Dynasty. | Review at least 50 proposals using accept, skip, next, and defer. | Response time, duplicate persons, mirrored pairs, cycles, missing candidates, and state continuity. | Review remains usable and pair-state invariants hold throughout. | `NOT RUN` |
 | P3-SCALE-03 | Two fresh copies of the same unchanged baseline save and configuration. | Activate one workflow in each copy and compare the first generated recommendations. | Initial candidate set, ordering, permanent-lock state, and error log. | Deterministic inputs produce deterministic recommendations, subject only to explicitly documented CK3 randomness; neither copy attempts a second activated workflow. | `NOT RUN` |
 | P3-SCALE-04 | Large accepted list near the approved maximum. | Open final summary, cancel in one save, execute in another. | Summary responsiveness, full validation time, no-preconfirm state, execution time, and errors. | Cancel is consequence-free; execution validates fully before mutation and finishes without duplicate or partial pair state. | `NOT RUN` |
@@ -343,40 +371,42 @@ Inspect the CK3 error log after every suite for:
 
 | Final gate | Result |
 | --- | --- |
-| Adult marriage cases | `NOT RUN` |
-| Minor betrothal cases | `NOT RUN` |
-| Ordinary and matrilineal direction | `NOT RUN` |
-| Fertility tiers and five-point boundaries | `NOT RUN` |
-| Hard adult–minor age exclusions | `NOT RUN` |
+| Adult marriage cases | `PASS` for the tested ordinary and matrilineal paths; stronger side-effect cases remain `NOT RUN` |
+| Minor betrothal cases | `PASS` for the tested ordinary and matrilineal paths; maturation and broader authority cases remain `NOT RUN` |
+| Ordinary and matrilineal direction | `PASS` for the four tested relationship paths |
+| Fertility tiers and five-point boundaries | `PASS` for `100/95/94`, `80/75/74`, absolute inclusive `0.05`, and tested within-tier age priority |
+| Hard adult–minor age exclusions | `PASS` for female `29/30` and male `39/40`; stronger role-direction and birthday variants remain `NOT RUN` |
 | Marital-history groups and placeholders | `NOT RUN` |
 | Doctrine and kinship legality | `NOT RUN` |
 | Authority, matchmaker, ruler, and external-court cases | `NOT RUN` |
-| Workflow-scoped authorization lifecycle and cleanup | `NOT RUN` |
-| Permanent one-workflow-per-save lock | `NOT RUN` |
+| Workflow-scoped authorization lifecycle and cleanup | `PARTIAL PASS`; mapped entry, cancel, and abnormal-exit cases pass; death and Dynast-loss variants remain `NOT RUN` |
+| Permanent one-workflow-per-save lock | `PASS` in the mapped smoke/cancel paths; stronger multiplayer and stale-event variants remain `NOT RUN` |
 | Out-of-workflow and stale-authorization execution guards | `NOT RUN` |
 | Special-state exclusions | `NOT RUN` |
-| Pair-state and duplicate protection | `NOT RUN` |
-| Immediate reservation in all four subject/partner roles | `NOT RUN` |
-| Duplicate rejection with zero slot writes and zero count increase | `NOT RUN` |
+| Pair-state and duplicate protection | `PASS` for the mapped reservation, mirror, overlap, and final-preflight cases |
+| Immediate reservation in all four subject/partner roles | `PASS` |
+| Duplicate rejection with zero slot writes and zero count increase | `PASS` |
 | Shared reservation contract across all four acceptance paths | `NOT RUN` |
-| Fixed slots 01/16 and seventeenth-pair capacity boundary | `NOT RUN` |
+| Fixed slots 01/16 and seventeenth-pair capacity boundary | `PARTIAL PASS`; slot 16 and pair 17 pass, while the full slot-01 field audit remains `NOT RUN` |
 | Partial records and reservation-marker integrity | `NOT RUN` |
-| Cancel and no-preconfirmation consequences | `NOT RUN` |
-| Full prevalidation and invalidation safety | `NOT RUN` |
+| Cancel and no-preconfirmation consequences | `PASS` for mapped review/final cancel paths; stronger state audits remain `NOT RUN` |
+| Full prevalidation and invalidation safety | `PARTIAL PASS`; valid multi-pair and one invalid-pair abort pass; other invalidation causes remain `NOT RUN` |
 | Approach A advisory comparison (deferred, not selected) | `NOT RUN` |
-| Approach B isolated prototype | `NOT RUN` |
-| Final duplicate preflight defense in depth | `NOT RUN` |
-| Completion-result visibility and count accuracy | `NOT RUN` |
-| Large-Dynasty performance | `NOT RUN` |
+| Approach B isolated prototype | `PARTIAL PASS`; four relationship paths, tested batch execution, and persistence pass |
+| Final duplicate preflight defense in depth | `PASS` |
+| Completion-result visibility and count accuracy | `PARTIAL PASS`; timing passes, mixed-type count-detail case remains `NOT RUN` |
+| Large-Dynasty performance | `PASS` for the reported recommendation-generation scenario; stronger scale cases remain `NOT RUN` |
 | English localisation | `NOT RUN` |
 | Simplified Chinese localisation | `NOT RUN` |
 | Phase 1 regression | `NOT RUN` |
 | Phase 2 regression | `NOT RUN` |
-| Save/reload cleanup with lock retained | `NOT RUN` |
+| Save/reload cleanup with lock retained | `PARTIAL PASS`; mapped abnormal/locked-state and successful-batch persistence pass |
 | CK3 error log clean | `NOT RUN` |
-| Ray recommendation | `NOT RUN` |
-| Jay/Boss approval | `NOT RUN` |
+| Ray recommendation | `PROTOTYPE ACCEPTED FOR PRODUCTION DESIGN` |
+| Jay/Boss approval | `PENDING` |
 
-Post-fix Phase 3 reservation-regression status remains `NOT RUN`. The current
-gate is `AWAITING RAY RESERVATION-REGRESSION RETEST`. This matrix does not
-authorize production implementation or production release.
+The repaired accepted-character reservation regression is closed by Ray's
+post-fix retest. Smoke 3's unaccepted-character reuse is expected behavior.
+The formal status is `PROTOTYPE ACCEPTED — PRODUCTION DESIGN MAY PROCEED`.
+Production implementation and release remain unapproved; 116 stronger or
+unreported matrix cases remain `NOT RUN`.

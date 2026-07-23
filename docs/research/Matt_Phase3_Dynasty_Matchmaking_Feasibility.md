@@ -1,15 +1,20 @@
 # Breed Improved Phase 3 - Dynasty Matchmaking Feasibility
 
+Current runtime status (2026-07-23): `PROTOTYPE ACCEPTED — PRODUCTION DESIGN
+MAY PROCEED`; 40 mapped matrix cases pass and 116 remain `NOT RUN`. Historical
+research-gate wording below remains part of the pre-runtime feasibility record.
+See `docs/Matt_to_Jay_Phase3_Prototype_Runtime_Acceptance.md`.
+
 - Target: CK3 `1.19.0.6 (Scribe)`
 - Research status: `COMPLETE FOR STATIC FEASIBILITY`
 - Phase 3 isolated prototype:
-  `STATIC IMPLEMENTATION COMPLETE — RUNTIME TEST REQUIRED`
+  `STATIC IMPLEMENTATION COMPLETE — PARTIAL RUNTIME ACCEPTANCE COMPLETE`
 - Prototype approval: `P0 CORRECTED AND CLOSED`
 - P0 evidence/design checkpoint: `P0 CORRECTED AND CLOSED`
 - P1-P5 status: `STATIC COMPLETE`
-- P6 status: `AWAITING RAY RUNTIME APPROVAL`
+- P6 status: `PROTOTYPE ACCEPTED — PRODUCTION DESIGN MAY PROCEED`
 - Production implementation: `NOT APPROVED`
-- CK3 runtime: `NOT RUN`
+- CK3 runtime: `40 MAPPED PASS / 0 FAIL / 116 NOT RUN`
 
 This report evaluates Phase 3 against the installed same-version vanilla files. It does not implement gameplay or claim runtime behavior.
 
@@ -23,7 +28,7 @@ This report evaluates Phase 3 against the installed same-version vanilla files. 
 
 CK3 provides the individual building blocks for a guarded prototype: Dynasty iteration, sequential review, fertility and age values, marriage-legality checks, coarse kinship categories, native UI preselection, and direct ordinary/matrilineal marriage or betrothal effects.
 
-The approved isolated-prototype model is **Dynast override, limited to one explicitly initiated workflow**, using direct Approach B only after final confirmation. This is a Breed Improved test power, not vanilla authority. Because exact numeric run identity remains unverified, the prototype uses a permanent one-workflow-per-save lock. Production implementation remains blocked because direct effects need side-effect comparison, the dynamic fertility tier and the selected pair-state lifetime need runtime proof, abnormal event closure has no verified generic callback, and no exact relatedness value is exposed. Recommended status: `P0 CORRECTED AND CLOSED; P1-P5 STATIC COMPLETE; P6 AWAITING RAY RUNTIME APPROVAL; PRODUCTION NOT APPROVED`.
+The approved isolated-prototype model is **Dynast override, limited to one explicitly initiated workflow**, using direct Approach B only after final confirmation. This is a Breed Improved test power, not vanilla authority. Because exact numeric run identity remains unverified, the prototype uses a permanent one-workflow-per-save lock. The mapped runtime sequences validate the selected architecture sufficiently for production design, while direct-effect side effects, broader lifecycle and state coverage, product scoring, and exact relatedness remain unresolved. Recommended status: `PROTOTYPE ACCEPTED — PRODUCTION DESIGN MAY PROCEED; PRODUCTION IMPLEMENTATION NOT APPROVED`.
 
 The existing Phase 1/2 production baseline, including v0.2.0, is already
 published on Steam Workshop item `3769010534`. GitHub remains the source and
@@ -278,8 +283,9 @@ The prospective runtime matrix is `docs/testing/phase3_dynasty_matchmaking_manua
 ## 8. Closeout
 
 Phase 3 is **not ready for production implementation**. P0 is `CORRECTED AND
-CLOSED`; P1-P5 are `STATIC COMPLETE`; P6 is `AWAITING RAY RUNTIME APPROVAL`.
-CK3 runtime remains `NOT RUN`.
+CLOSED`; P1-P5 are `STATIC COMPLETE`; the prototype is
+`ACCEPTED — PRODUCTION DESIGN MAY PROCEED`. The matrix records 40 mapped
+runtime `PASS` cases and 116 `NOT RUN` cases.
 
 Approved prototype recommendation: use workflow-scoped Dynast override Approach B with the bounded P0 storage and cleanup design above. Retain Approach A only as a separately tested advisory handoff.
 

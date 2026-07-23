@@ -1,14 +1,15 @@
 # Breed Improved Phase 3 Prototype - Static Review
 
-- Status: `STATIC REVIEW PASSED — RESERVATION FIX RETEST REQUIRED`
+- Status: `STATIC REVIEW PASSED — POST-FIX RUNTIME RETEST RECORDED`
 - CK3 target: `1.19.0.6 (Scribe)`
 - Prototype namespace: `breedimp_p3_proto_matchmaking`
 - Runtime status:
-  `PRE-FIX BLOCKER OBSERVED; POST-FIX RETEST NOT RUN`
+  `PARTIAL RUNTIME ACCEPTANCE COMPLETE — 40 PASS / 116 NOT RUN`
 
-This report records the post-fix static inspection and distinguishes it from
-Ray's pre-fix P6 observation. It does not establish that CK3 can load, parse,
-display, persist, or execute the corrected prototype.
+This report records the post-fix static inspection and distinguishes static
+evidence from Ray's later runtime observations. Static `PASS` results below are
+not runtime claims. The current observed gameplay record is
+`docs/Matt_to_Jay_Phase3_Prototype_Runtime_Acceptance.md`.
 
 ## Scope and packaging isolation
 
@@ -104,7 +105,23 @@ Post-fix static checks:
 - [x] Confirm the final defense-in-depth preflight still contains all 120
       unordered slot comparisons and all four role comparisons per slot pair.
 
-Runtime status for every post-fix reservation behavior remains `NOT RUN`.
+## Post-runtime update
+
+After this static review:
+
+- Ray ran the isolated prototype;
+- the first runtime pass found that accepted characters could reappear after
+  their pair was committed;
+- Matt corrected the reservation path and reran the applicable static
+  validation;
+- Ray's post-fix retest did not reproduce the defect;
+- mapped reservation, duplicate/mirror, write-isolation, count-stability, and
+  final duplicate-preflight cases passed; and
+- Smoke 3 confirmed that a displayed but unaccepted character may later appear
+  in a different proposed pair, which is expected behavior.
+
+The runtime matrix now records 40 `PASS`, 0 `FAIL`, 116 `NOT RUN`, and 0
+`BLOCKED`. No clean CK3 `error.log` result or full-matrix pass is claimed.
 
 ## Mutation, automation, and localisation
 
@@ -183,13 +200,14 @@ Runtime status for every post-fix reservation behavior remains `NOT RUN`.
 - Test-only completion feedback: `PASS` (validated execution dispatches event
   `1144`; counts and 16 conditional slot-detail lines remain available until
   acknowledgement cleanup)
-- Phase 3 manual matrix: `PASS` (`156` unique cases, all `NOT RUN`)
+- Phase 3 manual matrix structure: `PASS` (`156` unique cases)
+- Phase 3 mapped runtime rows: `40 PASS / 0 FAIL / 116 NOT RUN / 0 BLOCKED`
 - Independent adversarial static review: `PASS` (no static blocker)
 
 Result:
-`STATIC REVIEW PASSED — RESERVATION FIX RETEST REQUIRED`
+`STATIC REVIEW PASSED — POST-FIX RUNTIME RETEST RECORDED`
 
 Runtime:
-`PRE-FIX BLOCKER OBSERVED; POST-FIX RETEST NOT RUN`
+`PARTIAL RUNTIME ACCEPTANCE COMPLETE — SEE RUNTIME ACCEPTANCE REPORT`
 
-Stop state: `AWAITING RAY RESERVATION-REGRESSION RETEST`
+Stop state: `AWAITING JAY/BOSS PRODUCTION-DESIGN APPROVAL`

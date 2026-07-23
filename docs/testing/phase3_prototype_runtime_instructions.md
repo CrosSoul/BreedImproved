@@ -1,24 +1,24 @@
 # Breed Improved Phase 3 Prototype - Runtime Instructions
 
-- Status: `POST-FIX RESERVATION REGRESSION NOT RUN`
+- Status: `PARTIAL RUNTIME ACCEPTANCE COMPLETE — REMAINING MATRIX GATES NOT RUN`
 - CK3 target: `1.19.0.6 (Scribe)`
 - Prototype namespace: `breedimp_p3_proto_matchmaking`
 - Production approval: `NOT APPROVED`
-- Runtime gate: `AWAITING RAY RESERVATION-REGRESSION RETEST`
+- Runtime gate: `AWAITING JAY/BOSS PRODUCTION-DESIGN APPROVAL`
 
-This document is the gated runtime procedure for the completed static isolated
-prototype. It does not authorize launching CK3 or changing production files;
-Ray must explicitly approve P6 first. Record only observed results in the Phase
-3 manual matrix, and do not convert an observation into a `PASS` without the
-required reviewer decision.
+This document records the runtime procedure and the remaining targeted gates
+for the completed isolated prototype. It does not authorize another CK3 run or
+any production-file change. Record only observed results in the Phase 3 manual
+matrix and preserve `NOT RUN` for unmatched or stronger cases.
 
-Ray/Boss reported that the pre-correction build passed entry/cancel Smoke 1,
-first activation/permanent-lock Smoke 2, and **View another partner for this
-person** on retest. That build wrote pair slots and retained the final
-duplicate preflight, but failed immediate reservation, later candidate
-exclusion, and the acceptance-time duplicate guard. These are historical
-observations, not post-fix results. Every reservation-regression and completion
-case for the corrected build remains `NOT RUN`.
+The first runtime pass found that accepted characters could reappear after
+their pair was committed. The final duplicate preflight still stopped the
+invalid plan, but immediate reservation was defective. Matt corrected the
+reservation path. Ray then passed Smoke 1, Smoke 2, Smoke 3, and the supplied
+first/second/third functional sequences; the accepted-character defect did not
+reproduce. The exact mapped results are maintained in the 156-case manual
+matrix. Unreported cases, including the dedicated error-log rows, remain
+`NOT RUN`.
 
 ## 1. Install and enable the isolated test Mod
 
@@ -47,7 +47,35 @@ preflight failure, actor death, Dynast loss, save/load, or an orphaned event.
 - Label every result with the baseline-save name and whether the permanent
   lock was observed before and after the action.
 
-## 3. Priority smoke gates
+## 3. Review and reservation semantics
+
+**View another partner** rejects or advances the current combination according
+to the implemented review flow. Display alone never creates a reservation.
+
+- A displayed, skipped, replaced, or otherwise unaccepted pair reserves neither
+  participant.
+- Either unaccepted participant may appear later in a different combination.
+- A character becomes reserved only when an accepted pair is successfully
+  committed.
+- A committed pair reserves both subject and partner immediately.
+- Neither accepted participant may appear later as subject or partner in
+  another accepted-plan opportunity.
+- Final duplicate preflight remains a separate defense-in-depth check.
+
+Targeted regression sequence:
+
+1. Display A+B and do not accept the pair.
+2. A later B+C proposal is expected and is not a defect.
+3. Accept and commit D+E.
+4. Any later proposal that could place D or E in another accepted plan is a
+   failure.
+
+Ray's Smoke 3 confirmed the first distinction: an unaccepted character was
+later proposed with a different partner. Ray's final reservation retest
+confirmed the second distinction: the prior accepted-character reuse defect
+did not recur.
+
+## 4. Priority smoke gates
 
 Run these gates before attempting the complete matrix. Stop and report a
 blocker if any gate fails or produces a CK3 error attributable to the
@@ -103,7 +131,7 @@ Stop the reservation-regression pass immediately if:
 - the final duplicate preflight no longer stops a duplicated plan before
   mutation.
 
-## 4. Observation capture
+## 5. Observation capture
 
 For every executed test, capture:
 
@@ -132,7 +160,7 @@ title, government, Prestige, claim, succession, House, or Dynasty state has
 changed. After every terminal action, save, reload, advance one day, and
 inspect the same fields again.
 
-## 5. Error log
+## 6. Error log
 
 After each smoke gate and each completed suite, inspect:
 
@@ -145,17 +173,15 @@ localisation errors, repeated messages, and any unexpected background activity.
 Do not delete or edit the log as part of this procedure. A clean log is a
 future observation, not a pre-recorded result.
 
-## 6. Full matrix progression
+## 7. Remaining matrix progression
 
-Only after the smoke gates are recorded for review, run the 156-case matrix in
-`docs/testing/phase3_dynasty_matchmaking_manual.md`. Use a separate fresh
-baseline for each activated workflow. Preserve `NOT RUN` for every case not
-actually executed, and stop immediately for any blocker involving a stale
-event, permanent-lock bypass, relationship change before final confirmation,
-repeated accepted character, partial slot write, rejected-duplicate count
-increase, premature or inaccurate completion result, partial batch execution,
-or Phase 1/2 regression.
+The manual matrix now records 40 mapped `PASS` cases and 116 `NOT RUN` cases.
+Any future approved pass must use a separate fresh baseline for each confirmed
+activation and must preserve `NOT RUN` for every case not actually executed.
+Stop immediately for a stale-event authorization path, permanent-lock bypass,
+relationship change before final confirmation, repeated accepted character,
+partial slot write, rejected-duplicate count increase, premature or inaccurate
+completion result, partial batch execution, or Phase 1/2 regression.
 
-Post-fix CK3 runtime remains `NOT RUN`. Stop after the requested reservation
-regression with status `AWAITING RAY RESERVATION-REGRESSION RETEST` until Ray
-records the new in-game observations.
+The current prototype acceptance report is the source of truth for observed
+runtime behavior. No additional CK3 run is authorized by this document.

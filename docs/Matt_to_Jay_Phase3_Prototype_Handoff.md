@@ -3,20 +3,21 @@
 ## Status
 
 - Phase 3 isolated prototype:
-  `STATIC IMPLEMENTATION COMPLETE — RUNTIME TEST REQUIRED`
+  `STATIC IMPLEMENTATION COMPLETE — PARTIAL RUNTIME ACCEPTANCE COMPLETE`
 - P0: `CORRECTED AND CLOSED`
 - P1-P5: `STATIC COMPLETE`
-- P6: `PRE-FIX BLOCKER OBSERVED; POST-FIX RETEST NOT RUN`
+- P6: `MAPPED RUNTIME SEQUENCES PASSED; FULL MATRIX PARTIAL`
 - Production implementation: `NOT APPROVED`
 - CK3 runtime:
-  `PRE-FIX BLOCKER OBSERVED; POST-FIX RESERVATION RETEST NOT RUN`
-- Final handoff state: `AWAITING RAY RESERVATION-REGRESSION RETEST`
+  `PARTIAL RUNTIME ACCEPTANCE COMPLETE — 40 PASS / 116 NOT RUN`
+- Final handoff state: `AWAITING JAY/BOSS PRODUCTION-DESIGN APPROVAL`
 - Target: CK3 `1.19.0.6 (Scribe)`
 
 This handoff covers only the isolated test Mod under
 `tests/phase3_dynasty_matchmaking/`. It does not approve Phase 3 production
-code or change the released Mod. Ray's first P6 pass established the pre-fix
-observations recorded below; no post-fix CK3 result is claimed.
+code or change the released Mod. Ray's first P6 pass exposed the reservation
+defect recorded below. Matt corrected it, and Ray's final retest passed the
+reported smoke and functional sequences without reproducing that defect.
 
 ## 1. Run isolation
 
@@ -283,34 +284,46 @@ The conditional description pattern is evidenced by
 initialization and increments are evidenced by
 `events/court_events/introduce_court_fashion_events.txt:84-109,157-175`.
 
-## 7. Runtime gates and known risks
+## 7. Runtime results and remaining gates
 
-P6 must verify:
+Ray reported:
 
-- descriptor loading, parsing, scopes, event flow, and localisation rendering;
-- permanent-lock serialization and save/reload behavior;
+- Smoke 1, Smoke 2, and Smoke 3 behaved as expected;
+- the supplied first, second, and third functional test sequences behaved as
+  expected;
+- ordinary and matrilineal adult marriage and minor betrothal paths executed;
+- mapped lifecycle, batch-safety, capacity, fertility-boundary, age-boundary,
+  completion-feedback, and tested large-Dynasty behaviors passed;
+- the accepted-character reservation defect was fixed and did not reproduce;
+  and
+- an unaccepted displayed character later appearing with a different partner
+  is expected because only accepted and committed pairs reserve participants.
+
+The 156-case matrix records 40 exact mapped `PASS` cases, 0 `FAIL`, 116
+`NOT RUN`, and 0 `BLOCKED`. The conversational sequence labels were mapped by
+tested action and expected result; they are not required to be matrix section
+names.
+
+Remaining runtime gates before production integration or release include:
+
 - actor-owned character, flag, number, list, and Dynasty state across events;
 - actor death and every relevant Dynast-transfer route;
-- abnormal visible-event closure and orphaned-state isolation;
 - fixed-slot persistence, incomplete writes, marker checks, and diagnostics;
-- immediate exclusion of an accepted subject and partner from both later
-  roles;
-- effect-time duplicate rejection with no partial slot or count change;
 - ordinary/matrilineal marriage and betrothal parity through the shared
-  reservation guard;
+  reservation guard in every stronger matrix variant;
 - completion-event counts, slot details, and acknowledgement-time cleanup;
-- maximum-minus-`0.05` fertility boundaries and age-gap ordering;
-- ordinary and matrilineal adult marriage;
-- ordinary and matrilineal minor betrothal;
 - direct-effect alliance, Prestige, court, succession, memory, and other side
   effects compared with native behavior;
 - external-court and landed Dynasty members;
-- 16-pair capacity, collision protection, and whole-plan failure behavior;
-- large-Dynasty responsiveness;
+- partial/malformed slot records and additional invalidation causes;
+- broader fertility, kinship, placeholder, special-state, and scale variants;
 - Phase 1 and Phase 2 regression safety; and
 - CK3 `error.log`.
 
-All 156 manual cases remain `NOT RUN`.
+The direct relationship effects still have no verified rollback if an engine
+operation fails after full preflight and after an earlier relationship in the
+batch has executed. That residual risk must be resolved or explicitly accepted
+before production integration.
 
 ## 8. Ray handoff
 
@@ -321,6 +334,8 @@ review. Use
 `docs/testing/phase3_dynasty_matchmaking_manual.md` as the complete 156-case
 matrix.
 
-Ray should now perform the reservation-regression retest before continuing
-the broader P6 matrix. A post-fix runtime pass would validate only this
-isolated prototype; it would not approve production implementation.
+Use `docs/Matt_to_Jay_Phase3_Prototype_Runtime_Acceptance.md` as the current
+runtime source of truth. The isolated prototype is accepted for production
+design and gap-closure planning only. The next recommended task is **Phase 3
+production implementation design and gap-closure specification**. Production
+code remains unapproved.

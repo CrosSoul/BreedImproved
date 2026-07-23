@@ -1,5 +1,10 @@
 # Breed Improved Phase 3 - P0 Checkpoint Report
 
+Current runtime status (2026-07-23): `PROTOTYPE ACCEPTED — PRODUCTION DESIGN
+MAY PROCEED`; 40 mapped matrix cases pass and 116 remain `NOT RUN`. The P0/P6
+status statements below describe this checkpoint's historical state. See
+`docs/Matt_to_Jay_Phase3_Prototype_Runtime_Acceptance.md`.
+
 Prepared by Matt (CK3ModDeveloper) for Jay (CK3ModLeader).
 
 - CK3 target: `1.19.0.6 (Scribe)`

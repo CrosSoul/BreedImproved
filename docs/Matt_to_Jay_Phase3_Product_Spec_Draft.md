@@ -1,24 +1,30 @@
 # Breed Improved Phase 3 - Dynasty Matchmaking Management Product Specification Draft
 
+Current runtime status (2026-07-23): `PROTOTYPE ACCEPTED — PRODUCTION DESIGN
+MAY PROCEED`; 40 mapped matrix cases pass and 116 remain `NOT RUN`. The
+checkpoint-era status fields below are retained as design-history context. See
+`docs/Matt_to_Jay_Phase3_Prototype_Runtime_Acceptance.md`.
+
 Prepared by Matt (CK3ModDeveloper) for Jay (CK3ModLeader).
 
 - CK3 evidence target: `1.19.0.6 (Scribe)`
 - Production compatibility target: `1.19.*`
 - Document status: `DRAFT — PROTOTYPE DIRECTION APPROVED; PRODUCT REVIEW CONTINUES`
 - Phase 3 isolated prototype:
-  `STATIC IMPLEMENTATION COMPLETE — RUNTIME TEST REQUIRED`
+  `STATIC IMPLEMENTATION COMPLETE — PARTIAL RUNTIME ACCEPTANCE COMPLETE`
 - Implementation status: `PRODUCTION NOT APPROVED`
 - Approved prototype direction: `WORKFLOW-SCOPED DYNAST OVERRIDE / DIRECT EXECUTION`
 - P0 status: `P0 CORRECTED AND CLOSED`
 - P1-P5 status: `STATIC COMPLETE`
-- P6 status: `AWAITING RAY RUNTIME APPROVAL`
+- P6 status: `40 MAPPED PASS / 0 FAIL / 116 NOT RUN`
 - Prototype event allocation: `breedimp_p3_proto_matchmaking.1000-1199`
-- CK3 runtime status: `NOT RUN`
+- CK3 runtime status: `PARTIAL RUNTIME ACCEPTANCE COMPLETE`
 
 This document defines the proposed player-facing contract for Phase 3. It does
 not authorize production gameplay. P1-P5 static work is complete, but all
-runtime behavior remains unverified. Technical feasibility, vanilla evidence,
-and approach-specific risks are recorded separately in:
+production decisions remain subject to Jay/Boss review and gap closure.
+Technical feasibility, vanilla evidence, and approach-specific risks are
+recorded separately in:
 
 - `docs/research/Matt_Phase3_Dynasty_Matchmaking_Feasibility.md`; and
 - `docs/Matt_to_Jay_Phase3_Technical_Approach_Comparison.md`.
