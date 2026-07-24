@@ -27,7 +27,37 @@ from the production build.
    claim, inheritance, opinion, stress, hook, memory, or resource state changed.
 7. After execution, save, reload, advance one day, then one month where safe,
    and inspect the same fields.
-8. Preserve the CK3 `error.log` produced by the test session.
+8. Preserve the CK3 `error.log` produced by the test session. Each game
+   launch overwrites the previous session's logs, so capture them before
+   launching any other configuration.
+
+### 0.1 Playset pre-flight check (required once per Mod configuration)
+
+A Mod entry that exists in the launcher library is not automatically inside
+the active playset. Before every first launch of a new configuration:
+
+1. Open the active playset in the launcher's playset editor, not the Mods
+   library, and confirm the **Breed Improved - Local Runtime** entry is
+   listed as a playset member and toggled on. Add it to the playset first if
+   it is absent from the member list.
+2. Launch through the launcher, then before loading a save verify on disk
+   that `dlc_load.json` contains
+   `mod/Breed Improved - Local Runtime.mod`. If it does not, the game never
+   received the Mod; fix playset membership and relaunch.
+3. Console checks once in game: `event breedimp_dynasty_cleanup.1001` must
+   resolve (Phase 2 is Workshop-proven); `event breedimp_dynasty_matchmaking.2000`
+   must not report `not a valid id`. If the Phase 2 event resolves but the
+   Phase 3 event does not, report immediately as a Phase 3 registration
+   defect instead of continuing.
+
+Incident 2026-07-24: SMOKE-01 initially reported `FAIL` because the
+production entry was never a member of the active playset; the game loaded
+no Breed Improved content at all. Static diagnosis confirmed every
+repository file, the descriptor, and the launcher entry were healthy, and
+the prototype run proved the local-Mod pipeline. Re-run SMOKE-01 after the
+pre-flight check. Benign `should be in utf8-bom encoding` lexer warnings for
+`.txt` files are expected and non-blocking; the accepted prototype produced
+the same warnings.
 
 Do not edit the repository descriptor with a local absolute path. The outer
 local `.mod` entry is launcher-managed and is not committed.
