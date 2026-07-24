@@ -1,0 +1,7 @@
+Breed Improved v0.3.0
+
+Added the player-triggered Manage Dynasty Matchmaking workflow for living player Dynasts. Review same-Dynasty AI candidates one proposal at a time, choose ordinary or matrilineal marriage/betrothal, use skip/defer/another-partner/finish-early controls, and confirm the whole plan before any relationship is created. Adults marry; any pair containing a minor becomes betrothed. Phase 1 Individual Exile from Dynasty and Phase 2 Manage Dynasty Cleanup remain unchanged. English and Simplified Chinese localisation included. Compatibility remains CK3 1.19.*.
+
+Breed Improved v0.3.0
+
+新增由玩家主动控制的“管理宗族婚配”流程，面向在世的玩家宗族族长。逐条审阅同宗族的 AI 候选人提案，选择普通或入赘婚姻/betrothal，使用跳过、暂缓、换伴侣、提前结束等控制，并在整个计划确认后才创建关系。成年人结为婚姻，任何包含未成年人的配对结为 betrothal。Phase 1 单角色逐出宗族与 Phase 2 管理宗族清理继续保留。包含英文与简体中文本地化。兼容 CK3 1.19.*。

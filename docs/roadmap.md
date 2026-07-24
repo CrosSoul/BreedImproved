@@ -35,18 +35,17 @@ Deferred Phase 2 extensions include accepted-founder-parent and whole-branch pro
 
 ## Phase 3 - Dynasty Matchmaking Management
 
-### Current production-candidate status
+### Current v0.3.0 status
 
 Status:
-`PRODUCTION CANDIDATE IMPLEMENTED IN SOURCE — STATIC REVIEW COMPLETE (PASS)`.
+`RELEASED AS PART OF V0.3.0 WITH LIMITED RUNTIME ACCEPTANCE — STATIC REVIEW COMPLETE (PASS); EXHAUSTIVE TARGETED MATRIX DEFERRED`.
 
-CK3 runtime: `NOT RUN`.
+CK3 runtime: `LIMITED`.
 
-The one-shot Phase 3 production pass is authorized through the next Ray
-runtime gate. The production candidate adds a repeatable, player-initiated
-**Manage Dynasty Matchmaking** Decision for a living current Dynast. Its
-authority override is limited to one active workflow and to eligible
-AI-controlled members of the actor's current Dynasty.
+The v0.3.0 release adds a repeatable, player-initiated **Manage Dynasty
+Matchmaking** Decision for a living current Dynast. Its authority override is
+limited to one active workflow and to eligible AI-controlled members of the
+actor's current Dynasty.
 
 The candidate uses alternating A/B stale-event tokens, explicit interrupted
 workflow recovery, a visible 32-pair capacity, 64 bounded rejected-pair
@@ -54,20 +53,20 @@ records, deterministic adult/minor ranking, ordinary or matrilineal marriage
 and betrothal plans, complete final preflight, and stop-on-first-unexpected-
 failure execution. It adds no background scan or recurring matchmaking.
 
-Phase 1 and Phase 2 release states remain unchanged. Phase 3 does not change
-the released version, descriptors, packages, or Workshop item. The static
-review record is complete with no unresolved blocking finding; the final
-local commit exists and its push is delegated to Ray through GitHub Desktop.
-The next gates are Ray's push followed by the targeted production runtime
-plan. Release and Workshop publication remain unapproved.
+Phase 1 and Phase 2 release states remain unchanged. Phase 3 is packaged in
+the v0.3.0 Workshop update to the existing item `3769010534`. The static
+review record is complete with no unresolved blocking finding. Ray approved
+the v0.3.0 release based on observed Mod load, Phase 1/2/3 visibility, and
+basic matchmaking/betrothal gameplay smoke; the full targeted runtime matrix
+remains deferred.
 
 Current engineering stop state:
 
-`AWAITING RAY MANUAL GITHUB DESKTOP PUSH`
+`AWAITING RAY MANUAL GITHUB DESKTOP PUSH AND WORKSHOP UPLOAD`
 
-After the push:
+After the push and upload:
 
-`AWAITING RAY PHASE 3 PRODUCTION RUNTIME TEST`
+`AWAITING RAY POST-PUBLISH VERIFICATION AND DEFERRED RUNTIME HARDENING`
 
 ### Accepted isolated-prototype record
 

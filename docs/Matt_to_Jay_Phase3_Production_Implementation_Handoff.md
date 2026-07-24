@@ -7,11 +7,11 @@
   `1bb5f68ac43d23405c3d6f6ea0d564720ed8fbcf`
 - Production implementation: `PRESENT IN SOURCE`
 - Static validation: `PASS — docs/testing/phase3_production_static_review.md`
-- CK3 runtime: `NOT RUN`
-- Release approval: `NOT GRANTED`
-- Workshop/release files: `OUT OF SCOPE`
-- Local commit: `FINAL STATIC-GATE COMMIT CREATED LOCALLY; SEE GIT LOG`
-- Push: `DELEGATED — Ray pushes the verified local commit with GitHub Desktop; no GitHub network operation was attempted from this environment`
+- CK3 runtime: `NOT RUN` (Ray observed basic load and functionality smoke; exhaustive targeted matrix remains deferred)
+- Release approval: `LIMITED RUNTIME ACCEPTANCE — V0.3.0 WORKSHOP RELEASE APPROVED BY RAY; DEFERRED COVERAGE REMAINS`
+- Workshop/release files: `V0.3.0 RELEASE PREPARATION`
+- Local commit: `FINAL V0.3.0 RELEASE COMMIT CREATED LOCALLY; SEE GIT LOG`
+- Push: `DELEGATED — Ray will push the v0.3.0 release commit with GitHub Desktop; no GitHub network operation was attempted from this environment`
 
 This handoff separates code presence, static evidence, and runtime evidence. It
 must not be used to claim CK3 behavior before Ray completes the targeted
@@ -174,31 +174,37 @@ of production loading or release packaging.
 - CK3 direct effects are not transactional. A post-effect failure can leave
   earlier relationships valid.
 
-## 7. Release blockers
+## 7. Release status
 
-Phase 3 may not be released until:
+Ray has approved preparation of the v0.3.0 Workshop release with the following
+explicit boundary:
 
-1. the final static record has no unresolved blocking finding;
-2. Ray completes the must-pass production smoke;
-3. repeatability, stale-event recovery, all four relationship forms, 32-pair
-   capacity, eligibility, ranking, placeholder, preflight, save/load, and
-   direct-effect side effects are reviewed;
-4. Phase 1 and Phase 2 production regression passes;
-5. English and Simplified Chinese UI passes;
-6. CK3 `error.log` has no blocking Phase 3 error; and
-7. Jay/Boss explicitly approves release work.
+- the production Mod loads correctly;
+- Phase 1, Phase 2, and Phase 3 are all visible in game;
+- Ray performed basic gameplay testing of bulk Dynasty matchmaking and
+  betrothal workflows and reported them behaving normally;
+- the exhaustive Phase 3 targeted runtime matrix is incomplete;
+- remaining edge-case, capacity, stress, lifecycle, and compatibility testing is
+  deferred to a future patch;
+- the residual risk is accepted for v0.3.0.
 
-No Workshop upload, package rebuild, version change, tag, or GitHub Release is
-authorized by this handoff.
+The static record has no unresolved blocking finding. Phase 1 and Phase 2
+regression is required as part of Ray's post-publish verification; it is not a
+release-preparation blocker because no Phase 1/2 gameplay file changed.
+
+This handoff now authorizes v0.3.0 Workshop release preparation and packaging.
+It does not authorize a new Workshop item, a compatibility claim, a clean
+error-log claim, or conversion of unexecuted test rows to `PASS`.
 
 ## 8. Handoff state
 
-The static review record is complete and the final local commit exists. The
-current stop state is:
+The static review record is complete. The v0.3.0 release-preparation stop
+state is:
 
-`AWAITING RAY MANUAL GITHUB DESKTOP PUSH`
+`AWAITING RAY MANUAL GITHUB DESKTOP PUSH AND WORKSHOP UPLOAD`
 
-After Ray pushes the verified local commit, the required engineering stop
-state becomes:
+After Ray pushes the release commit and uploads the v0.3.0 build to the
+existing Workshop item `3769010534`, the required engineering stop state
+becomes:
 
-`AWAITING RAY PHASE 3 PRODUCTION RUNTIME TEST`
+`AWAITING RAY POST-PUBLISH VERIFICATION AND DEFERRED RUNTIME HARDENING`

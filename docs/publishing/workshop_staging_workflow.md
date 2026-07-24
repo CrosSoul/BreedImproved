@@ -11,7 +11,7 @@ The first upload created Workshop item `3769010534`. All future Breed Improved u
 From the repository root on Windows:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\stage_workshop.ps1 -Version 0.2.0
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\stage_workshop.ps1 -Version 0.3.0
 ```
 
 The process-level execution-policy override does not modify the machine or user PowerShell policy.
@@ -31,7 +31,7 @@ events/
 localization/
 ```
 
-The script completely deletes and recreates the staging root on every run. It requires the production root to match the frozen v0.2.0 allowlist of 16 files; a missing or unexpected production file fails the build. It then copies those files directly from `MyCK3Mod/` and copies the fixed publishing asset from `assets/workshop/thumbnail.png` to the staging root. The thumbnail is Workshop publishing metadata, not a gameplay file and not part of the production Mod root.
+The script completely deletes and recreates the staging root on every run. It copies every file in `MyCK3Mod/` except repository-only `.gitkeep` markers directly to staging and copies the fixed publishing asset from `assets/workshop/thumbnail.png` to the staging root. The thumbnail is Workshop publishing metadata, not a gameplay file and not part of the production Mod root. A strict allowlist guards against unexpected production files; a missing required file or an extra unexpected file fails the build.
 
 The script verifies a byte-identical production copy and publishing-asset copy before applying the only authorized descriptor transform: adding exactly one `remote_file_id="3769010534"` to the staged `descriptor.mod`.
 
@@ -49,14 +49,16 @@ The manifest is outside the upload root. It records the release and Workshop ide
 
 The workflow verifies:
 
-- version `0.2.0`;
+- version matches the supplied release parameter (default `0.3.0`);
+- `name="Breed Improved"`;
 - `supported_version="1.19.*"`;
-- no local `path` field;
+- tags include `Utilities` and `Gameplay`;
+- no local `path` field in either the source or staged descriptor;
 - configured Workshop ID exists and is exactly `3769010534`;
 - exactly one staged `remote_file_id="3769010534"` entry;
 - no missing, duplicate, malformed, or different staged Workshop ID;
 - required production gameplay and localisation files;
-- an exact frozen 16-file production allowlist, with no missing or unexpected payload file;
+- an exact production-file allowlist, with no missing or unexpected payload file;
 - required `assets/workshop/thumbnail.png` source and staged `thumbnail.png`;
 - PNG signature, `IHDR` header, exact `512×512` dimensions, non-empty byte size, and exact source/staging thumbnail size and SHA-256 match;
 - English and Simplified Chinese UTF-8 BOM;
@@ -65,7 +67,7 @@ The workflow verifies:
 - no development directories, local absolute paths, or `breedimp_test_` identifiers; and
 - byte-identical production/publishing-source and staging hashes before descriptor injection; and
 - byte-identical gameplay, localisation, and thumbnail hashes after injection, with only the exact descriptor association permitted to differ.
-- a deterministic internal manifest covering 16 production files and one publishing asset.
+- a deterministic internal manifest covering every production file and the publishing asset, including the source Git revision when available.
 
 `dist/` is generated and Git-ignored. The staging directory is an internal upload input, not a public download or supported manual-install package.
 

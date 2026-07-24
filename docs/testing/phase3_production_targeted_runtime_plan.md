@@ -5,12 +5,18 @@
 - CK3 target: `1.19.0.6 (Scribe)`
 - Build: `PRODUCTION SOURCE UNDER MyCK3Mod/`
 - Tester: `Ray`
-- Runtime status: `NOT RUN`
-- Workshop status: `DO NOT UPLOAD`
+- Runtime status: `LIMITED RUNTIME ACCEPTANCE — V0.3.0 WORKSHOP RELEASE APPROVED BY RAY; EXHAUSTIVE MATRIX DEFERRED`
+- Workshop status: `V0.3.0 UPLOAD PREPARATION — UPDATE EXISTING ITEM 3769010534`
 
 This checklist is for the first integrated Phase 3 production pass. It does not
 inherit prototype passes. Record `PASS`, `FAIL`, `BLOCKED`, or `NOT RUN` only
 from the production build.
+
+Ray has approved the v0.3.0 Workshop release based on observed Mod load,
+Phase 1/2/3 visibility, and basic matchmaking/betrothal gameplay smoke. The
+targeted functional, ranking, lifecycle, capacity, stress, and regression rows
+below remain unexecuted and are deferred to a future patch. Do not convert
+unexecuted rows to `PASS`.
 
 ## 0. Local installation and evidence discipline
 

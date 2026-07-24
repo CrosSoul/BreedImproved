@@ -1,5 +1,5 @@
 param(
-	[string]$Version = "0.2.0"
+	[string]$Version = "0.3.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -79,27 +79,41 @@ if ($thumbnailSourceMetadata.Width -ne 512 -or $thumbnailSourceMetadata.Height -
 	throw "Workshop thumbnail must be exactly 512x512 pixels: $thumbnailSourcePath"
 }
 
+# Release payload allowlist. Any file in the production Mod root must either be
+# listed here or be a repository-only .gitkeep marker. This prevents accidental
+# diagnostics, prototypes, or developer files from reaching Workshop staging.
 $requiredProductionFiles = @(
 	"descriptor.mod",
 	"common/character_interactions/breedimp_dynasty_cleanup_protection_interactions.txt",
 	"common/character_interactions/breedimp_exile_from_dynasty_interaction.txt",
 	"common/decisions/breedimp_dynasty_cleanup_decisions.txt",
+	"common/decisions/breedimp_dynasty_matchmaking_decisions.txt",
 	"common/modifiers/breedimp_dynasty_exile_modifiers.txt",
+	"common/on_action/breedimp_dynasty_matchmaking_on_actions.txt",
 	"common/opinion_modifiers/breedimp_dynasty_exile_opinions.txt",
+	"common/script_values/breedimp_dynasty_exile_values.txt",
+	"common/script_values/breedimp_dynasty_matchmaking_values.txt",
 	"common/scripted_effects/breedimp_dynasty_cleanup_effects.txt",
 	"common/scripted_effects/breedimp_dynasty_exile_effects.txt",
+	"common/scripted_effects/breedimp_dynasty_matchmaking_candidate_effects.txt",
+	"common/scripted_effects/breedimp_dynasty_matchmaking_lifecycle_effects.txt",
+	"common/scripted_effects/breedimp_dynasty_matchmaking_plan_effects.txt",
+	"common/scripted_effects/breedimp_dynasty_matchmaking_relationship_effects.txt",
 	"common/scripted_triggers/breedimp_dynasty_cleanup_triggers.txt",
 	"common/scripted_triggers/breedimp_dynasty_exile_triggers.txt",
-	"common/script_values/breedimp_dynasty_exile_values.txt",
+	"common/scripted_triggers/breedimp_dynasty_matchmaking_candidate_triggers.txt",
+	"common/scripted_triggers/breedimp_dynasty_matchmaking_lifecycle_triggers.txt",
+	"common/scripted_triggers/breedimp_dynasty_matchmaking_plan_triggers.txt",
 	"events/breedimp_dynasty_cleanup_events.txt",
+	"events/breedimp_dynasty_matchmaking_events.txt",
 	"localization/english/breedimp_dynasty_cleanup_l_english.yml",
 	"localization/english/breedimp_dynasty_exile_l_english.yml",
+	"localization/english/breedimp_dynasty_matchmaking_l_english.yml",
 	"localization/simp_chinese/breedimp_dynasty_cleanup_l_simp_chinese.yml",
-	"localization/simp_chinese/breedimp_dynasty_exile_l_simp_chinese.yml"
+	"localization/simp_chinese/breedimp_dynasty_exile_l_simp_chinese.yml",
+	"localization/simp_chinese/breedimp_dynasty_matchmaking_l_simp_chinese.yml"
 )
 
-# Freeze the v0.2.0 production payload. An unexpected file in the CK3 content
-# root is a release error even when it would copy byte-for-byte to staging.
 $productionFiles = @(
 	Get-ChildItem -LiteralPath $productionRoot -Recurse -File -Force |
 		Where-Object { $_.Name -ne ".gitkeep" }
@@ -115,16 +129,31 @@ $missingProductionFiles = @(
 	$requiredProductionFiles | Where-Object { $_ -notin $productionRelativePaths }
 )
 if ($unexpectedProductionFiles.Count -ne 0) {
-	throw "Unexpected file in frozen v0.2.0 production payload: $($unexpectedProductionFiles[0])"
+	throw "Unexpected file in production payload: $($unexpectedProductionFiles[0])"
 }
 if ($missingProductionFiles.Count -ne 0) {
-	throw "Required v0.2.0 production file is missing: $($missingProductionFiles[0])"
+	throw "Required production file is missing: $($missingProductionFiles[0])"
 }
 
 $sourceDescriptorPath = Join-Path $productionRoot "descriptor.mod"
 $sourceDescriptor = Get-Content -LiteralPath $sourceDescriptorPath -Raw -Encoding UTF8
 if ($sourceDescriptor -match '(?m)^\s*remote_file_id\s*=') {
 	throw "Production descriptor must not contain remote_file_id; it is injected only into Workshop staging."
+}
+if ($sourceDescriptor -match '(?m)^\s*path\s*=') {
+	throw "Production descriptor must not contain a local path field."
+}
+foreach ($entry in @(
+	"version=`"$Version`"",
+	"name=`"Breed Improved`"",
+	"supported_version=`"1.19.*`""
+)) {
+	if (-not $sourceDescriptor.Contains($entry)) {
+		throw "Production descriptor is missing required metadata: $entry"
+	}
+}
+if (-not ($sourceDescriptor -match '(?m)^\s*tags\s*=\s*\{\s*("Utilities"\s+"Gameplay"|"Gameplay"\s+"Utilities")\s*\}')) {
+	throw 'Production descriptor must contain tags { "Utilities" "Gameplay" } in either order.'
 }
 
 New-Item -ItemType Directory -Path $workshopRoot -Force | Out-Null
@@ -239,6 +268,9 @@ foreach ($entry in @(
 		throw "Workshop descriptor is missing required metadata: $entry"
 	}
 }
+if (-not ($descriptor -match '(?m)^\s*tags\s*=\s*\{\s*("Utilities"\s+"Gameplay"|"Gameplay"\s+"Utilities")\s*\}')) {
+	throw 'Workshop descriptor must contain tags { "Utilities" "Gameplay" } in either order.'
+}
 if ($descriptor -match '(?m)^\s*path\s*=') {
 	throw "Workshop descriptor must not contain a local path field."
 }
@@ -339,19 +371,43 @@ $roleByPath = @{
 	"common/character_interactions/breedimp_dynasty_cleanup_protection_interactions.txt" = "Phase 2 protection interactions"
 	"common/character_interactions/breedimp_exile_from_dynasty_interaction.txt" = "Phase 1 individual interaction"
 	"common/decisions/breedimp_dynasty_cleanup_decisions.txt" = "Phase 2 decision"
+	"common/decisions/breedimp_dynasty_matchmaking_decisions.txt" = "Phase 3 decision"
 	"common/modifiers/breedimp_dynasty_exile_modifiers.txt" = "shared exile modifier"
+	"common/on_action/breedimp_dynasty_matchmaking_on_actions.txt" = "Phase 3 lifecycle on_actions"
 	"common/opinion_modifiers/breedimp_dynasty_exile_opinions.txt" = "shared exile opinion modifier"
 	"common/script_values/breedimp_dynasty_exile_values.txt" = "Phase 1 interaction cost value"
+	"common/script_values/breedimp_dynasty_matchmaking_values.txt" = "Phase 3 ranking values"
 	"common/scripted_effects/breedimp_dynasty_cleanup_effects.txt" = "Phase 2 effects"
 	"common/scripted_effects/breedimp_dynasty_exile_effects.txt" = "shared exile effect"
+	"common/scripted_effects/breedimp_dynasty_matchmaking_candidate_effects.txt" = "Phase 3 candidate effects"
+	"common/scripted_effects/breedimp_dynasty_matchmaking_lifecycle_effects.txt" = "Phase 3 lifecycle effects"
+	"common/scripted_effects/breedimp_dynasty_matchmaking_plan_effects.txt" = "Phase 3 plan and preflight effects"
+	"common/scripted_effects/breedimp_dynasty_matchmaking_relationship_effects.txt" = "Phase 3 relationship execution effects"
 	"common/scripted_triggers/breedimp_dynasty_cleanup_triggers.txt" = "Phase 2 triggers"
 	"common/scripted_triggers/breedimp_dynasty_exile_triggers.txt" = "shared exile triggers"
+	"common/scripted_triggers/breedimp_dynasty_matchmaking_candidate_triggers.txt" = "Phase 3 candidate triggers"
+	"common/scripted_triggers/breedimp_dynasty_matchmaking_lifecycle_triggers.txt" = "Phase 3 lifecycle triggers"
+	"common/scripted_triggers/breedimp_dynasty_matchmaking_plan_triggers.txt" = "Phase 3 plan triggers"
 	"events/breedimp_dynasty_cleanup_events.txt" = "Phase 2 events"
+	"events/breedimp_dynasty_matchmaking_events.txt" = "Phase 3 events"
 	"localization/english/breedimp_dynasty_cleanup_l_english.yml" = "Phase 2 English localisation"
 	"localization/english/breedimp_dynasty_exile_l_english.yml" = "Phase 1 English localisation"
+	"localization/english/breedimp_dynasty_matchmaking_l_english.yml" = "Phase 3 English localisation"
 	"localization/simp_chinese/breedimp_dynasty_cleanup_l_simp_chinese.yml" = "Phase 2 Simplified Chinese localisation"
 	"localization/simp_chinese/breedimp_dynasty_exile_l_simp_chinese.yml" = "Phase 1 Simplified Chinese localisation"
+	"localization/simp_chinese/breedimp_dynasty_matchmaking_l_simp_chinese.yml" = "Phase 3 Simplified Chinese localisation"
 }
+
+$sourceRevision = ""
+try {
+	$gitOutput = & git -C $repositoryRoot rev-parse HEAD 2>$null
+	if ($LASTEXITCODE -eq 0 -and $gitOutput) {
+		$sourceRevision = $gitOutput.Trim()
+	}
+} catch {
+	$sourceRevision = ""
+}
+
 $manifestFiles = @(
 	foreach ($relativePath in @($stageMap.Keys | Sort-Object)) {
 		$normalizedPath = $relativePath.Replace("\", "/")
@@ -371,6 +427,7 @@ $manifest = [ordered]@{
 	supported_version = "1.19.*"
 	workshop_item_id = $configuredWorkshopId
 	staging_root = "dist/workshop/BreedImproved"
+	source_revision = if ($sourceRevision) { $sourceRevision } else { "unknown" }
 	production_file_count = $productionFiles.Count
 	publishing_asset_count = 1
 	staged_file_count = $stagedFiles.Count

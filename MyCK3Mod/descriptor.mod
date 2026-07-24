@@ -1,3 +1,7 @@
 version="0.3.0"
-name="Breed Improved - Local Runtime"
+tags={
+    "Utilities"
+    "Gameplay"
+}
+name="Breed Improved"
 supported_version="1.19.*"

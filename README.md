@@ -2,13 +2,17 @@
 
 Breed Improved is a player-controlled dynasty management utility for Crusader Kings III.
 
-- Mod version: `0.2.0`
+- Mod version: `0.3.0`
 - CK3 compatibility: `1.19.*`
 - Languages: English and Simplified Chinese
 - Workshop: https://steamcommunity.com/sharedfiles/filedetails/?id=3769010534
 - Source: https://github.com/CrosSoul/BreedImproved
 
-Version 0.2.0 is runtime-accepted and ready for Ray to upload to the existing Workshop item. Phase 2 passed the complete final acceptance matrix, including both supported languages, all review and confirmation paths, candidate/protection/branch cases, large-Dynasty and save/reload coverage, and the final CK3 error-log review. The Workshop update has not yet been uploaded or published.
+Version 0.3.0 adds the **Manage Dynasty Matchmaking** workflow. Ray approved
+the v0.3.0 Workshop release after observing that the Mod loads correctly and
+that basic bulk matchmaking/betrothal gameplay behaves normally. The exhaustive
+edge-case, capacity, stress, lifecycle, and compatibility matrix remains
+deferred to a future patch.
 
 ## Individual Exile from Dynasty
 
@@ -47,6 +51,35 @@ No exile occurs during review. A separate final confirmation is required before 
 - Direct-candidate protection prevents a character from appearing as a direct candidate or execution root. It is not whole-branch protection: a protected character may still move when they belong to the complete descendant branch of a selected ancestor.
 - Each valid selected branch root and its descendants enter a generated replacement Dynasty through the existing Exile from Dynasty outcome.
 - Bulk cleanup has no separate Prestige cost in v0.2.0.
+
+## v0.3.0 — Manage Dynasty Matchmaking
+
+Version 0.3.0 adds the player-initiated **Manage Dynasty Matchmaking** Decision for a living player-controlled Dynast.
+
+### Review and confirmation
+
+Candidates are reviewed one proposal at a time. For each proposal you may accept ordinary, accept matrilineal, request another partner, skip the current subject, defer the subject, or finish early with the pairs you already accepted. No relationship is created during review; a separate final confirmation is required before any marriage or betrothal is applied.
+
+### Adults and minors
+
+- Adult plus adult pairs become marriages.
+- Any pair containing a minor becomes a betrothal.
+- Both ordinary and matrilineal directions are offered where legal.
+
+### Ranking and boundaries
+
+Adults are ranked by fertility first, using an inclusive five-percentage-point top band, then age proximity, congenital traits, and coarse kinship preference. Minors are ranked by age proximity first, then congenital traits and kinship preference. Woman 30+ and man 40+ are not matched to minors; woman 29 and man 39 are still allowed. Fertile divorced and widowed adults may be rematched. A zero-fertility adult is used only as a clearly warned fallback placeholder for a fertile previously married adult when no positive-fertility partner remains.
+
+### Limitations
+
+- Candidates are limited to AI-controlled members of your current Dynasty.
+- Up to 32 accepted pairs are allowed in one run.
+- There is no accept-all-remaining option and no Grand Wedding orchestration.
+- Only one matchmaking workflow can be active at a time.
+- Known vanilla congenital traits are used for scoring; unknown/modded trait groups are ignored.
+- Direct relationship operations are used after final confirmation.
+
+Exhaustive edge-case, capacity, stress, lifecycle, and compatibility testing is deferred.
 
 ## Player control and automation boundary
 

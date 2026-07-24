@@ -6,10 +6,12 @@
 - Baseline:
   `1bb5f68ac43d23405c3d6f6ea0d564720ed8fbcf`
 - Review status: `COMPLETE`
-- CK3 runtime: `NOT RUN`
+- CK3 runtime: `NOT RUN` (Ray observed basic load and functionality smoke only; exhaustive matrix deferred)
+- Release preparation: `V0.3.0 WORKSHOP RELEASE APPROVED BY RAY WITH DEFERRED COVERAGE`
 - Reviewer: `Kimi K3 (Matt implementation role, one-shot self-review)`
 - Review date: `2026-07-24`
 - Final commit: `THIS RECORD IS INCLUDED IN THE FINAL STATIC-GATE COMMIT; SEE GIT LOG`
+- v0.3.0 release commit: `FINAL V0.3.0 RELEASE COMMIT CREATED LOCALLY; SEE GIT LOG`
 
 This document is a result record. `PENDING` was replaced only after the named
 check was executed. Code presence was not treated as a pass. Checks requiring
