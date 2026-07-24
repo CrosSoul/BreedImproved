@@ -1,6 +1,9 @@
 ---
 name: ck3-mod-development
 description: Develop, review, and debug Crusader Kings III (CK3) mods with strict project-first evidence and CK3-only syntax. Use for Paradox Script, events, decisions, interactions, traits, modifiers, localisation, history, on_actions, scripted triggers/effects, GUI, descriptors, and related CK3 mod files. Prioritize correctness over creativity, reject syntax from other Paradox games, and stop for verification whenever a CK3 construct is uncertain.
+type: prompt
+whenToUse: When implementing, reviewing, debugging, or validating CK3 Mod code
+disableModelInvocation: false
 ---
 
 # CK3 Mod Development

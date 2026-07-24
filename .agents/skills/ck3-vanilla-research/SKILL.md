@@ -1,6 +1,9 @@
 ---
 name: ck3-vanilla-research
 description: Focused, cache-first research of Crusader Kings III vanilla script. Use when Lynn or Codex is asked to verify CK3 syntax, locate a vanilla example, or establish implementation evidence for an effect, trigger, scope, cost, Character Interaction field, localisation form, UI pattern, or static engine behavior. Do not use for ordinary Matt implementation work, mod-file editing, feature design, balance decisions, or runtime-test execution unless the request explicitly requires fresh vanilla evidence research.
+type: prompt
+whenToUse: When CK3 Mod work requires vanilla evidence, syntax verification, scope research, or feasibility analysis
+disableModelInvocation: false
 ---
 
 # CK3 Vanilla Research
