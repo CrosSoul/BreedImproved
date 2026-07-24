@@ -2,3 +2,6 @@ interface:
   display_name: "CK3 Vanilla Research"
   short_description: "Focused, cache-first CK3 vanilla evidence"
   default_prompt: "Use $ck3-vanilla-research to verify a focused CK3 syntax question from cached project evidence before searching vanilla."
+  type: prompt
+  whenToUse: When CK3 Mod work requires vanilla evidence, syntax verification, scope research, or feasibility analysis
+  disableModelInvocation: false
