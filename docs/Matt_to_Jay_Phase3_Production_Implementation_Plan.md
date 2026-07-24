@@ -89,7 +89,7 @@ Exit criterion: no guessed CK3 construct is required by the production design.
 
 ### Stage P3-PROD-1 - Repeatable lifecycle
 
-Status: `IMPLEMENTED; STATIC GATE PENDING`
+Status: `IMPLEMENTED; STATIC GATE PASS`
 
 - Add player-only Dynast Decision and pre-activation confirmation.
 - Add one global active actor and one global phase.
@@ -106,7 +106,7 @@ execution.
 
 ### Stage P3-PROD-2 - Candidate eligibility and deterministic ranking
 
-Status: `IMPLEMENTED; STATIC GATE PENDING`
+Status: `IMPLEMENTED; STATIC GATE PASS`
 
 - Implement shared base eligibility.
 - Preserve mutual `can_marry_character_trigger` and direct-ancestry checks.
@@ -123,7 +123,7 @@ no unbounded all-pairs persistent table.
 
 ### Stage P3-PROD-3 - Review and bounded plan
 
-Status: `IMPLEMENTED; STATIC GATE PENDING`
+Status: `IMPLEMENTED; STATIC GATE PASS`
 
 - Store up to 32 complete six-field pair records.
 - Write reservation marker last.
@@ -139,7 +139,7 @@ betrothals.
 
 ### Stage P3-PROD-4 - Full preflight and guarded execution
 
-Status: `IMPLEMENTED; STATIC GATE PENDING`
+Status: `IMPLEMENTED; STATIC GATE PASS`
 
 - Revalidate active authority and token.
 - Validate all 32 slots as committed-and-currently-valid or completely empty.
@@ -157,7 +157,7 @@ paths.
 
 ### Stage P3-PROD-5 - Events and localisation
 
-Status: `IMPLEMENTED; STATIC GATE PENDING`
+Status: `IMPLEMENTED; STATIC GATE PASS`
 
 - Add A/B review, final confirmation, capacity, failed-preflight, success, and
   partial-failure events.
@@ -172,20 +172,20 @@ bilingual.
 
 ### Stage P3-PROD-6 - Two-pass self-review
 
-Status: `PENDING FINAL RECORD`
+Status: `COMPLETE — BOTH PASSES RECORDED`
 
-Pass 1 reviews each changed file against the settled requirements and evidence.
-Pass 2 starts from the final diff and challenges lifecycle, scope, token,
-reservation, ranking, preflight, execution, localisation, and integration.
-Every finding must be fixed before static validation is marked complete.
+Pass 1 reviewed each changed file against the settled requirements and
+evidence. Pass 2 started from the corrected diff and challenged lifecycle,
+scope, token, reservation, ranking, preflight, execution, localisation, and
+integration. Pass 1 produced and closed two findings (one dead definition,
+one indentation correction). Pass 2 produced no findings.
 
-The results belong in
-`docs/testing/phase3_production_static_review.md`; no review pass may be
-reported as passed before it is actually performed.
+The results are recorded in
+`docs/testing/phase3_production_static_review.md`.
 
 ### Stage P3-PROD-7 - Static and repository validation
 
-Status: `PENDING FINAL RECORD`
+Status: `COMPLETE — STATIC-01..39 PASS, STATIC-40 DELEGATED`
 
 Run all checks listed in Section 16 of the one-shot instruction, including:
 
@@ -220,14 +220,19 @@ release work.
 
 ## 4. Commit and handoff gate
 
-After Stage P3-PROD-7 passes:
+After Stage P3-PROD-7 passed:
 
-1. review the complete authorized diff;
-2. commit the production implementation and records;
-3. push the current branch without force;
-4. verify the pushed commit; and
-5. stop without packaging, tagging, releasing, or uploading Workshop content.
+1. the complete authorized diff was reviewed;
+2. the production corrections and records were committed locally;
+3. the push is delegated to Ray through GitHub Desktop because this
+   environment has no GitHub network access;
+4. no packaging, tagging, release, or Workshop upload was performed; and
+5. the pushed commit must be verified by Ray after the push.
 
-Required stop state:
+Current stop state:
+
+`AWAITING RAY MANUAL GITHUB DESKTOP PUSH`
+
+After the push, the required stop state is:
 
 `AWAITING RAY PHASE 3 PRODUCTION RUNTIME TEST`

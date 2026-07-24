@@ -38,7 +38,7 @@ Deferred Phase 2 extensions include accepted-founder-parent and whole-branch pro
 ### Current production-candidate status
 
 Status:
-`PRODUCTION CANDIDATE IMPLEMENTED IN SOURCE — FINAL STATIC RECORD PENDING`.
+`PRODUCTION CANDIDATE IMPLEMENTED IN SOURCE — STATIC REVIEW COMPLETE (PASS)`.
 
 CK3 runtime: `NOT RUN`.
 
@@ -55,11 +55,17 @@ and betrothal plans, complete final preflight, and stop-on-first-unexpected-
 failure execution. It adds no background scan or recurring matchmaking.
 
 Phase 1 and Phase 2 release states remain unchanged. Phase 3 does not change
-the released version, descriptors, packages, or Workshop item. The required
-next gate is completion of the static review record followed by Ray's targeted
-production runtime plan. Release and Workshop publication remain unapproved.
+the released version, descriptors, packages, or Workshop item. The static
+review record is complete with no unresolved blocking finding; the final
+local commit exists and its push is delegated to Ray through GitHub Desktop.
+The next gates are Ray's push followed by the targeted production runtime
+plan. Release and Workshop publication remain unapproved.
 
-Current engineering stop state after static validation:
+Current engineering stop state:
+
+`AWAITING RAY MANUAL GITHUB DESKTOP PUSH`
+
+After the push:
 
 `AWAITING RAY PHASE 3 PRODUCTION RUNTIME TEST`
 

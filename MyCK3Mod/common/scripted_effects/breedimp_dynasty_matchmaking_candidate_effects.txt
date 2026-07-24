@@ -160,10 +160,10 @@ breedimp_dynasty_matchmaking_build_partner_list_effect = {
 							PARTNER = scope:breedimp_dynasty_matchmaking_partner_candidate_temp
 						}
 					}
+				}
+				add_to_list = breedimp_dynasty_matchmaking_partner_candidates
 			}
-			add_to_list = breedimp_dynasty_matchmaking_partner_candidates
 		}
-	}
 	}
 
 	breedimp_dynasty_matchmaking_select_partner_for_current_subject_effect = yes
@@ -538,21 +538,6 @@ breedimp_dynasty_matchmaking_reject_current_partner_effect = {
 			breedimp_dynasty_matchmaking_rejection_has_empty_slot_trigger = yes
 		}
 		breedimp_dynasty_matchmaking_commit_rejection_and_select_partner_effect = yes
-	}
-}
-
-breedimp_dynasty_matchmaking_recover_invalid_current_pair_effect = {
-	if = {
-		limit = {
-			exists = scope:breedimp_dynasty_matchmaking_current_subject
-			scope:breedimp_dynasty_matchmaking_current_subject = {
-				breedimp_dynasty_matchmaking_subject_candidate_trigger = { ACTOR = root }
-			}
-		}
-		breedimp_dynasty_matchmaking_build_partner_list_effect = yes
-	}
-	else = {
-		breedimp_dynasty_matchmaking_select_next_subject_effect = yes
 	}
 }
 

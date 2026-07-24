@@ -6,10 +6,12 @@
 - Accepted baseline:
   `1bb5f68ac43d23405c3d6f6ea0d564720ed8fbcf`
 - Production implementation: `PRESENT IN SOURCE`
-- Static validation: `SEE docs/testing/phase3_production_static_review.md`
+- Static validation: `PASS — docs/testing/phase3_production_static_review.md`
 - CK3 runtime: `NOT RUN`
 - Release approval: `NOT GRANTED`
 - Workshop/release files: `OUT OF SCOPE`
+- Local commit: `FINAL STATIC-GATE COMMIT CREATED LOCALLY; SEE GIT LOG`
+- Push: `DELEGATED — Ray pushes the verified local commit with GitHub Desktop; no GitHub network operation was attempted from this environment`
 
 This handoff separates code presence, static evidence, and runtime evidence. It
 must not be used to claim CK3 behavior before Ray completes the targeted
@@ -118,8 +120,9 @@ That record must contain the actual result of:
 - `git diff --check`; and
 - final staged-diff and clean-worktree checks.
 
-Until that record is completed, the correct status is
-`STATIC VALIDATION NOT YET RECORDED`.
+The record is complete: both self-review passes are recorded with concrete
+findings and corrections, STATIC-01 through STATIC-39 are `PASS`, STATIC-40
+is `DELEGATED` to Ray, and there is no unresolved blocking finding.
 
 ## 4. Awaiting CK3 runtime
 
@@ -190,7 +193,12 @@ authorized by this handoff.
 
 ## 8. Handoff state
 
-When the static review record is complete and the implementation commit is
-pushed, the required engineering stop state is:
+The static review record is complete and the final local commit exists. The
+current stop state is:
+
+`AWAITING RAY MANUAL GITHUB DESKTOP PUSH`
+
+After Ray pushes the verified local commit, the required engineering stop
+state becomes:
 
 `AWAITING RAY PHASE 3 PRODUCTION RUNTIME TEST`
